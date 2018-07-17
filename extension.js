@@ -20,7 +20,7 @@ function activate( context )
     {
         var entries = [];
 
-        var timestamp = strftime( "%H:%M:%S", new Date( message.createdAt ) );
+        var timestamp = strftime( "%a %H:%M:%S", new Date( message.createdAt ) );
 
         if( message.type == "GUILD_MEMBER_JOIN" )
         {
