@@ -1,6 +1,6 @@
 # Discord Chat
 
-A very basic chat client for [Discord](https://discordapp.com/).
+A very basic [Discord](https://discordapp.com/) chat client for vscode.
 
 After installing, go to your settings and set `discord-chat.token` to your API token. See [here](https://discordhelp.net/discord-token) for one way of finding your token. There are other ways too.
 
