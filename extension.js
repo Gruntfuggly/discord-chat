@@ -72,9 +72,13 @@ function activate( context )
                 var outputChannelName = 'discord-chat.' + channel.guild.name + '.' + channel.name;
                 currentChannel = channel;
 
-                var outputChannel = vscode.window.createOutputChannel( outputChannelName );
-                outputChannels[ outputChannelName ] = outputChannel;
-                context.subscriptions.push( outputChannel );
+                var outputChannel = outputChannels[ outputChannelName ];
+                if( !outputChannel )
+                {
+                    outputChannel = vscode.window.createOutputChannel( outputChannelName );
+                    outputChannels[ outputChannelName ] = outputChannel;
+                    context.subscriptions.push( outputChannel );
+                }
 
                 var entries = [];
                 channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
