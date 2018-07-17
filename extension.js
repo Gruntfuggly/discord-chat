@@ -35,7 +35,14 @@ function activate( context )
                 {
                     messages.map( function( message )
                     {
-                        entries.push( message.author.username + ": " + message.content );
+                        if( message.type == "GUILD_MEMBER_JOIN" )
+                        {
+                            entries.push( message.author.username + " joined" );
+                        }
+                        else
+                        {
+                            entries.push( message.author.username + ": " + message.content );
+                        }
                     } );
 
                     entries.reverse().map( function( entry )
