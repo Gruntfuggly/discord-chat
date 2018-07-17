@@ -1,6 +1,7 @@
 /* jshint esversion:6 */
 
 const discord = require( 'discord.js' );
+const strftime = require( 'strftime' );
 const vscode = require( 'vscode' );
 var treeView = require( "./dataProvider" );
 
@@ -14,6 +15,33 @@ function activate( context )
     var provider = new treeView.DiscordChatDataProvider( context );
     // var status = vscode.window.createStatusBarItem( vscode.StatusBarAlignment.Left, 0 );
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
+
+    function formatMessage( message )
+    {
+        var entries = [];
+
+        var timestamp = strftime( "%H:%M:%S", new Date( message.createdAt ) );
+
+        if( message.type == "GUILD_MEMBER_JOIN" )
+        {
+            entries.push( timestamp + " " + message.author.username + " joined" );
+        }
+        else if( message.cleanContent )
+        {
+            entries.push( timestamp + " " + message.author.username + ":\n " + message.cleanContent );
+        }
+        else if( message.content )
+        {
+            entries.push( timestamp + " " + message.author.username + ":\n " + message.content );
+        }
+
+        message.attachments.map( function( attachment )
+        {
+            entries.push( timestamp + " " + message.author.username + " attached " + attachment.url );
+        } );
+
+        return entries;
+    }
 
     function register()
     {
@@ -35,14 +63,7 @@ function activate( context )
                 {
                     messages.map( function( message )
                     {
-                        if( message.type == "GUILD_MEMBER_JOIN" )
-                        {
-                            entries.push( message.author.username + " joined" );
-                        }
-                        else
-                        {
-                            entries.push( message.author.username + ": " + message.content );
-                        }
+                        entries = entries.concat( formatMessage( message ) );
                     } );
 
                     entries.reverse().map( function( entry )
@@ -96,7 +117,10 @@ function activate( context )
                     var outputChannel = outputChannels[ outputChannelName ];
                     if( outputChannel )
                     {
-                        outputChannel.appendLine( message.author.username + ": " + message.content );
+                        formatMessage( message ).map( entry =>
+                        {
+                            outputChannel.appendLine( entry )
+                        } );
                     }
                     provider.clearUnread( message.channel );
                 }

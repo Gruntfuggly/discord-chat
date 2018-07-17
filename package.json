@@ -1,79 +1,78 @@
 {
-    "name": "discord-chat",
-    "displayName": "Discord Chat",
-    "description": "A very basic discord text chat client for vscode",
-    "keywords": [
-    ],
-    "version": "0.0.71",
-    "icon": "resources/discord-chat.png",
-    "publisher": "Gruntfuggly",
-    "engines": {
-        "vscode": "^1.5.0"
-    },
-    "repository": "https://github.com/Gruntfuggly/discord-chat",
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [
-        "*"
-    ],
-    "main": "./extension",
-    "contributes": {
-        "viewsContainers": {
-            "activitybar": [
-                {
-                    "id": "discord-chat-container",
-                    "title": "Discord",
-                    "icon": "resources/discord-chat-container.svg"
-                }
-            ]
-        },
-        "views": {
-            "explorer": [
-                {
-                    "id": "discord-chat-explorer",
-                    "name": "Discord",
-                    "when": "discord-chat-in-explorer"
-                }
-            ],
-            "discord-chat-container": [
-                {
-                    "id": "discord-chat",
-                    "name": "Discord"
-                }
-            ]
-        },
-
-        "commands": [
-            {
-                "command": "discord-chat.post",
-                "title": "Post",
-                "category": "discord-chat"
-            }
-        ],
-        "configuration": {
-            "type": "object",
-            "title": "discord-chat configuration",
-            "properties": {
-                "discord-chat.token": {
-                    "type": "string",
-                    "description": "Your discord token",
-                    "default": ""
-                },
-                "discord-chat.history": {
-                    "type": "integer",
-                    "description": "Number of messages to fetch when opening a channel",
-                    "default": 10
-                },
-                "discord-chat.showInExplorer": {
-                    "type": "boolean",
-                    "description": "If true, show the tree in the explorer. Set to false if you only want to use the dedicated tree in the activity bar",
-                    "default": true
-                }
-            }
+  "name": "discord-chat",
+  "displayName": "Discord Chat",
+  "description": "A very basic discord text chat client for vscode",
+  "keywords": [],
+  "version": "0.0.71",
+  "icon": "resources/discord-chat.png",
+  "publisher": "Gruntfuggly",
+  "engines": {
+    "vscode": "^1.5.0"
+  },
+  "repository": "https://github.com/Gruntfuggly/discord-chat",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./extension",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "discord-chat-container",
+          "title": "Discord",
+          "icon": "resources/discord-chat-container.svg"
         }
+      ]
     },
-    "dependencies": {
-        "discord.js": "^11.3.2"
+    "views": {
+      "explorer": [
+        {
+          "id": "discord-chat-explorer",
+          "name": "Discord",
+          "when": "discord-chat-in-explorer"
+        }
+      ],
+      "discord-chat-container": [
+        {
+          "id": "discord-chat",
+          "name": "Discord"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "discord-chat.post",
+        "title": "Post",
+        "category": "discord-chat"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "discord-chat configuration",
+      "properties": {
+        "discord-chat.token": {
+          "type": "string",
+          "description": "Your discord token",
+          "default": ""
+        },
+        "discord-chat.history": {
+          "type": "integer",
+          "description": "Number of messages to fetch when opening a channel",
+          "default": 10
+        },
+        "discord-chat.showInExplorer": {
+          "type": "boolean",
+          "description": "If true, show the tree in the explorer. Set to false if you only want to use the dedicated tree in the activity bar",
+          "default": true
+        }
+      }
     }
+  },
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "strftime": "^0.10.0"
+  }
 }
