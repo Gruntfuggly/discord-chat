@@ -43,6 +43,24 @@ function activate( context )
         return entries;
     }
 
+    function login()
+    {
+        generalOutputChannel.appendLine( "Logging in..." );
+        var token = vscode.workspace.getConfiguration( 'discord-chat' ).token;
+        if( token )
+        {
+            client.login( token ).then( function()
+            {
+            } ).catch( function( reason )
+            {
+                generalOutputChannel.appendLine( reason );
+            } );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please set discord-chat.token (see https://discordhelp.net/discord-token)" );
+        }
+    }
     function register()
     {
         vscode.window.registerTreeDataProvider( 'discord-chat', provider );
@@ -93,12 +111,30 @@ function activate( context )
             if( e.affectsConfiguration( "discord-chat" ) )
             {
                 vscode.commands.executeCommand( 'setContext', 'discord-chat-in-explorer', vscode.workspace.getConfiguration( 'discord-chat' ).showInExplorer );
+
+                if( client.readyAt === null )
+                {
+                    login();
+                }
             }
         } ) );
 
         context.subscriptions.push( generalOutputChannel );
 
         vscode.commands.executeCommand( 'setContext', 'discord-chat-in-explorer', vscode.workspace.getConfiguration( 'discord-chat' ).showInExplorer );
+
+        client.on( 'error', error =>
+        {
+            generalOutputChannel.appendLine( "error: " + error );
+        } );
+        client.on( 'warn', warning =>
+        {
+            generalOutputChannel.appendLine( "warning: " + warning );
+        } );
+        client.on( 'debug', message =>
+        {
+            generalOutputChannel.appendLine( "debug: " + message );
+        } );
 
         client.on( 'ready', () =>
         {
@@ -131,15 +167,7 @@ function activate( context )
             }
         } );
 
-        var token = vscode.workspace.getConfiguration( 'discord-chat' ).token;
-        if( token )
-        {
-            client.login( token );
-        }
-        else
-        {
-            vscode.window.showInformationMessage( "Please set discord-chat.token" );
-        }
+        login();
     }
 
     register();
