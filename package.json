@@ -42,11 +42,24 @@
         }
       ]
     },
+    "menus": {
+      "view/title": [
+        {
+          "command": "discord-chat.post",
+          "when": "view =~ /discord-chat/",
+          "group": "navigation@1"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "discord-chat.post",
         "title": "Post",
-        "category": "discord-chat"
+        "category": "discord-chat",
+        "icon": {
+          "dark": "resources/icons/dark/post.svg",
+          "light": "resources/icons/light/post.svg"
+        }
       }
     ],
     "configuration": {

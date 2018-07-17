@@ -10,12 +10,12 @@ A tree view will show available servers and channels. Click on a channel to open
 
 - [ ] somehow colour names in the output panel
 - [ ] somehow show avatars
-- [ ] show tree icons for servers and channels
+- [x] show tree icons for servers and channels
 - [ ] persist unread message counts
-- [ ] create a panel icon
+- [x] create a panel icon
 - [ ] allow notifications
 - [ ] allow panel format to be configurable
-- [ ] add button for posting
+- [x] add button for posting
 - [ ] ensure output panel is visible (visible editors)
 
 ## Installing
@@ -44,3 +44,6 @@ The extension can be customised as follows:
 
 ### Credits
 
+Container icon from [iconscout](https://iconscout.com/icon/discord-3).
+
+Post icon from made by <a href="https://www.flaticon.com/authors/dave-gandy" title="Dave Gandy">Dave Gandy</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>.

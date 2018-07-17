@@ -2,6 +2,7 @@
 
 Object.defineProperty( exports, "__esModule", { value: true } );
 
+var path = require( 'path' );
 var vscode = require( 'vscode' );
 
 var servers = [];
@@ -59,10 +60,26 @@ class DiscordChatDataProvider
 
         if( element.type === SERVER )
         {
+            var darkIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "dark", "server.svg" ) );
+            var lightIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "light", "server.svg" ) );
+
+            treeItem.iconPath = {
+                dark: darkIconPath,
+                light: lightIconPath
+            };
+
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         }
         else if( element.type === CHANNEL )
         {
+            var darkIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "dark", "channel.svg" ) );
+            var lightIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "light", "channel.svg" ) );
+
+            treeItem.iconPath = {
+                dark: darkIconPath,
+                light: lightIconPath
+            };
+
             treeItem.command = {
                 command: "discord-chat.openChannel",
                 title: "",
