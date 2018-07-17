@@ -2,6 +2,10 @@
 
 A very basic chat client for [Discord](https://discordapp.com/).
 
+After installing, go to your settings and set `discord-chat.token` to your API token. See [here](https://discordhelp.net/discord-token) for one way of finding your token. There are other ways too.
+
+*NOTE: Keep your token to yourself!*
+
 A tree view will show available servers and channels. Click on a channel to open the channel in the output panel. Click the post icon in the tree view or use the `discord-char: Post` command to send a message to the currently selected channel.
 
 <!-- <img src="https://raw.githubusercontent.com/Gruntfuggly/discord-chat/master/resources/screenshot.png"> -->
