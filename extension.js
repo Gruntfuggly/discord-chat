@@ -129,15 +129,15 @@ function activate( context )
 
         client.on( 'error', error =>
         {
-            generalOutputChannel.appendLine( "error: " + error );
+            generalOutputChannel.appendLine( "error: " + JSON.stringify( error ) );
         } );
         client.on( 'warn', warning =>
         {
-            generalOutputChannel.appendLine( "warning: " + warning );
+            generalOutputChannel.appendLine( "warning: " + JSON.stringify( warning ) );
         } );
         client.on( 'debug', message =>
         {
-            generalOutputChannel.appendLine( "debug: " + message );
+            generalOutputChannel.appendLine( "debug: " + JSON.stringify( message ) );
         } );
 
         client.on( 'ready', () =>
