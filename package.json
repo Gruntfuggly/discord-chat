@@ -46,7 +46,7 @@
       "view/title": [
         {
           "command": "discord-chat.post",
-          "when": "view =~ /discord-chat/",
+          "when": "view =~ /discord-chat/ && discord-channel-selected",
           "group": "navigation@1"
         }
       ]

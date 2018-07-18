@@ -61,8 +61,16 @@ function activate( context )
             vscode.window.showInformationMessage( "Please set discord-chat.token (see https://discordhelp.net/discord-token)" );
         }
     }
+
+    function updateSelectionState()
+    {
+        vscode.commands.executeCommand( 'setContext', 'discord-channel-selected', currentChannel !== undefined );
+    }
+
     function register()
     {
+        updateSelectionState();
+
         var discordChatExplorerView = vscode.window.createTreeView( "discord-chat-view-explorer", { treeDataProvider: provider } );
         var discordChatView = vscode.window.createTreeView( "discord-chat-view", { treeDataProvider: provider } );
 
@@ -71,7 +79,10 @@ function activate( context )
             vscode.window.showInputBox( { prompt: "Post message to " + currentChannel.name } ).then(
                 function( message )
                 {
-                    currentChannel.send( message );
+                    if( message )
+                    {
+                        currentChannel.send( message );
+                    }
                 } );
         } ) );
 
@@ -88,6 +99,7 @@ function activate( context )
                         if( outputChannels[ channelName ].outputChannel._id === document.fileName )
                         {
                             currentChannel = outputChannels[ channelName ].discordChannel;
+                            updateSelectionState();
                             var element = provider.getChannelElement( outputChannels[ channelName ].discordChannel );
                             if( discordChatExplorerView.visible === true )
                             {
@@ -103,10 +115,17 @@ function activate( context )
             } );
         } ) );
 
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.selectServer', ( server ) =>
+        {
+            currentChannel = undefined;
+            updateSelectionState();
+        } ) );
+
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', ( channel ) =>
         {
             var outputChannelName = 'discord-chat.' + channel.guild.name + '.' + channel.name;
             currentChannel = channel;
+            updateSelectionState();
 
             var outputChannel = outputChannels[ outputChannelName ];
             if( !outputChannel )

@@ -94,13 +94,22 @@ class DiscordChatDataProvider
         {
             treeItem.iconPath = this.getIcon( SERVER );
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+            treeItem.tooltip = "";
+            treeItem.command = {
+                command: "discord-chat.selectServer",
+                title: "Select server",
+                arguments: [
+                    element.server
+                ]
+            };
         }
         else if( element.type === CHANNEL )
         {
             treeItem.iconPath = this.getIcon( CHANNEL );
+            treeItem.tooltip = "Open channel";
             treeItem.command = {
                 command: "discord-chat.openChannel",
-                title: "",
+                title: "Open channel",
                 arguments: [
                     element.channel
                 ]
@@ -133,7 +142,7 @@ class DiscordChatDataProvider
                 var server = servers.find( findServer, channel.guild.id );
                 if( server === undefined )
                 {
-                    server = { type: SERVER, name: channel.guild.name, channels: [], id: channel.guild.id, unreadCount: 0 };
+                    server = { type: SERVER, name: channel.guild.name, server: server, channels: [], id: channel.guild.id, unreadCount: 0 };
                     servers.push( server );
                 }
 
@@ -156,12 +165,7 @@ class DiscordChatDataProvider
     {
         if( server )
         {
-            var total = 0;
-            server.channels.map( channel =>
-            {
-                total += channel.unreadCount;
-            } );
-            server.unreadCount = total;
+            server.unreadCount = server.channels.reduce( ( total, channel ) => total + channel.unreadCount, 0 );
             this._onDidChangeTreeData.fire();
         }
         this.updateStatus();
@@ -180,12 +184,7 @@ class DiscordChatDataProvider
 
     unreadCount()
     {
-        var total = 0;
-        servers.map( server =>
-        {
-            total += server.unreadCount;
-        } );
-        return total;
+        return servers.reduce( ( total, server ) => total + server.unreadCount, 0 );
     }
 
     update( message )
@@ -193,29 +192,21 @@ class DiscordChatDataProvider
         var channelElement = this.getChannelElement( message.channel );
         if( channelElement )
         {
-            channelElement.unreadCount += 1;
+            ++channelElement.unreadCount;
+            this.updateServerCount( servers.find( findServer, message.channel.guild.id ) );
         }
-        this.updateServerCount( servers.find( findServer, message.channel.guild.id ) );
     }
 
     setUnread( channel, messages )
     {
-        var storedDate = this._context.workspaceState.get( "read.discord-chat" + channel.id );
-        var lastRead = new Date( storedDate ? storedDate : 0 );
-        var unread = 0;
-        messages.map( message =>
-        {
-            if( message.createdAt > lastRead )
-            {
-                unread++;
-            }
-        } );
         var channelElement = this.getChannelElement( channel );
         if( channelElement )
         {
-            channelElement.unreadCount = unread;
+            var storedDate = this._context.workspaceState.get( "read.discord-chat" + channel.id );
+            var lastRead = new Date( storedDate ? storedDate : 0 );
+            channelElement.unreadCount = messages.reduce( ( total, message ) => total + ( message.createdAt > lastRead ? 1 : 0 ), 0 );
+            this.updateServerCount( servers.find( findServer, channel.guild.id ) );
         }
-        this.updateServerCount( servers.find( findServer, channel.guild.id ) );
     }
 
     markRead( channel )
@@ -225,8 +216,8 @@ class DiscordChatDataProvider
         {
             channelElement.unreadCount = 0;
             this._context.workspaceState.update( "read.discord-chat" + channel.id, new Date().toISOString() );
+            this.updateServerCount( servers.find( findServer, channel.guild.id ) );
         }
-        this.updateServerCount( servers.find( findServer, channel.guild.id ) );
     }
 
     refresh()
