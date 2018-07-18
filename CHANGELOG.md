@@ -1,6 +1,12 @@
 # v0.1.2 - 2018-07-17
 - persist unread counts
 - add status bar indicator for unread messages
+- simplify total counting
+- only show post icon when channel is selected
+- keep selected channel in sync
+- change fetching message to ...
+- store read times in globalState
+- fetch messages based on last fetched
 
 # v0.1.1 - 2018-07-17
 - Fix README.md again

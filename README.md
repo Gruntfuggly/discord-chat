@@ -14,13 +14,12 @@ A tree view will show available servers and channels. Click on a channel to open
 
 - [ ] somehow colour names in the output panel
 - [ ] somehow show avatars
+- [ ] allow notifications
+- [ ] allow panel format to be configurable
 - [x] show tree icons for servers and channels
 - [x] persist unread message counts
 - [x] create a panel icon
-- [ ] allow notifications
-- [ ] allow panel format to be configurable
 - [x] add button for posting
-- [ ] ensure output panel is visible (visible editors)
 
 ## Installing
 
