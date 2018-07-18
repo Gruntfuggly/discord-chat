@@ -21,26 +21,38 @@ function activate( context )
 
     function formatMessage( message )
     {
+        var compact = vscode.workspace.getConfiguration( 'discord-chat' ).compactView;
+
+        function separator()
+        {
+            return compact === true ? ": " : ":\n ";
+        }
+
+        function content( text )
+        {
+            return text.split( '\n' ).join( compact ? "\n" : "\n " );
+        }
+
         var entries = [];
 
         var timestamp = strftime( "%a %H:%M:%S", new Date( message.createdAt ) );
 
         if( message.type == "GUILD_MEMBER_JOIN" )
         {
-            entries.push( timestamp + " " + message.author.username + " joined" );
+            entries.push( timestamp + " @" + message.author.username + " joined" );
         }
         else if( message.cleanContent )
         {
-            entries.push( timestamp + " " + message.author.username + ":\n " + message.cleanContent );
+            entries.push( timestamp + " @" + message.author.username + separator() + content( message.cleanContent ) );
         }
         else if( message.content )
         {
-            entries.push( timestamp + " " + message.author.username + ":\n " + message.content );
+            entries.push( timestamp + " @" + message.author.username + separator() + content( message.content ) );
         }
 
         message.attachments.map( function( attachment )
         {
-            entries.push( timestamp + " " + message.author.username + " attached " + attachment.url );
+            entries.push( timestamp + " @" + message.author.username + " attached " + attachment.url );
         } );
 
         return entries;
@@ -69,6 +81,43 @@ function activate( context )
     function updateSelectionState()
     {
         vscode.commands.executeCommand( 'setContext', 'discord-channel-selected', currentChannel !== undefined );
+    }
+
+    function populateChannel( outputChannelName )
+    {
+        var entries = [];
+        var options = {
+            limit: vscode.workspace.getConfiguration( 'discord-chat' ).history,
+        };
+
+        if( outputChannels[ outputChannelName ].lastMessage )
+        {
+            options.after = outputChannels[ outputChannelName ].lastMessage.id;
+        }
+
+        outputChannels[ outputChannelName ].discordChannel.fetchMessages( options ).then( function( messages )
+        {
+            if( messages.size > 0 )
+            {
+                outputChannels[ outputChannelName ].lastMessage = messages.values().next().value;
+            }
+
+            messages.map( function( message )
+            {
+                entries = entries.concat( formatMessage( message ) );
+                if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
+                {
+                    entries.push( "" );
+                }
+            } );
+
+            entries.reverse().map( function( entry )
+            {
+                outputChannels[ outputChannelName ].outputChannel.appendLine( entry );
+            } );
+
+            provider.markRead( outputChannels[ outputChannelName ].discordChannel );
+        } );
     }
 
     function register()
@@ -164,47 +213,28 @@ function activate( context )
 
             outputChannel.show( true );
 
-            var entries = [];
-            var options = {
-                limit: vscode.workspace.getConfiguration( 'discord-chat' ).history,
-            };
-
-            if( outputChannels[ outputChannelName ].lastMessage )
-            {
-                options.after = outputChannels[ outputChannelName ].lastMessage.id;
-            }
-
-            channel.fetchMessages( options ).then( function( messages )
-            {
-                if( messages.size > 0 )
-                {
-                    outputChannels[ outputChannelName ].lastMessage = messages.values().next().value;
-                }
-
-                messages.map( function( message )
-                {
-                    entries = entries.concat( formatMessage( message ) );
-                } );
-
-                entries.reverse().map( function( entry )
-                {
-                    outputChannel.appendLine( entry );
-                } );
-
-                provider.markRead( channel );
-            } );
+            populateChannel( outputChannelName );
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
         {
-            if( e.affectsConfiguration( 'discord-chat' ) )
+            if( e.affectsConfiguration( 'discord-chat.showInExplorer' ) )
             {
                 vscode.commands.executeCommand( 'setContext', 'discord-chat-in-explorer', vscode.workspace.getConfiguration( 'discord-chat' ).showInExplorer );
-
-                if( client.readyAt === null )
+            }
+            else if( e.affectsConfiguration( 'discord-chat.token' ) && client.readyAt === null )
+            {
+                login();
+            }
+            else if( e.affectsConfiguration( 'discord-chat.compactView' ) ||
+                e.affectsConfiguration( 'discord-chat.history' ) )
+            {
+                Object.keys( outputChannels ).map( outputChannelName =>
                 {
-                    login();
-                }
+                    outputChannels[ outputChannelName ].outputChannel.clear();
+                    outputChannels[ outputChannelName ].lastMessage = undefined;
+                    populateChannel( outputChannelName );
+                } );
             }
         } ) );
 

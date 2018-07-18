@@ -1,3 +1,6 @@
+# v0.1.4 - 2018-07-18
+- Add compact view option
+
 # v0.1.3 - 2018-07-18
 - Sync unread counts between windows
 
