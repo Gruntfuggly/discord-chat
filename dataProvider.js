@@ -20,6 +20,8 @@ function findChannel( e )
     return e.type === CHANNEL && e.id.toString() === this.toString();
 };
 
+var status = vscode.window.createStatusBarItem( vscode.StatusBarAlignment.Left, 0 );
+
 class DiscordChatDataProvider
 {
     constructor( _context )
@@ -28,6 +30,25 @@ class DiscordChatDataProvider
 
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+    }
+
+    updateStatus()
+    {
+        var unread = this.unreadCount();
+        status.text = "$(comment-discussion)" + unread;
+        if( unread > 0 )
+        {
+            status.show();
+        }
+        else
+        {
+            status.hide();
+        }
+    }
+
+    getParent( element )
+    {
+        return element.parent;
     }
 
     getChildren( element )
@@ -50,6 +71,17 @@ class DiscordChatDataProvider
         }
     }
 
+    getIcon( name )
+    {
+        var darkIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "dark", name + ".svg" ) );
+        var lightIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "light", name + ".svg" ) );
+
+        return {
+            dark: darkIconPath,
+            light: lightIconPath
+        };
+    }
+
     getTreeItem( element )
     {
         var treeItem = new vscode.TreeItem( element.name );
@@ -60,26 +92,12 @@ class DiscordChatDataProvider
 
         if( element.type === SERVER )
         {
-            var darkIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "dark", "server.svg" ) );
-            var lightIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "light", "server.svg" ) );
-
-            treeItem.iconPath = {
-                dark: darkIconPath,
-                light: lightIconPath
-            };
-
+            treeItem.iconPath = this.getIcon( SERVER );
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         }
         else if( element.type === CHANNEL )
         {
-            var darkIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "dark", "channel.svg" ) );
-            var lightIconPath = this._context.asAbsolutePath( path.join( "resources/icons", "light", "channel.svg" ) );
-
-            treeItem.iconPath = {
-                dark: darkIconPath,
-                light: lightIconPath
-            };
-
+            treeItem.iconPath = this.getIcon( CHANNEL );
             treeItem.command = {
                 command: "discord-chat.openChannel",
                 title: "",
@@ -87,12 +105,14 @@ class DiscordChatDataProvider
                     element.channel
                 ]
             };
-
         }
 
         if( element.unreadCount && element.unreadCount > 0 )
         {
-            treeItem.label = element.name + " (" + element.unreadCount + ")";
+            treeItem.label = element.name +
+                " (" + element.unreadCount +
+                ( element.unreadCount >= vscode.workspace.getConfiguration( 'discord-chat' ).history ? "+" : "" ) +
+                ")";
         }
 
         return treeItem;
@@ -105,6 +125,7 @@ class DiscordChatDataProvider
 
     populate( channels )
     {
+        var me = this;
         channels.map( function( channel )
         {
             if( channel.guild && channel.type === "text" )
@@ -116,11 +137,16 @@ class DiscordChatDataProvider
                     servers.push( server );
                 }
 
-                var channelItem = server.channels.find( findChannel, channel.id );
-                if( channelItem === undefined )
+                var channelElement = server.channels.find( findChannel, channel.id );
+                if( channelElement === undefined )
                 {
-                    channelItem = { type: CHANNEL, name: channel.name, channel: channel, users: [], id: channel.id, unreadCount: 0 };
-                    server.channels.push( channelItem );
+                    channelElement = { type: CHANNEL, name: channel.name, channel: channel, users: [], id: channel.id, unreadCount: 0, parent: server };
+                    server.channels.push( channelElement );
+
+                    channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
+                    {
+                        me.setUnread( channel, messages );
+                    } );
                 }
             }
         } );
@@ -128,37 +154,79 @@ class DiscordChatDataProvider
 
     updateServerCount( server )
     {
-        var total = 0;
-        server.channels.map( channel =>
+        if( server )
         {
-            total += channel.unreadCount;
-        } );
-        server.unreadCount = total;
-        this._onDidChangeTreeData.fire();
+            var total = 0;
+            server.channels.map( channel =>
+            {
+                total += channel.unreadCount;
+            } );
+            server.unreadCount = total;
+            this._onDidChangeTreeData.fire();
+        }
+        this.updateStatus();
     }
 
-    updateChannelCount( channel, increment )
+    getChannelElement( channel )
     {
+        var channelElement;
         var server = servers.find( findServer, channel.guild.id );
         if( server )
         {
-            var channelItem = server.channels.find( findChannel, channel.id );
-            if( channelItem )
-            {
-                channelItem.unreadCount = increment ? channelItem.unreadCount + 1 : 0;
-                this.updateServerCount( server );
-            }
+            channelElement = server.channels.find( findChannel, channel.id );
         }
+        return channelElement;
+    }
+
+    unreadCount()
+    {
+        var total = 0;
+        servers.map( server =>
+        {
+            total += server.unreadCount;
+        } );
+        return total;
     }
 
     update( message )
     {
-        this.updateChannelCount( message.channel, +1 );
+        var channelElement = this.getChannelElement( message.channel );
+        if( channelElement )
+        {
+            channelElement.unreadCount += 1;
+        }
+        this.updateServerCount( servers.find( findServer, message.channel.guild.id ) );
     }
 
-    clearUnread( channel )
+    setUnread( channel, messages )
     {
-        this.updateChannelCount( channel, 0 );
+        var storedDate = this._context.workspaceState.get( "read.discord-chat" + channel.id );
+        var lastRead = new Date( storedDate ? storedDate : 0 );
+        var unread = 0;
+        messages.map( message =>
+        {
+            if( message.createdAt > lastRead )
+            {
+                unread++;
+            }
+        } );
+        var channelElement = this.getChannelElement( channel );
+        if( channelElement )
+        {
+            channelElement.unreadCount = unread;
+        }
+        this.updateServerCount( servers.find( findServer, channel.guild.id ) );
+    }
+
+    markRead( channel )
+    {
+        var channelElement = this.getChannelElement( channel );
+        if( channelElement )
+        {
+            channelElement.unreadCount = 0;
+            this._context.workspaceState.update( "read.discord-chat" + channel.id, new Date().toISOString() );
+        }
+        this.updateServerCount( servers.find( findServer, channel.guild.id ) );
     }
 
     refresh()

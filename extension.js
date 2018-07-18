@@ -13,7 +13,6 @@ function activate( context )
     const client = new discord.Client();
 
     var provider = new treeView.DiscordChatDataProvider( context );
-    // var status = vscode.window.createStatusBarItem( vscode.StatusBarAlignment.Left, 0 );
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
 
     function formatMessage( message )
@@ -46,6 +45,7 @@ function activate( context )
     function login()
     {
         generalOutputChannel.appendLine( "Logging in..." );
+
         var token = vscode.workspace.getConfiguration( 'discord-chat' ).token;
         if( token )
         {
@@ -63,52 +63,85 @@ function activate( context )
     }
     function register()
     {
-        vscode.window.registerTreeDataProvider( 'discord-chat', provider );
-        vscode.window.registerTreeDataProvider( 'discord-chat-explorer', provider );
+        var discordChatExplorerView = vscode.window.createTreeView( "discord-chat-view-explorer", { treeDataProvider: provider } );
+        var discordChatView = vscode.window.createTreeView( "discord-chat-view", { treeDataProvider: provider } );
 
-        context.subscriptions.push(
-            vscode.commands.registerCommand( 'discord-chat.openChannel', ( channel ) =>
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.post', function()
+        {
+            vscode.window.showInputBox( { prompt: "Post message to " + currentChannel.name } ).then(
+                function( message )
+                {
+                    currentChannel.send( message );
+                } );
+        } ) );
+
+        context.subscriptions.push( vscode.window.onDidChangeActiveTextEditor( function( e )
+        {
+            var documents = vscode.workspace.textDocuments;
+
+            documents.map( document =>
             {
-                var outputChannelName = 'discord-chat.' + channel.guild.name + '.' + channel.name;
-                currentChannel = channel;
-
-                var outputChannel = outputChannels[ outputChannelName ];
-                if( !outputChannel )
+                if( document.uri && document.uri.scheme === "output" )
                 {
-                    outputChannel = vscode.window.createOutputChannel( outputChannelName );
-                    outputChannels[ outputChannelName ] = outputChannel;
-                    context.subscriptions.push( outputChannel );
+                    Object.keys( outputChannels ).forEach( channelName =>
+                    {
+                        if( outputChannels[ channelName ].outputChannel._id === document.fileName )
+                        {
+                            currentChannel = outputChannels[ channelName ].discordChannel;
+                            var element = provider.getChannelElement( outputChannels[ channelName ].discordChannel );
+                            if( discordChatExplorerView.visible === true )
+                            {
+                                discordChatExplorerView.reveal( element, { focus: false, select: true } );
+                            }
+                            if( discordChatView.visible === true )
+                            {
+                                discordChatView.reveal( element, { focus: false, select: true } );
+                            }
+                        }
+                    } );
                 }
+            } );
+        } ) );
 
-                var entries = [];
-                channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', ( channel ) =>
+        {
+            var outputChannelName = 'discord-chat.' + channel.guild.name + '.' + channel.name;
+            currentChannel = channel;
+
+            var outputChannel = outputChannels[ outputChannelName ];
+            if( !outputChannel )
+            {
+                outputChannel = vscode.window.createOutputChannel( outputChannelName );
+                outputChannels[ outputChannelName ] = {
+                    outputChannel: outputChannel,
+                    discordChannel: channel
+                };
+                context.subscriptions.push( outputChannel );
+            }
+            else
+            {
+                outputChannel = outputChannel.outputChannel;
+            }
+
+            outputChannel.show( true );
+
+            var entries = [];
+            channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
+            {
+                messages.map( function( message )
                 {
-                    messages.map( function( message )
-                    {
-                        entries = entries.concat( formatMessage( message ) );
-                    } );
-
-                    entries.reverse().map( function( entry )
-                    {
-                        outputChannel.appendLine( entry );
-                    } );
-
-                    outputChannel.show( false );
-
-                    provider.clearUnread( channel );
+                    entries = entries.concat( formatMessage( message ) );
                 } );
 
-            } ) );
+                entries.reverse().map( function( entry )
+                {
+                    outputChannel.appendLine( entry );
+                } );
 
-        context.subscriptions.push(
-            vscode.commands.registerCommand( 'discord-chat.post', function()
-            {
-                vscode.window.showInputBox( { prompt: "Post message to " + currentChannel.name } ).then(
-                    function( message )
-                    {
-                        currentChannel.send( message );
-                    } );
-            } ) );
+                provider.markRead( channel );
+            } );
+
+        } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
         {
@@ -154,7 +187,7 @@ function activate( context )
                 if( message.channel === currentChannel )
                 {
                     var outputChannelName = 'discord-chat.' + message.channel.guild.name + '.' + message.channel.name;
-                    var outputChannel = outputChannels[ outputChannelName ];
+                    var outputChannel = outputChannels[ outputChannelName ].outputChannel;
                     if( outputChannel )
                     {
                         formatMessage( message ).map( entry =>
@@ -162,7 +195,7 @@ function activate( context )
                             outputChannel.appendLine( entry )
                         } );
                     }
-                    provider.clearUnread( message.channel );
+                    provider.markRead( message.channel );
                 }
                 else
                 {

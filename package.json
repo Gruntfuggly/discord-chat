@@ -30,14 +30,14 @@
     "views": {
       "explorer": [
         {
-          "id": "discord-chat-explorer",
+          "id": "discord-chat-view-explorer",
           "name": "Discord",
           "when": "discord-chat-in-explorer"
         }
       ],
       "discord-chat-container": [
         {
-          "id": "discord-chat",
+          "id": "discord-chat-view",
           "name": "Discord"
         }
       ]
