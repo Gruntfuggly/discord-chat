@@ -3,7 +3,7 @@
   "displayName": "Discord Chat",
   "description": "A very basic discord text chat client for vscode",
   "keywords": [],
-  "version": "0.1.2",
+  "version": "0.1.3",
   "icon": "resources/discord-chat.png",
   "publisher": "Gruntfuggly",
   "engines": {
@@ -81,6 +81,11 @@
           "type": "boolean",
           "description": "If true, show the tree in the explorer. Set to false if you only want to use the dedicated tree in the activity bar",
           "default": true
+        },
+        "discord-chat.lastRead": {
+          "type": "object",
+          "description": "Channel last read times",
+          "default": {}
         }
       }
     }

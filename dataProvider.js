@@ -5,6 +5,8 @@ Object.defineProperty( exports, "__esModule", { value: true } );
 var path = require( 'path' );
 var vscode = require( 'vscode' );
 
+var lastRead = require( './lastRead' );
+
 var servers = [];
 
 const SERVER = "server";
@@ -151,12 +153,12 @@ class DiscordChatDataProvider
                 {
                     channelElement = { type: CHANNEL, name: channel.name, channel: channel, users: [], id: channel.id, unreadCount: 0, parent: server };
                     server.channels.push( channelElement );
-
-                    channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
-                    {
-                        me.setUnread( channel, messages );
-                    } );
                 }
+
+                channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
+                {
+                    me.setUnread( channel, messages );
+                } );
             }
         } );
     }
@@ -202,9 +204,9 @@ class DiscordChatDataProvider
         var channelElement = this.getChannelElement( channel );
         if( channelElement )
         {
-            var storedDate = this._context.globalState.get( "read.discord-chat" + channel.id );
-            var lastRead = new Date( storedDate ? storedDate : 0 );
-            channelElement.unreadCount = messages.reduce( ( total, message ) => total + ( message.createdAt > lastRead ? 1 : 0 ), 0 );
+            var storedDate = lastRead.getLastRead( channel );
+            var channelLastRead = new Date( storedDate ? storedDate : 0 );
+            channelElement.unreadCount = messages.reduce( ( total, message ) => total + ( message.createdAt > channelLastRead ? 1 : 0 ), 0 );
             this.updateServerCount( servers.find( findServer, channel.guild.id ) );
         }
     }
@@ -215,7 +217,7 @@ class DiscordChatDataProvider
         if( channelElement )
         {
             channelElement.unreadCount = 0;
-            this._context.globalState.update( "read.discord-chat" + channel.id, new Date().toISOString() );
+            lastRead.setLastRead( channel );
             this.updateServerCount( servers.find( findServer, channel.guild.id ) );
         }
     }

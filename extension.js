@@ -1,9 +1,11 @@
 /* jshint esversion:6 */
 
-const discord = require( 'discord.js' );
-const strftime = require( 'strftime' );
-const vscode = require( 'vscode' );
-var treeView = require( "./dataProvider" );
+var discord = require( 'discord.js' );
+var strftime = require( 'strftime' );
+var vscode = require( 'vscode' );
+
+var lastRead = require( './lastRead' );
+var treeView = require( './dataProvider' );
 
 var outputChannels = {};
 var currentChannel;
@@ -14,6 +16,8 @@ function activate( context )
 
     var provider = new treeView.DiscordChatDataProvider( context );
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
+
+    lastRead.initialize( generalOutputChannel );
 
     function formatMessage( message )
     {
@@ -71,8 +75,8 @@ function activate( context )
     {
         updateSelectionState();
 
-        var discordChatExplorerView = vscode.window.createTreeView( "discord-chat-view-explorer", { treeDataProvider: provider } );
-        var discordChatView = vscode.window.createTreeView( "discord-chat-view", { treeDataProvider: provider } );
+        var discordChatExplorerView = vscode.window.createTreeView( 'discord-chat-view-explorer', { treeDataProvider: provider } );
+        var discordChatView = vscode.window.createTreeView( 'discord-chat-view', { treeDataProvider: provider } );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.post', function()
         {
@@ -108,7 +112,7 @@ function activate( context )
 
             documents.map( document =>
             {
-                if( document.uri && document.uri.scheme === "output" )
+                if( document.uri && document.uri.scheme === 'output' )
                 {
                     Object.keys( outputChannels ).forEach( channelName =>
                     {
@@ -193,7 +197,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
         {
-            if( e.affectsConfiguration( "discord-chat" ) )
+            if( e.affectsConfiguration( 'discord-chat' ) )
             {
                 vscode.commands.executeCommand( 'setContext', 'discord-chat-in-explorer', vscode.workspace.getConfiguration( 'discord-chat' ).showInExplorer );
 
@@ -230,7 +234,7 @@ function activate( context )
 
         client.on( 'message', message =>
         {
-            if( message.channel.type === "text" )
+            if( message.channel.type === 'text' )
             {
                 if( message.channel === currentChannel )
                 {
@@ -256,6 +260,8 @@ function activate( context )
     }
 
     register();
+
+    return lastRead;
 }
 
 function deactivate()
