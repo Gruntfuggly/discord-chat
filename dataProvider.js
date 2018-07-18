@@ -59,7 +59,7 @@ class DiscordChatDataProvider
             {
                 return servers;
             }
-            return [ { name: "Houston - we have a problem..." } ];
+            return [ { name: "..." } ];
         }
         else if( element.type === SERVER )
         {
@@ -202,7 +202,7 @@ class DiscordChatDataProvider
         var channelElement = this.getChannelElement( channel );
         if( channelElement )
         {
-            var storedDate = this._context.workspaceState.get( "read.discord-chat" + channel.id );
+            var storedDate = this._context.globalState.get( "read.discord-chat" + channel.id );
             var lastRead = new Date( storedDate ? storedDate : 0 );
             channelElement.unreadCount = messages.reduce( ( total, message ) => total + ( message.createdAt > lastRead ? 1 : 0 ), 0 );
             this.updateServerCount( servers.find( findServer, channel.guild.id ) );
@@ -215,7 +215,7 @@ class DiscordChatDataProvider
         if( channelElement )
         {
             channelElement.unreadCount = 0;
-            this._context.workspaceState.update( "read.discord-chat" + channel.id, new Date().toISOString() );
+            this._context.globalState.update( "read.discord-chat" + channel.id, new Date().toISOString() );
             this.updateServerCount( servers.find( findServer, channel.guild.id ) );
         }
     }

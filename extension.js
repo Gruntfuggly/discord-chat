@@ -76,14 +76,30 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.post', function()
         {
-            vscode.window.showInputBox( { prompt: "Post message to " + currentChannel.name } ).then(
-                function( message )
-                {
-                    if( message )
+            if( currentChannel )
+            {
+                vscode.window.showInputBox( { prompt: "Post message to #" + currentChannel.name } ).then(
+                    function( message )
                     {
-                        currentChannel.send( message );
-                    }
-                } );
+                        if( message )
+                        {
+                            currentChannel.send( message );
+                        }
+                    } );
+            }
+            else
+            {
+                vscode.window.showInformationMessage( "discord-chat: Please select a channel first" );
+            }
+        } ) );
+
+        context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
+        {
+            if( e.focused )
+            {
+                provider.populate( client.channels );
+                provider.refresh();
+            }
         } ) );
 
         context.subscriptions.push( vscode.window.onDidChangeActiveTextEditor( function( e )
@@ -145,8 +161,22 @@ function activate( context )
             outputChannel.show( true );
 
             var entries = [];
-            channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
+            var options = {
+                limit: vscode.workspace.getConfiguration( 'discord-chat' ).history,
+            };
+
+            if( outputChannels[ outputChannelName ].lastMessage )
             {
+                options.after = outputChannels[ outputChannelName ].lastMessage.id;
+            }
+
+            channel.fetchMessages( options ).then( function( messages )
+            {
+                if( messages.size > 0 )
+                {
+                    outputChannels[ outputChannelName ].lastMessage = messages.values().next().value;
+                }
+
                 messages.map( function( message )
                 {
                     entries = entries.concat( formatMessage( message ) );
@@ -159,7 +189,6 @@ function activate( context )
 
                 provider.markRead( channel );
             } );
-
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )

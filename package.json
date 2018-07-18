@@ -56,6 +56,7 @@
         "command": "discord-chat.post",
         "title": "Post",
         "category": "discord-chat",
+        "when": "discord-channel-selected",
         "icon": {
           "dark": "resources/icons/dark/post.svg",
           "light": "resources/icons/light/post.svg"
