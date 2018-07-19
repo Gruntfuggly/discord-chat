@@ -15,6 +15,8 @@ A tree view will show available servers and channels. Click on a channel to open
 - [ ] somehow colour names in the output panel
 - [ ] somehow show avatars
 - [ ] allow notifications
+- [ ] add refresh button
+- [ ] support direct messages
 
 ## Installing
 

@@ -266,12 +266,20 @@ function activate( context )
         {
             if( message.channel.type === 'text' )
             {
+                var outputChannelName = 'discord-chat.' + message.channel.guild.name + '.' + message.channel.name;
+
+                outputChannels[ outputChannelName ].lastMessage = message;
                 if( message.channel === currentChannel )
                 {
-                    var outputChannelName = 'discord-chat.' + message.channel.guild.name + '.' + message.channel.name;
                     var outputChannel = outputChannels[ outputChannelName ].outputChannel;
                     if( outputChannel )
                     {
+
+                        if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
+                        {
+                            outputChannel.appendLine( "" );
+                        }
+
                         formatMessage( message ).map( entry =>
                         {
                             outputChannel.appendLine( entry )
