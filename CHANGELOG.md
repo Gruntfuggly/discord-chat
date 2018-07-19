@@ -1,3 +1,6 @@
+# v0.1.7 - 2018-07-19
+- add screenshot to README.md
+
 # v0.1.6 - 2018-07-19
 - add support for colouring user names
 
@@ -29,4 +32,4 @@
 - fix README.md
 
 # v0.0.1 - 2018-07-17
-- First version
+- first version
