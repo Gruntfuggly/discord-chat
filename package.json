@@ -3,7 +3,7 @@
     "displayName": "Discord Chat",
     "description": "A very basic discord text chat client for vscode",
     "keywords": [],
-    "version": "0.1.5",
+    "version": "0.1.6",
     "icon": "resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
@@ -95,6 +95,11 @@
                     "type": "boolean",
                     "description": "Puts date, time, name and message on one line",
                     "default": false
+                },
+                "discord-chat.highlightDelay": {
+                    "type": "integer",
+                    "description": "Number of milliseconds before highlighting user names after an update",
+                    "default": 500
                 },
                 "discord-chat.history": {
                     "type": "integer",

@@ -10,6 +10,8 @@ var utils = require( './utils' );
 
 var outputChannels = {};
 var currentChannel;
+var decorations = [];
+var highlightTimeout;
 
 function activate( context )
 {
@@ -19,6 +21,14 @@ function activate( context )
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
 
     lastRead.initialize( generalOutputChannel );
+
+    function getDecoration( tag )
+    {
+        return vscode.window.createTextEditorDecorationType( {
+            light: { color: utils.toDarkColour( tag ) },
+            dark: { color: utils.toLightColour( tag ) },
+        } );
+    }
 
     function formatMessage( message )
     {
@@ -84,7 +94,7 @@ function activate( context )
         vscode.commands.executeCommand( 'setContext', 'discord-channel-selected', currentChannel !== undefined );
     }
 
-    function populateChannel( outputChannelName )
+    function populateChannel( outputChannelName, done )
     {
         var entries = [];
         var options = {
@@ -118,6 +128,8 @@ function activate( context )
             } );
 
             provider.markRead( outputChannels[ outputChannelName ].discordChannel );
+
+            done();
         } );
     }
 
@@ -125,6 +137,53 @@ function activate( context )
     {
         provider.populate( client.channels );
         provider.refresh();
+    }
+
+    function triggerHighlight()
+    {
+        clearTimeout( highlightTimeout );
+        highlightTimeout = setTimeout( highlightUsers, vscode.workspace.getConfiguration( 'discord-chat' ).get( 'highlightDelay', 500 ) );
+    }
+
+    function highlightUsers()
+    {
+        var visibleEditors = vscode.window.visibleTextEditors;
+
+        visibleEditors.map( editor =>
+        {
+            if( editor.document && editor.document.uri && editor.document.uri.scheme === 'output' )
+            {
+                var highlights = {};
+
+                const text = editor.document.getText();
+                var userList = [];
+                client.users.map( user => { userList.push( "@" + user.username ); } );
+                var regex = new RegExp( "(" + userList.join( "|" ) + ")", 'g' );
+                let match;
+                while( ( match = regex.exec( text ) ) !== null )
+                {
+                    const tag = match[ match.length - 1 ];
+                    const startPos = editor.document.positionAt( match.index );
+                    const endPos = editor.document.positionAt( match.index + match[ 0 ].length );
+                    const decoration = { range: new vscode.Range( startPos, endPos ) };
+                    if( highlights[ tag ] === undefined )
+                    {
+                        highlights[ tag ] = [];
+                    }
+                    highlights[ tag ].push( decoration );
+                }
+                decorations.forEach( decoration =>
+                {
+                    decoration.dispose();
+                } );
+                Object.keys( highlights ).forEach( tag =>
+                {
+                    var decoration = getDecoration( tag );
+                    decorations.push( decoration );
+                    editor.setDecorations( decoration, highlights[ tag ] );
+                } );
+            }
+        } );
     }
 
     function register()
@@ -190,6 +249,8 @@ function activate( context )
                             {
                                 discordChatView.reveal( element, { focus: false, select: true } );
                             }
+
+                            triggerHighlight();
                         }
                     } );
                 }
@@ -225,7 +286,7 @@ function activate( context )
 
             outputChannel.show( true );
 
-            populateChannel( outputChannelName );
+            populateChannel( outputChannelName, triggerHighlight );
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
@@ -295,8 +356,10 @@ function activate( context )
 
                             formatMessage( message ).map( entry =>
                             {
-                                outputChannel.appendLine( entry )
+                                outputChannel.appendLine( entry );
                             } );
+
+                            triggerHighlight();
                         }
                         provider.markRead( message.channel );
                     }

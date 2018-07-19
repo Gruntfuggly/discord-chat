@@ -1,3 +1,6 @@
+# v0.1.6 - 2018-07-19
+- add support for colouring user names
+
 # v0.1.5 - 2018-07-19
 - add support for direct messages
 - update extension icon
