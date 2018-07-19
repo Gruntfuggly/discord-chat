@@ -120,12 +120,20 @@ function activate( context )
         } );
     }
 
+    function refresh()
+    {
+        provider.populate( client.channels );
+        provider.refresh();
+    }
+
     function register()
     {
         updateSelectionState();
 
         var discordChatExplorerView = vscode.window.createTreeView( 'discord-chat-view-explorer', { treeDataProvider: provider } );
         var discordChatView = vscode.window.createTreeView( 'discord-chat-view', { treeDataProvider: provider } );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.refresh', refresh ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.post', function()
         {
@@ -150,8 +158,7 @@ function activate( context )
         {
             if( e.focused )
             {
-                provider.populate( client.channels );
-                provider.refresh();
+                refresh();
             }
         } ) );
 
@@ -258,8 +265,7 @@ function activate( context )
         client.on( 'ready', () =>
         {
             generalOutputChannel.appendLine( `Logged in as ${client.user.tag}!` );
-            provider.populate( client.channels );
-            provider.refresh();
+            refresh();
         } );
 
         client.on( 'message', message =>

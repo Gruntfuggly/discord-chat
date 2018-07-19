@@ -1,102 +1,116 @@
 {
-  "name": "discord-chat",
-  "displayName": "Discord Chat",
-  "description": "A very basic discord text chat client for vscode",
-  "keywords": [],
-  "version": "0.1.4",
-  "icon": "resources/discord-chat.png",
-  "publisher": "Gruntfuggly",
-  "engines": {
-    "vscode": "^1.5.0"
-  },
-  "repository": "https://github.com/Gruntfuggly/discord-chat",
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "*"
-  ],
-  "main": "./extension",
-  "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "discord-chat-container",
-          "title": "Discord",
-          "icon": "resources/discord-chat-container.svg"
-        }
-      ]
+    "name": "discord-chat",
+    "displayName": "Discord Chat",
+    "description": "A very basic discord text chat client for vscode",
+    "keywords": [],
+    "version": "0.1.4",
+    "icon": "resources/discord-chat.png",
+    "publisher": "Gruntfuggly",
+    "engines": {
+        "vscode": "^1.5.0"
     },
-    "views": {
-      "explorer": [
-        {
-          "id": "discord-chat-view-explorer",
-          "name": "Discord",
-          "when": "discord-chat-in-explorer"
-        }
-      ],
-      "discord-chat-container": [
-        {
-          "id": "discord-chat-view",
-          "name": "Discord"
-        }
-      ]
-    },
-    "menus": {
-      "view/title": [
-        {
-          "command": "discord-chat.post",
-          "when": "view =~ /discord-chat/ && discord-channel-selected",
-          "group": "navigation@1"
-        }
-      ]
-    },
-    "commands": [
-      {
-        "command": "discord-chat.post",
-        "title": "Post",
-        "category": "discord-chat",
-        "when": "discord-channel-selected",
-        "icon": {
-          "dark": "resources/icons/dark/post.svg",
-          "light": "resources/icons/light/post.svg"
-        }
-      }
+    "repository": "https://github.com/Gruntfuggly/discord-chat",
+    "categories": [
+        "Other"
     ],
-    "configuration": {
-      "type": "object",
-      "title": "discord-chat configuration",
-      "properties": {
-        "discord-chat.token": {
-          "type": "string",
-          "description": "Your discord token",
-          "default": ""
+    "activationEvents": [
+        "*"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "discord-chat-container",
+                    "title": "Discord",
+                    "icon": "resources/discord-chat-container.svg"
+                }
+            ]
         },
-        "discord-chat.compactView": {
-          "type": "boolean",
-          "description": "Puts date, time, name and message on one line",
-          "default": false
+        "views": {
+            "explorer": [
+                {
+                    "id": "discord-chat-view-explorer",
+                    "name": "Discord",
+                    "when": "discord-chat-in-explorer"
+                }
+            ],
+            "discord-chat-container": [
+                {
+                    "id": "discord-chat-view",
+                    "name": "Discord"
+                }
+            ]
         },
-        "discord-chat.history": {
-          "type": "integer",
-          "description": "Number of messages to fetch when opening a channel",
-          "default": 10
+        "menus": {
+            "view/title": [
+                {
+                    "command": "discord-chat.refresh",
+                    "when": "view =~ /discord-chat/",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "discord-chat.post",
+                    "when": "view =~ /discord-chat/ && discord-channel-selected",
+                    "group": "navigation@1"
+                }
+            ]
         },
-        "discord-chat.showInExplorer": {
-          "type": "boolean",
-          "description": "If true, show the tree in the explorer. Set to false if you only want to use the dedicated tree in the activity bar",
-          "default": true
-        },
-        "discord-chat.lastRead": {
-          "type": "object",
-          "description": "Channel last read times",
-          "default": {}
+        "commands": [
+            {
+                "command": "discord-chat.post",
+                "title": "Post",
+                "category": "discord-chat",
+                "when": "discord-channel-selected",
+                "icon": {
+                    "dark": "resources/icons/dark/post.svg",
+                    "light": "resources/icons/light/post.svg"
+                }
+            },
+            {
+                "command": "discord-chat.refresh",
+                "title": "Refresh",
+                "category": "discord-chat",
+                "icon": {
+                    "dark": "resources/icons/dark/refresh.svg",
+                    "light": "resources/icons/light/refresh.svg"
+                }
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "discord-chat configuration",
+            "properties": {
+                "discord-chat.token": {
+                    "type": "string",
+                    "description": "Your discord token",
+                    "default": ""
+                },
+                "discord-chat.compactView": {
+                    "type": "boolean",
+                    "description": "Puts date, time, name and message on one line",
+                    "default": false
+                },
+                "discord-chat.history": {
+                    "type": "integer",
+                    "description": "Number of messages to fetch when opening a channel",
+                    "default": 10
+                },
+                "discord-chat.showInExplorer": {
+                    "type": "boolean",
+                    "description": "If true, show the tree in the explorer. Set to false if you only want to use the dedicated tree in the activity bar",
+                    "default": true
+                },
+                "discord-chat.lastRead": {
+                    "type": "object",
+                    "description": "Channel last read times",
+                    "default": {}
+                }
+            }
         }
-      }
+    },
+    "dependencies": {
+        "discord.js": "^11.3.2",
+        "strftime": "^0.10.0"
     }
-  },
-  "dependencies": {
-    "discord.js": "^11.3.2",
-    "strftime": "^0.10.0"
-  }
 }
