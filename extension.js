@@ -6,6 +6,7 @@ var vscode = require( 'vscode' );
 
 var lastRead = require( './lastRead' );
 var treeView = require( './dataProvider' );
+var utils = require( './utils' );
 
 var outputChannels = {};
 var currentChannel;
@@ -18,22 +19,6 @@ function activate( context )
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
 
     lastRead.initialize( generalOutputChannel );
-
-    function channelName( channel )
-    {
-        var name = 'discord-chat.';
-        if( channel.guild )
-        {
-            name += channel.guild.name;
-        }
-        else
-        {
-            name += "dm";
-        }
-        name += '.' + channel.name;
-
-        return name;
-    }
 
     function formatMessage( message )
     {
@@ -150,6 +135,10 @@ function activate( context )
         var discordChatView = vscode.window.createTreeView( 'discord-chat-view', { treeDataProvider: provider } );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.refresh', refresh ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markAllRead', function()
+        {
+            provider.markAllRead();
+        } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.post', function()
         {
@@ -215,7 +204,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', ( channel ) =>
         {
-            var outputChannelName = channelName( channel );
+            var outputChannelName = utils.toOutputChannelName( channel );
             currentChannel = channel;
             updateSelectionState();
 
@@ -288,30 +277,33 @@ function activate( context )
         {
             if( message.channel.type === 'text' )
             {
-                var outputChannelName = channelName( message.channel );
+                var outputChannelName = utils.toOutputChannelName( message.channel );
 
-                outputChannels[ outputChannelName ].lastMessage = message;
-                if( message.channel === currentChannel )
+                if( outputChannelName )
                 {
-                    var outputChannel = outputChannels[ outputChannelName ].outputChannel;
-                    if( outputChannel )
+                    if( message.channel === currentChannel )
                     {
-
-                        if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
+                        outputChannels[ outputChannelName ].lastMessage = message;
+                        var outputChannel = outputChannels[ outputChannelName ].outputChannel;
+                        if( outputChannel )
                         {
-                            outputChannel.appendLine( "" );
+
+                            if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
+                            {
+                                outputChannel.appendLine( "" );
+                            }
+
+                            formatMessage( message ).map( entry =>
+                            {
+                                outputChannel.appendLine( entry )
+                            } );
                         }
-
-                        formatMessage( message ).map( entry =>
-                        {
-                            outputChannel.appendLine( entry )
-                        } );
+                        provider.markRead( message.channel );
                     }
-                    provider.markRead( message.channel );
-                }
-                else
-                {
-                    provider.update( message );
+                    else
+                    {
+                        provider.update( message );
+                    }
                 }
             }
         } );

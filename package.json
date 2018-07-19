@@ -3,7 +3,7 @@
     "displayName": "Discord Chat",
     "description": "A very basic discord text chat client for vscode",
     "keywords": [],
-    "version": "0.1.4",
+    "version": "0.1.5",
     "icon": "resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
@@ -75,6 +75,11 @@
                     "dark": "resources/icons/dark/refresh.svg",
                     "light": "resources/icons/light/refresh.svg"
                 }
+            },
+            {
+                "command": "discord-chat.markAllRead",
+                "title": "Mark All Read",
+                "category": "discord-chat"
             }
         ],
         "configuration": {

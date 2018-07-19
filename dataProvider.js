@@ -6,6 +6,7 @@ var path = require( 'path' );
 var vscode = require( 'vscode' );
 
 var lastRead = require( './lastRead' );
+var utils = require( './utils' );
 
 var servers = [];
 
@@ -22,35 +23,6 @@ function findChannel( e )
     return e.type === CHANNEL && e.id.toString() === this.toString();
 };
 
-function parentId( channel )
-{
-    if( channel.guild )
-    {
-        return channel.guild.id;
-    }
-    return channel.ownerID;
-}
-
-function serverName( channel )
-{
-    return channel.guild ? channel.guild.name : "Direct Messages";
-}
-
-function channelName( channel )
-{
-    var name = channel.name;
-    if( !name )
-    {
-        var names = [];
-        channel.recipients.map( recipient =>
-        {
-            names.push( recipient.username );
-        } );
-        name = names.join( ", " );
-    }
-    return name;
-}
-
 var status = vscode.window.createStatusBarItem( vscode.StatusBarAlignment.Left, 0 );
 
 class DiscordChatDataProvider
@@ -66,7 +38,9 @@ class DiscordChatDataProvider
     updateStatus()
     {
         var unread = this.unreadCount();
-        status.text = "$(comment-discussion)" + unread;
+        status.text = "$(comment-discussion) " + unread;
+        status.command = "discord-chat.markAllRead";
+        status.tooltip = "Click to mark all channels as read";
         if( unread > 0 )
         {
             status.show();
@@ -168,17 +142,17 @@ class DiscordChatDataProvider
         {
             if( channel.type === "text" || channel.type === "dm" || channel.type === "group" )
             {
-                var server = servers.find( findServer, parentId( channel ) );
+                var server = servers.find( findServer, utils.toParentId( channel ) );
                 if( server === undefined )
                 {
-                    server = { type: SERVER, name: serverName( channel ), server: server, channels: [], id: parentId( channel ), unreadCount: 0 };
+                    server = { type: SERVER, name: utils.toServerName( channel ), server: server, channels: [], id: utils.toParentId( channel ), unreadCount: 0 };
                     servers.push( server );
                 }
 
                 var channelElement = server.channels.find( findChannel, channel.id );
                 if( channelElement === undefined )
                 {
-                    channelElement = { type: CHANNEL, name: channelName( channel ), channel: channel, users: [], id: channel.id, unreadCount: 0, parent: server };
+                    channelElement = { type: CHANNEL, name: utils.toChannelName( channel ), channel: channel, users: [], id: channel.id, unreadCount: 0, parent: server };
                     server.channels.push( channelElement );
                 }
 
@@ -203,7 +177,7 @@ class DiscordChatDataProvider
     getChannelElement( channel )
     {
         var channelElement;
-        var server = servers.find( findServer, parentId( channel ) );
+        var server = servers.find( findServer, utils.toParentId( channel ) );
         if( server )
         {
             channelElement = server.channels.find( findChannel, channel.id );
@@ -222,7 +196,7 @@ class DiscordChatDataProvider
         if( channelElement )
         {
             ++channelElement.unreadCount;
-            this.updateServerCount( servers.find( findServer, parentId( message.channel ) ) );
+            this.updateServerCount( servers.find( findServer, utils.toParentId( message.channel ) ) );
         }
     }
 
@@ -234,19 +208,37 @@ class DiscordChatDataProvider
             var storedDate = lastRead.getLastRead( channel );
             var channelLastRead = new Date( storedDate ? storedDate : 0 );
             channelElement.unreadCount = messages.reduce( ( total, message ) => total + ( message.createdAt > channelLastRead ? 1 : 0 ), 0 );
-            this.updateServerCount( servers.find( findServer, parentId( channel ) ) );
+            this.updateServerCount( servers.find( findServer, utils.toParentId( channel ) ) );
         }
     }
 
-    markRead( channel )
+    markRead( channel, inhibitUpdate )
     {
         var channelElement = this.getChannelElement( channel );
         if( channelElement )
         {
             channelElement.unreadCount = 0;
             lastRead.setLastRead( channel );
-            this.updateServerCount( servers.find( findServer, parentId( channel ) ) );
+            if( inhibitUpdate !== false )
+            {
+                lastRead.updateLastRead();
+            }
+            this.updateServerCount( servers.find( findServer, utils.toParentId( channel ) ) );
         }
+    }
+
+    markAllRead()
+    {
+        var me = this;
+
+        servers.map( server =>
+        {
+            server.channels.map( channelElement =>
+            {
+                me.markRead( channelElement.channel, false );
+            } );
+        } );
+        lastRead.updateLastRead();
     }
 
     refresh()

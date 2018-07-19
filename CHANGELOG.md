@@ -1,8 +1,13 @@
+# v0.1.5 - 2018-07-19
+- add support for direct messages
+- update extension icon
+- add refresh button
+
 # v0.1.4 - 2018-07-18
-- Add compact view option
+- add compact view option
 
 # v0.1.3 - 2018-07-18
-- Sync unread counts between windows
+- sync unread counts between windows
 
 # v0.1.2 - 2018-07-18
 - persist unread counts
@@ -15,10 +20,10 @@
 - fetch messages based on last fetched
 
 # v0.1.1 - 2018-07-17
-- Fix README.md again
+- fix README.md again
 
 # v0.1.0 - 2018-07-17
-- Fix README.md
+- fix README.md
 
 # v0.0.1 - 2018-07-17
 - First version
