@@ -19,6 +19,22 @@ function activate( context )
 
     lastRead.initialize( generalOutputChannel );
 
+    function channelName( channel )
+    {
+        var name = 'discord-chat.';
+        if( channel.guild )
+        {
+            name += channel.guild.name;
+        }
+        else
+        {
+            name += "dm";
+        }
+        name += '.' + channel.name;
+
+        return name;
+    }
+
     function formatMessage( message )
     {
         var compact = vscode.workspace.getConfiguration( 'discord-chat' ).compactView;
@@ -199,7 +215,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', ( channel ) =>
         {
-            var outputChannelName = 'discord-chat.' + channel.guild.name + '.' + channel.name;
+            var outputChannelName = channelName( channel );
             currentChannel = channel;
             updateSelectionState();
 
@@ -272,7 +288,7 @@ function activate( context )
         {
             if( message.channel.type === 'text' )
             {
-                var outputChannelName = 'discord-chat.' + message.channel.guild.name + '.' + message.channel.name;
+                var outputChannelName = channelName( message.channel );
 
                 outputChannels[ outputChannelName ].lastMessage = message;
                 if( message.channel === currentChannel )
