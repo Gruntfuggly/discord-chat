@@ -255,6 +255,7 @@ function activate( context )
                             triggerHighlight();
                         }
                     } );
+
                 }
             } );
         } ) );
@@ -338,7 +339,7 @@ function activate( context )
 
         client.on( 'message', message =>
         {
-            if( message.channel.type === 'text' )
+            if( utils.isReadableChannel( message.channel ) )
             {
                 var outputChannelName = utils.toOutputChannelName( message.channel );
 

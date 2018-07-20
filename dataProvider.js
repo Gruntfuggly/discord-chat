@@ -140,7 +140,7 @@ class DiscordChatDataProvider
 
         channels.map( function( channel )
         {
-            if( channel.type === "text" || channel.type === "dm" || channel.type === "group" )
+            if( utils.isReadableChannel( channel ) )
             {
                 var server = servers.find( findServer, utils.toParentId( channel ) );
                 if( server === undefined )

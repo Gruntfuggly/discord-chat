@@ -1,5 +1,10 @@
 function toParentId( channel )
 {
+    if( !channel )
+    {
+        return undefined;
+    }
+
     if( channel.guild )
     {
         return channel.guild.id;
@@ -9,11 +14,21 @@ function toParentId( channel )
 
 function toServerName( channel )
 {
+    if( !channel )
+    {
+        return undefined;
+    }
+
     return channel.guild ? channel.guild.name : "Direct Messages";
 }
 
 function toChannelName( channel )
 {
+    if( !channel )
+    {
+        return undefined;
+    }
+
     var name = channel.name;
     if( !name )
     {
@@ -30,6 +45,11 @@ function toChannelName( channel )
 
 function toOutputChannelName( channel )
 {
+    if( !channel )
+    {
+        return undefined;
+    }
+
     var name = 'discord-chat.';
     if( channel.guild )
     {
@@ -78,9 +98,15 @@ var toLightColour = function( text )
     return colour;
 }
 
+var isReadableChannel = function( channel )
+{
+    return channel.type === 'text' || channel.type === 'dm' || channel.type === 'group';
+}
+
 module.exports.toParentId = toParentId;
 module.exports.toServerName = toServerName;
 module.exports.toChannelName = toChannelName;
 module.exports.toOutputChannelName = toOutputChannelName;
 module.exports.toDarkColour = toDarkColour;
 module.exports.toLightColour = toLightColour;
+module.exports.isReadableChannel = isReadableChannel;
