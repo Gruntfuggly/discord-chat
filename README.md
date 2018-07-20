@@ -13,7 +13,6 @@ A tree view will show available servers and channels. Click on a channel to open
 ## TODO
 
 - [ ] somehow show avatars
-- [ ] allow notifications
 - [ ] support channel mute
 
 ## Installing
@@ -36,7 +35,8 @@ The extension can be customised as follows:
 |---------|---------|-------------|
 | discord-chat.token | | You need to set this to authenticate with Discord |
 | discord-chat.compactView | false | Set this to true to put the date, time, name and first line of the message on one line |
-| discord-chat.highlightDelay | 500 | The delay before highlighting user names (in milliseconds). |
+| discord-chat.notify | whenHidden | Can also be set to "always" or "never" |
+| discord-chat.highlightDelay | 500 | The delay before highlighting user names (in milliseconds) |
 | discord-chat.history | 10 | The number of previous messages to fetch when opening a channel |
 | discord-chat.showInExplorer | true | Set this to false if you would rather only see the channel list in a dedicated view in the activity bar |
 

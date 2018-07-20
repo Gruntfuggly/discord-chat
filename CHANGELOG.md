@@ -1,3 +1,6 @@
+# v0.1.8 - 2018-07-20
+- add support for notifications
+
 # v0.1.7 - 2018-07-19
 - add screenshot to README.md
 

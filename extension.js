@@ -234,6 +234,8 @@ function activate( context )
             {
                 if( document.uri && document.uri.scheme === 'output' )
                 {
+                    currentChannel = undefined;
+
                     Object.keys( outputChannels ).forEach( channelName =>
                     {
                         if( outputChannels[ channelName ].outputChannel._id === document.fileName )
@@ -243,11 +245,11 @@ function activate( context )
                             var element = provider.getChannelElement( outputChannels[ channelName ].discordChannel );
                             if( discordChatExplorerView.visible === true )
                             {
-                                discordChatExplorerView.reveal( element, { focus: false, select: true } );
+                                discordChatExplorerView.reveal( element, { focus: true, select: true } );
                             }
                             if( discordChatView.visible === true )
                             {
-                                discordChatView.reveal( element, { focus: false, select: true } );
+                                discordChatView.reveal( element, { focus: true, select: true } );
                             }
 
                             triggerHighlight();
@@ -366,6 +368,27 @@ function activate( context )
                     else
                     {
                         provider.update( message );
+
+                        var element = provider.getChannelElement( message.channel );
+                        if( discordChatExplorerView.visible === true )
+                        {
+                            discordChatExplorerView.reveal( element, { focus: false, select: false } );
+                        }
+                        if( discordChatView.visible === true )
+                        {
+                            discordChatView.reveal( element, { focus: false, select: false } );
+                        }
+
+                        if( vscode.window.state.focused === true )
+                        {
+                            var notify = vscode.workspace.getConfiguration( 'discord-chat' ).notify;
+                            if( notify === "always" ||
+                                ( notify == "whenHidden" && ( currentChannel === undefined ) ||
+                                    ( discordChatExplorerView.visible === false && discordChatView.visible === false ) ) )
+                            {
+                                vscode.window.showInformationMessage( formatMessage( message ).join() );
+                            }
+                        }
                     }
                 }
             }
