@@ -255,7 +255,6 @@ function activate( context )
                             triggerHighlight();
                         }
                     } );
-
                 }
             } );
         } ) );
@@ -343,6 +342,8 @@ function activate( context )
             {
                 var outputChannelName = utils.toOutputChannelName( message.channel );
 
+                generalOutputChannel.appendLine( "Received message on " + outputChannelName );
+
                 if( outputChannelName )
                 {
                     if( message.channel === currentChannel )
@@ -351,7 +352,6 @@ function activate( context )
                         var outputChannel = outputChannels[ outputChannelName ].outputChannel;
                         if( outputChannel )
                         {
-
                             if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
                             {
                                 outputChannel.appendLine( "" );
@@ -380,15 +380,12 @@ function activate( context )
                             discordChatView.reveal( element, { focus: false, select: false } );
                         }
 
-                        if( vscode.window.state.focused === true )
+                        var notify = vscode.workspace.getConfiguration( 'discord-chat' ).notify;
+                        if( notify === "always" ||
+                            ( notify == "whenHidden" &&
+                                ( discordChatExplorerView.visible === false && discordChatView.visible === false ) ) )
                         {
-                            var notify = vscode.workspace.getConfiguration( 'discord-chat' ).notify;
-                            if( notify === "always" ||
-                                ( notify == "whenHidden" && ( currentChannel === undefined ) ||
-                                    ( discordChatExplorerView.visible === false && discordChatView.visible === false ) ) )
-                            {
-                                vscode.window.showInformationMessage( formatMessage( message ).join() );
-                            }
+                            vscode.window.showInformationMessage( formatMessage( message ).join() );
                         }
                     }
                 }
