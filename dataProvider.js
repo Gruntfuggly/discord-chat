@@ -145,7 +145,7 @@ class DiscordChatDataProvider
                 var server = servers.find( findServer, utils.toParentId( channel ) );
                 if( server === undefined )
                 {
-                    server = { type: SERVER, name: utils.toServerName( channel ), server: server, channels: [], id: utils.toParentId( channel ), unreadCount: 0 };
+                    server = { type: SERVER, name: utils.toServerName( channel ), server: channel.guild, channels: [], id: utils.toParentId( channel ), unreadCount: 0 };
                     servers.push( server );
                 }
 

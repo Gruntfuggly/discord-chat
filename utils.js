@@ -54,12 +54,13 @@ function toOutputChannelName( channel )
     if( channel.guild )
     {
         name += channel.guild.name;
+        name += '.' + channel.name;
     }
     else
     {
         name += "dm";
+        name += '.' + toChannelName( channel );
     }
-    name += '.' + channel.name;
 
     return name;
 }

@@ -3,7 +3,7 @@
     "displayName": "Discord Chat",
     "description": "A very basic discord text chat client for vscode",
     "keywords": [],
-    "version": "0.1.9",
+    "version": "0.1.10",
     "icon": "resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
@@ -47,6 +47,11 @@
                 {
                     "command": "discord-chat.refresh",
                     "when": "view =~ /discord-chat/",
+                    "group": "navigation@3"
+                },
+                {
+                    "command": "discord-chat.createChannel",
+                    "when": "view =~ /discord-chat/ && discord-server-selected",
                     "group": "navigation@2"
                 },
                 {
@@ -79,6 +84,20 @@
             {
                 "command": "discord-chat.markAllRead",
                 "title": "Mark All Read",
+                "category": "discord-chat"
+            },
+            {
+                "command": "discord-chat.createChannel",
+                "title": "Create Channel",
+                "category": "discord-chat",
+                "icon": {
+                    "dark": "resources/icons/dark/add.svg",
+                    "light": "resources/icons/light/add.svg"
+                }
+            },
+            {
+                "command": "discord-chat.deleteChannel",
+                "title": "Delete Channel",
                 "category": "discord-chat"
             }
         ],

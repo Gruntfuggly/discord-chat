@@ -10,6 +10,13 @@ A tree view will show available servers and channels. Click on a channel to open
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/discord-chat/master/resources/screenshot.png">
 
+### Commands
+
+- `discord-chat: Post` - send a message to the selected channel
+- `discord-chat: Create Channel` - create a new channel on the selected server
+- `discord-chat: Delete Channel` - delete the currently selected channel
+- `discord-chat: Mark All Read` - reset unread count on all channels
+- `discord-chat: Refresh` - repopulate the channel list
 ### Notifications
 
 Notifications are generated if a message arrives from a channel other that the currently selected channel. By default these these will only be shown if the channel tree is hidden (or collpased). See *Configuration* for other settings.
@@ -18,6 +25,8 @@ Notifications are generated if a message arrives from a channel other that the c
 
 - [ ] somehow show avatars
 - [ ] support channel mute
+- [ ] support send code
+- [ ] support categories
 
 ## Installing
 

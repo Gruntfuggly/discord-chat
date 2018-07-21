@@ -1,3 +1,6 @@
+# v0.1.10 - 2018-07-22
+- add support for creating and deleting channels
+
 # v0.1.9 - 2018-07-21
 - show notifications for other channels regardless of focused window
 
