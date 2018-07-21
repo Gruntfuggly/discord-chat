@@ -1,3 +1,6 @@
+# v0.1.9 - 2018-07-21
+- show notifications for other channels regardless of focused window
+
 # v0.1.8 - 2018-07-20
 - add support for notifications
 

@@ -3,7 +3,7 @@
     "displayName": "Discord Chat",
     "description": "A very basic discord text chat client for vscode",
     "keywords": [],
-    "version": "0.1.8",
+    "version": "0.1.9",
     "icon": "resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
@@ -98,7 +98,11 @@
                 },
                 "discord-chat.notify": {
                     "type": "string",
-                    "enum": [ "always", "whenHidden", "never" ],
+                    "enum": [
+                        "always",
+                        "whenHidden",
+                        "never"
+                    ],
                     "description": "When to show popup notifications",
                     "default": "whenHidden"
                 },

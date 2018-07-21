@@ -10,6 +10,10 @@ A tree view will show available servers and channels. Click on a channel to open
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/discord-chat/master/resources/screenshot.png">
 
+### Notifications
+
+Notifications are generated if a message arrives from a channel other that the currently selected channel. By default these these will only be shown if the channel tree is hidden (or collpased). See *Configuration* for other settings.
+
 ## TODO
 
 - [ ] somehow show avatars
