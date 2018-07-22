@@ -17,6 +17,7 @@ A tree view will show available servers and channels. Click on a channel to open
 - `discord-chat: Delete Channel` - delete the currently selected channel
 - `discord-chat: Mark All Read` - reset unread count on all channels
 - `discord-chat: Refresh` - repopulate the channel list
+
 ### Notifications
 
 Notifications are generated if a message arrives from a channel other that the currently selected channel. By default these these will only be shown if the channel tree is hidden (or collpased). See *Configuration* for other settings.

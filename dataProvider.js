@@ -10,6 +10,7 @@ var utils = require( './utils' );
 
 var servers = [];
 
+const DEBUG = "debug";
 const SERVER = "server";
 const CHANNEL = "channel";
 
@@ -64,7 +65,7 @@ class DiscordChatDataProvider
             {
                 return servers;
             }
-            return [ { name: "..." } ];
+            return [ { name: "...", type: DEBUG } ];
         }
         else if( element.type === SERVER )
         {
@@ -95,7 +96,15 @@ class DiscordChatDataProvider
 
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
 
-        if( element.type === SERVER )
+        if( element.type === DEBUG )
+        {
+            treeItem.tooltip = "Open debug console...";
+            treeItem.command = {
+                command: "discord-chat.openDebugConsole",
+                title: "Open debug console"
+            };
+        }
+        else if( element.type === SERVER )
         {
             treeItem.iconPath = this.getIcon( SERVER );
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;

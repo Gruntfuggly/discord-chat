@@ -235,8 +235,7 @@ function activate( context )
                             ).catch(
                                 e =>
                                 {
-                                    console.log( e.message );
-                                    vscode.window.showErrorMessage( "Invalid channel name: " + name );
+                                    vscode.window.showErrorMessage( e.message );
                                 }
                             );
                         }
@@ -332,6 +331,11 @@ function activate( context )
                     } );
                 }
             } );
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openDebugConsole', function()
+        {
+            generalOutputChannel.show();
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.selectServer', ( server ) =>
