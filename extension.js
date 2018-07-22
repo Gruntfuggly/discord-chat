@@ -135,14 +135,20 @@ function activate( context )
         } ).catch( function( e )
         {
             console.log( e );
-        } )
-            ;
+        } );
     }
 
     function refresh()
     {
-        provider.populate( client.channels );
-        provider.refresh();
+        if( client.readyAt === null )
+        {
+            login();
+        }
+        else
+        {
+            provider.populate( client.channels );
+            provider.refresh();
+        }
     }
 
     function triggerHighlight()
