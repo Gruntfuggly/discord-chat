@@ -144,6 +144,11 @@
                     "type": "object",
                     "description": "Channel last read times",
                     "default": {}
+                },
+                "discord-chat.useIcons": {
+                    "type": "boolean",
+                    "description": "Set this to false to disable the use of server icons",
+                    "default": true
                 }
             }
         }

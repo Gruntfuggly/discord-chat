@@ -3,6 +3,9 @@
 var discord = require( 'discord.js' );
 var strftime = require( 'strftime' );
 var vscode = require( 'vscode' );
+var https = require( 'https' );
+var fs = require( 'fs' );
+var path = require( 'path' );
 
 var lastRead = require( './lastRead' );
 var treeView = require( './dataProvider' );
@@ -22,6 +25,19 @@ function activate( context )
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
 
     lastRead.initialize( generalOutputChannel );
+
+    function fetchIcon( url, filename, cb )
+    {
+        var file = fs.createWriteStream( filename );
+        var request = https.get( url, function( response )
+        {
+            response.pipe( file );
+            file.on( 'finish', function()
+            {
+                file.close( cb );  // close() is async, call cb after close completes.
+            } );
+        } );
+    }
 
     function getDecoration( tag )
     {
@@ -140,14 +156,46 @@ function activate( context )
 
     function refresh()
     {
+        var pending = client.guilds.size;
+        var icons = {};
+
+        function checkFinished()
+        {
+            --pending;
+            if( pending === 0 )
+            {
+                provider.setIcons( icons );
+                provider.populate( client.channels );
+                provider.refresh();
+            }
+        }
+
         if( client.readyAt === null )
         {
             login();
         }
         else
         {
-            provider.populate( client.channels );
-            provider.refresh();
+            var storagePath = context.storagePath;
+            if( context.storagePath && !fs.existsSync( context.storagePath ) )
+            {
+                fs.mkdirSync( context.storagePath );
+            }
+
+            client.guilds.map( guild =>
+            {
+                if( guild.iconURL )
+                {
+                    var filename = path.join( storagePath, guild.id + path.extname( guild.iconURL ) );
+                    generalOutputChannel.appendLine( "Fetching icon " + guild.iconURL );
+                    icons[ guild.id ] = filename;
+                    fetchIcon( guild.iconURL, filename, checkFinished );
+                }
+                else
+                {
+                    checkFinished();
+                }
+            } );
         }
     }
 
@@ -396,6 +444,10 @@ function activate( context )
                     outputChannels[ outputChannelName ].lastMessage = undefined;
                     populateChannel( outputChannels[ outputChannelName ].discordChannel );
                 } );
+            }
+            else if( e.affectsConfiguration( 'discord-chat.useIcons' ) )
+            {
+                refresh();
             }
         } ) );
 

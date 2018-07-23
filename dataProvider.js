@@ -34,6 +34,8 @@ class DiscordChatDataProvider
 
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+
+        this._icons = {};
     }
 
     updateStatus()
@@ -106,7 +108,14 @@ class DiscordChatDataProvider
         }
         else if( element.type === SERVER )
         {
-            treeItem.iconPath = this.getIcon( SERVER );
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).useIcons === true && element.iconPath )
+            {
+                treeItem.iconPath = { dark: element.iconPath, light: element.iconPath };
+            }
+            else
+            {
+                treeItem.iconPath = this.getIcon( SERVER );
+            }
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
             treeItem.tooltip = "";
             treeItem.command = {
@@ -141,6 +150,11 @@ class DiscordChatDataProvider
         return treeItem;
     }
 
+    setIcons( icons )
+    {
+        this._icons = icons;
+    }
+
     populate( channels )
     {
         var me = this;
@@ -154,7 +168,15 @@ class DiscordChatDataProvider
                 var server = servers.find( findServer, utils.toParentId( channel ) );
                 if( server === undefined )
                 {
-                    server = { type: SERVER, name: utils.toServerName( channel ), server: channel.guild, channels: [], id: utils.toParentId( channel ), unreadCount: 0 };
+                    server = {
+                        type: SERVER,
+                        name: utils.toServerName( channel ),
+                        server: channel.guild,
+                        channels: [],
+                        id: utils.toParentId( channel ),
+                        unreadCount: 0,
+                        iconPath: channel.guild ? me._icons[ channel.guild.id ] : undefined
+                    };
                     servers.push( server );
                 }
 
