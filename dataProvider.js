@@ -112,6 +112,10 @@ class DiscordChatDataProvider
             {
                 treeItem.iconPath = { dark: element.iconPath, light: element.iconPath };
             }
+            else if( element.name === utils.directMessagesServerName() )
+            {
+                treeItem.iconPath = this.getIcon( "dm" );
+            }
             else
             {
                 treeItem.iconPath = this.getIcon( SERVER );

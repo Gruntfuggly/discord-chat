@@ -1,3 +1,8 @@
+var directMessagesServerName = function()
+{
+    return "Direct Messages";
+}
+
 function toParentId( channel )
 {
     if( !channel )
@@ -19,7 +24,7 @@ function toServerName( channel )
         return undefined;
     }
 
-    return channel.guild ? channel.guild.name : "Direct Messages";
+    return channel.guild ? channel.guild.name : directMessagesServerName();
 }
 
 function toChannelName( channel )
@@ -111,3 +116,4 @@ module.exports.toOutputChannelName = toOutputChannelName;
 module.exports.toDarkColour = toDarkColour;
 module.exports.toLightColour = toLightColour;
 module.exports.isReadableChannel = isReadableChannel;
+module.exports.directMessagesServerName = directMessagesServerName;
