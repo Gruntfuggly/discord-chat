@@ -65,23 +65,29 @@ function activate( context )
 
         var timestamp = strftime( "%a %H:%M:%S", new Date( message.createdAt ) );
 
-        if( message.type == "GUILD_MEMBER_JOIN" )
+        if( message.author )
         {
-            entries.push( timestamp + " @" + message.author.username + " joined" );
-        }
-        else if( message.cleanContent )
-        {
-            entries.push( timestamp + " @" + message.author.username + separator() + content( message.cleanContent ) );
-        }
-        else if( message.content )
-        {
-            entries.push( timestamp + " @" + message.author.username + separator() + content( message.content ) );
-        }
+            if( message.type == "GUILD_MEMBER_JOIN" )
+            {
+                entries.push( timestamp + " @" + message.author.username + " joined" );
+            }
+            else if( message.cleanContent )
+            {
+                entries.push( timestamp + " @" + message.author.username + separator() + content( message.cleanContent ) );
+            }
+            else if( message.content )
+            {
+                entries.push( timestamp + " @" + message.author.username + separator() + content( message.content ) );
+            }
 
-        message.attachments.map( function( attachment )
-        {
-            entries.push( timestamp + " @" + message.author.username + " attached " + attachment.url );
-        } );
+            if( message.attachments )
+            {
+                message.attachments.map( function( attachment )
+                {
+                    entries.push( timestamp + " @" + message.author.username + " attached " + attachment.url );
+                } );
+            }
+        }
 
         return entries;
     }
@@ -156,7 +162,7 @@ function activate( context )
 
     function refresh()
     {
-        var pending = client.guilds.size;
+        var pending = client.guilds ? client.guilds.size : 0;
         var icons = {};
 
         function checkFinished()
@@ -182,20 +188,23 @@ function activate( context )
                 fs.mkdirSync( context.storagePath );
             }
 
-            client.guilds.map( guild =>
+            if( client.guilds )
             {
-                if( guild.iconURL )
+                client.guilds.map( guild =>
                 {
-                    var filename = path.join( storagePath, guild.id + path.extname( guild.iconURL ) );
-                    generalOutputChannel.appendLine( "Fetching icon " + guild.iconURL );
-                    icons[ guild.id ] = filename;
-                    fetchIcon( guild.iconURL, filename, checkFinished );
-                }
-                else
-                {
-                    checkFinished();
-                }
-            } );
+                    if( guild.iconURL )
+                    {
+                        var filename = path.join( storagePath, guild.id + path.extname( guild.iconURL ) );
+                        generalOutputChannel.appendLine( "Fetching icon " + guild.iconURL );
+                        icons[ guild.id ] = filename;
+                        fetchIcon( guild.iconURL, filename, checkFinished );
+                    }
+                    else
+                    {
+                        checkFinished();
+                    }
+                } );
+            }
         }
     }
 
@@ -484,7 +493,7 @@ function activate( context )
 
                 if( outputChannelName )
                 {
-                    if( message.channel === currentChannel )
+                    if( message.channel && message.channel === currentChannel )
                     {
                         outputChannels[ message.channel.id ].lastMessage = message;
                         var outputChannel = outputChannels[ message.channel.id ].outputChannel;

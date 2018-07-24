@@ -37,12 +37,19 @@ function toChannelName( channel )
     var name = channel.name;
     if( !name )
     {
-        var names = [];
-        channel.recipients.map( recipient =>
+        if( channel.type === "dm" )
         {
-            names.push( recipient.username );
-        } );
-        name = names.join( ", " );
+            name === channel.recipient;
+        }
+        else if( channel.type === "group" )
+        {
+            var names = [];
+            channel.recipients.map( recipient =>
+            {
+                names.push( recipient.username );
+            } );
+            name = names.join( ", " );
+        }
     }
     return name;
 }
@@ -106,7 +113,7 @@ var toLightColour = function( text )
 
 var isReadableChannel = function( channel )
 {
-    return channel.type === 'text' || channel.type === 'dm' || channel.type === 'group';
+    return channel && ( channel.type === 'text' || channel.type === 'dm' || channel.type === 'group' );
 }
 
 module.exports.toParentId = toParentId;
