@@ -1,3 +1,9 @@
+
+# v0.1.12 - 2018-07-24
+- fix tree element ids
+- escape user names for highlighting
+- handle view channel permissions (only show viewable channels)
+
 # v0.1.11 - 2018-07-24
 - show debug channel when clicking '...'
 - retry login if connection has failed
