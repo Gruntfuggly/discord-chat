@@ -65,6 +65,20 @@ function activate( context )
             {
                 entries.push( timestamp + " @" + message.author.username + separator() + content( message.content ) );
             }
+            else if( message.embeds.length > 0 )
+            {
+                message.embeds.map( function( embed )
+                {
+                    if( embed.image )
+                    {
+                        entries.push( timestamp + " @" + message.author.username + " embedded image " + embed.image.url + " (" + embed.description + ")" );
+                    }
+                    if( embed.video )
+                    {
+                        entries.push( timestamp + " @" + message.author.username + " embedded video " + embed.video.url + " (" + embed.description + ")" );
+                    }
+                } );
+            }
 
             if( message.attachments )
             {
@@ -252,6 +266,25 @@ function activate( context )
         } );
     }
 
+    function updateCurrentChannel( message )
+    {
+        outputChannels[ message.channel.id.toString() ].lastMessage = message;
+        var outputChannel = outputChannels[ message.channel.id.toString() ].outputChannel;
+        if( outputChannel )
+        {
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
+            {
+                outputChannel.appendLine( "" );
+            }
+            formatMessage( message ).map( entry =>
+            {
+                outputChannel.appendLine( entry );
+            } );
+            triggerHighlight();
+        }
+        provider.markRead( message.channel );
+    }
+
     function register()
     {
         function revealChannel( element, focus, select )
@@ -264,6 +297,24 @@ function activate( context )
             {
                 discordChatView.reveal( element, { focus: focus, select: select } );
             }
+        }
+
+        function updateChannel( message )
+        {
+            function showNotification()
+            {
+                var notify = vscode.workspace.getConfiguration( 'discord-chat' ).notify;
+                if( notify === "always" ||
+                    ( notify == "whenHidden" &&
+                        ( discordChatExplorerView.visible === false && discordChatView.visible === false ) ) )
+                {
+                    vscode.window.showInformationMessage( formatMessage( message ).join() );
+                }
+            }
+
+            provider.update( message );
+
+            showNotification();
         }
 
         updateSelectionState();
@@ -427,10 +478,7 @@ function activate( context )
 
             outputChannel.show( true );
 
-            if( channel.messages.size > 0 )
-            {
-                populateChannel( channel, triggerHighlight );
-            }
+            populateChannel( channel, triggerHighlight );
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
@@ -484,7 +532,7 @@ function activate( context )
 
         client.on( 'message', message =>
         {
-            if( utils.isReadableChannel( message.channel ) )
+            if( utils.isReadableChannel( client.user, message.channel ) )
             {
                 var outputChannelName = utils.toOutputChannelName( message.channel );
 
@@ -494,38 +542,11 @@ function activate( context )
                 {
                     if( message.channel && message.channel === currentChannel )
                     {
-                        outputChannels[ message.channel.toString() ].lastMessage = message;
-                        var outputChannel = outputChannels[ message.channel.id.toString() ].outputChannel;
-                        if( outputChannel )
-                        {
-                            if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
-                            {
-                                outputChannel.appendLine( "" );
-                            }
-
-                            formatMessage( message ).map( entry =>
-                            {
-                                outputChannel.appendLine( entry );
-                            } );
-
-                            triggerHighlight();
-                        }
-                        provider.markRead( message.channel );
+                        updateCurrentChannel( message );
                     }
                     else
                     {
-                        provider.update( message );
-
-                        var element = provider.getChannelElement( message.channel );
-                        // revealChannel( element, false, false );
-
-                        var notify = vscode.workspace.getConfiguration( 'discord-chat' ).notify;
-                        if( notify === "always" ||
-                            ( notify == "whenHidden" &&
-                                ( discordChatExplorerView.visible === false && discordChatView.visible === false ) ) )
-                        {
-                            vscode.window.showInformationMessage( formatMessage( message ).join() );
-                        }
+                        updateChannel( message );
                     }
                 }
             }

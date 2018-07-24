@@ -28,6 +28,8 @@ Notifications are generated if a message arrives from a channel other that the c
 - [ ] support channel mute
 - [ ] support send code
 - [ ] support categories
+- [ ] allow mark all in channels and servers
+- [ ] shorten notifications to include channel
 
 ## Installing
 
