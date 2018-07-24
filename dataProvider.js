@@ -13,6 +13,7 @@ var servers = [];
 const DEBUG = "debug";
 const SERVER = "server";
 const CHANNEL = "channel";
+const GROUP = "group";
 
 function findServer( e )
 {
@@ -131,8 +132,21 @@ class DiscordChatDataProvider
         }
         else if( element.type === CHANNEL )
         {
-            treeItem.id = element.parent.id + element.id;
             treeItem.iconPath = this.getIcon( CHANNEL );
+
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).useIcons === true )
+            {
+                if( element.channel.type === "dm" )
+                {
+                    treeItem.iconPath = { dark: element.iconPath, light: element.iconPath };
+                }
+                else if( element.channel.type === GROUP )
+                {
+                    treeItem.iconPath = this.getIcon( GROUP );
+                }
+            }
+
+            treeItem.id = element.parent.id + element.id;
             treeItem.tooltip = "Open channel";
             treeItem.command = {
                 command: "discord-chat.openChannel",
@@ -191,6 +205,13 @@ class DiscordChatDataProvider
                 {
                     channelElement = { type: CHANNEL, name: channelName, channel: channel, users: [], id: channel.id.toString(), unreadCount: 0, parent: server };
                     server.channels.push( channelElement );
+
+                    if( channel.type === "dm" )
+                    {
+                        var filename = path.join( me._context.storagePath, "avatar_" + channel.recipient.id.toString() + utils.urlExt( channel.recipient.avatarURL ) );
+                        channelElement.iconPath = filename;
+                        utils.fetchIcon( channel.recipient.avatarURL, filename, function() { } );
+                    }
                 }
 
                 channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )

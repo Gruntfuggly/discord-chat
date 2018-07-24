@@ -1,3 +1,9 @@
+var https = require( 'https' );
+var fs = require( 'fs' );
+var path = require( 'path' );
+
+var fetchedIcons = {};
+
 var directMessagesServerName = function()
 {
     return "Direct Messages";
@@ -14,7 +20,8 @@ function toParentId( channel )
     {
         return channel.guild.id.toString();
     }
-    return channel.ownerID.toString();
+
+    return 0;
 }
 
 function toServerName( channel )
@@ -39,14 +46,14 @@ function toChannelName( channel )
     {
         if( channel.type === "dm" )
         {
-            name === channel.recipient;
+            name = "@" + channel.recipient.username;
         }
         else if( channel.type === "group" )
         {
             var names = [];
             channel.recipients.map( recipient =>
             {
-                names.push( recipient.username );
+                names.push( "@" + recipient.username );
             } );
             name = names.join( ", " );
         }
@@ -128,6 +135,38 @@ var isReadableChannel = function( user, channel )
     return false;
 }
 
+function fetchIcon( url, filename, callback )
+{
+    if( !fetchedIcons[ url ] )
+    {
+        var file = fs.createWriteStream( filename );
+        var request = https.get( url, function( response )
+        {
+            response.pipe( file );
+            file.on( 'finish', function()
+            {
+                fetchedIcons[ url ] = true;
+                file.close( callback );  // close() is async, call cb after close completes.
+            } );
+        } );
+    }
+    else
+    {
+        callback();
+    }
+}
+
+function urlExt( url )
+{
+    var filePath = url;
+    var queryIndex = filePath.indexOf( '?' );
+    if( queryIndex > -1 )
+    {
+        filePath = filePath.substr( 0, queryIndex );
+    }
+    return path.extname( filePath );
+}
+
 module.exports.toParentId = toParentId;
 module.exports.toServerName = toServerName;
 module.exports.toChannelName = toChannelName;
@@ -136,3 +175,5 @@ module.exports.toDarkColour = toDarkColour;
 module.exports.toLightColour = toLightColour;
 module.exports.isReadableChannel = isReadableChannel;
 module.exports.directMessagesServerName = directMessagesServerName;
+module.exports.fetchIcon = fetchIcon;
+module.exports.urlExt = urlExt;

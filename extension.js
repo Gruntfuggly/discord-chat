@@ -1,11 +1,10 @@
 /* jshint esversion:6 */
 
 var discord = require( 'discord.js' );
-var strftime = require( 'strftime' );
-var vscode = require( 'vscode' );
-var https = require( 'https' );
 var fs = require( 'fs' );
 var path = require( 'path' );
+var strftime = require( 'strftime' );
+var vscode = require( 'vscode' );
 
 var lastRead = require( './lastRead' );
 var treeView = require( './dataProvider' );
@@ -25,19 +24,6 @@ function activate( context )
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
 
     lastRead.initialize( generalOutputChannel );
-
-    function fetchIcon( url, filename, cb )
-    {
-        var file = fs.createWriteStream( filename );
-        var request = https.get( url, function( response )
-        {
-            response.pipe( file );
-            file.on( 'finish', function()
-            {
-                file.close( cb );  // close() is async, call cb after close completes.
-            } );
-        } );
-    }
 
     function getDecoration( tag )
     {
@@ -193,10 +179,9 @@ function activate( context )
                 {
                     if( guild.iconURL )
                     {
-                        var filename = path.join( storagePath, guild.id.toString() + path.extname( guild.iconURL ) );
-                        generalOutputChannel.appendLine( "Fetching icon " + guild.iconURL );
+                        var filename = path.join( storagePath, "server_" + guild.id.toString() + utils.urlExt( guild.iconURL ) );
                         icons[ guild.id.toString() ] = filename;
-                        fetchIcon( guild.iconURL, filename, checkFinished );
+                        utils.fetchIcon( guild.iconURL, filename, checkFinished );
                     }
                     else
                     {
