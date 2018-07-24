@@ -171,7 +171,7 @@ function activate( context )
             if( pending === 0 )
             {
                 provider.setIcons( icons );
-                provider.populate( client.channels );
+                provider.populate( client.user, client.channels );
                 provider.refresh();
             }
         }
@@ -187,8 +187,7 @@ function activate( context )
             {
                 fs.mkdirSync( context.storagePath );
             }
-
-            if( client.guilds )
+            if( storagePath && client.guilds )
             {
                 client.guilds.map( guild =>
                 {
@@ -205,6 +204,11 @@ function activate( context )
                     }
                 } );
             }
+            else
+            {
+                provider.populate( client.user, client.channels );
+                provider.refresh();
+            }
         }
     }
 
@@ -216,6 +220,11 @@ function activate( context )
 
     function highlightUsers()
     {
+        function escapeRegExp( str )
+        {
+            return str.replace( /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&" );
+        }
+
         var visibleEditors = vscode.window.visibleTextEditors;
 
         visibleEditors.map( editor =>
@@ -226,31 +235,34 @@ function activate( context )
 
                 const text = editor.document.getText();
                 var userList = [];
-                client.users.map( user => { userList.push( "@" + user.username ); } );
-                var regex = new RegExp( "(" + userList.join( "|" ) + ")", 'g' );
-                let match;
-                while( ( match = regex.exec( text ) ) !== null )
+                if( client.users.size )
                 {
-                    const tag = match[ match.length - 1 ];
-                    const startPos = editor.document.positionAt( match.index );
-                    const endPos = editor.document.positionAt( match.index + match[ 0 ].length );
-                    const decoration = { range: new vscode.Range( startPos, endPos ) };
-                    if( highlights[ tag ] === undefined )
+                    client.users.map( user => { userList.push( escapeRegExp( "@" + user.username ) ); } );
+                    var regex = new RegExp( "(" + userList.join( "|" ) + ")", 'g' );
+                    let match;
+                    while( ( match = regex.exec( text ) ) !== null )
                     {
-                        highlights[ tag ] = [];
+                        const tag = match[ match.length - 1 ];
+                        const startPos = editor.document.positionAt( match.index );
+                        const endPos = editor.document.positionAt( match.index + match[ 0 ].length );
+                        const decoration = { range: new vscode.Range( startPos, endPos ) };
+                        if( highlights[ tag ] === undefined )
+                        {
+                            highlights[ tag ] = [];
+                        }
+                        highlights[ tag ].push( decoration );
                     }
-                    highlights[ tag ].push( decoration );
+                    decorations.forEach( decoration =>
+                    {
+                        decoration.dispose();
+                    } );
+                    Object.keys( highlights ).forEach( tag =>
+                    {
+                        var decoration = getDecoration( tag );
+                        decorations.push( decoration );
+                        editor.setDecorations( decoration, highlights[ tag ] );
+                    } );
                 }
-                decorations.forEach( decoration =>
-                {
-                    decoration.dispose();
-                } );
-                Object.keys( highlights ).forEach( tag =>
-                {
-                    var decoration = getDecoration( tag );
-                    decorations.push( decoration );
-                    editor.setDecorations( decoration, highlights[ tag ] );
-                } );
             }
         } );
     }
@@ -372,7 +384,6 @@ function activate( context )
 
             documents.map( document =>
             {
-                console.log( "onDidChangeActiveTextEditor" );
                 if( document.uri && document.uri.scheme === 'output' )
                 {
                     currentServer = undefined;
@@ -431,7 +442,10 @@ function activate( context )
 
             outputChannel.show( true );
 
-            populateChannel( channel, triggerHighlight );
+            if( channel.messages.size > 0 )
+            {
+                populateChannel( channel, triggerHighlight );
+            }
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
@@ -466,15 +480,15 @@ function activate( context )
 
         client.on( 'error', error =>
         {
-            generalOutputChannel.appendLine( "error: " + JSON.stringify( error ) );
+            generalOutputChannel.appendLine( "error: " + error.message );
         } );
         client.on( 'warn', warning =>
         {
-            generalOutputChannel.appendLine( "warning: " + JSON.stringify( warning ) );
+            generalOutputChannel.appendLine( "warning: " + warning );
         } );
         client.on( 'debug', message =>
         {
-            generalOutputChannel.appendLine( "debug: " + JSON.stringify( message ) );
+            generalOutputChannel.appendLine( "debug: " + message );
         } );
 
         client.on( 'ready', () =>
@@ -518,7 +532,7 @@ function activate( context )
                         provider.update( message );
 
                         var element = provider.getChannelElement( message.channel );
-                        revealChannel( element, false, false );
+                        // revealChannel( element, false, false );
 
                         var notify = vscode.workspace.getConfiguration( 'discord-chat' ).notify;
                         if( notify === "always" ||

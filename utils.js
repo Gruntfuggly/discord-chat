@@ -111,9 +111,21 @@ var toLightColour = function( text )
     return colour;
 }
 
-var isReadableChannel = function( channel )
+var isReadableChannel = function( user, channel )
 {
-    return channel && ( channel.type === 'text' || channel.type === 'dm' || channel.type === 'group' );
+    if( channel && user )
+    {
+        if( channel.type === 'dm' || channel.type === 'group' )
+        {
+            return true;
+        }
+        else if( channel.type === 'text' )
+        {
+            var permissions = channel.permissionsFor( user );
+            return permissions.has( "VIEW_CHANNEL" )
+        }
+    }
+    return false;
 }
 
 module.exports.toParentId = toParentId;

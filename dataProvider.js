@@ -56,7 +56,7 @@ class DiscordChatDataProvider
 
     getParent( element )
     {
-        return element.parent;
+        return element ? element.parent : undefined;
     }
 
     getChildren( element )
@@ -159,7 +159,7 @@ class DiscordChatDataProvider
         this._icons = icons;
     }
 
-    populate( channels )
+    populate( user, channels )
     {
         var me = this;
 
@@ -167,7 +167,7 @@ class DiscordChatDataProvider
 
         channels.map( function( channel )
         {
-            if( utils.isReadableChannel( channel ) )
+            if( utils.isReadableChannel( user, channel ) )
             {
                 var server = servers.find( findServer, utils.toParentId( channel ) );
                 if( server === undefined )
@@ -184,10 +184,12 @@ class DiscordChatDataProvider
                     servers.push( server );
                 }
 
+                var channelName = utils.toChannelName( channel );
+
                 var channelElement = server.channels.find( findChannel, channel.id.toString() );
                 if( channelElement === undefined )
                 {
-                    channelElement = { type: CHANNEL, name: utils.toChannelName( channel ), channel: channel, users: [], id: channel.id.toString(), unreadCount: 0, parent: server };
+                    channelElement = { type: CHANNEL, name: channelName, channel: channel, users: [], id: channel.id.toString(), unreadCount: 0, parent: server };
                     server.channels.push( channelElement );
                 }
 
