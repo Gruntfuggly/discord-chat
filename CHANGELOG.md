@@ -1,3 +1,7 @@
+# v0.1.13 - 2018-07-24
+- show avatars in tree for direct messages
+- several smaller fixes
+- add partial support for showing embeds
 
 # v0.1.12 - 2018-07-24
 - fix tree element ids
