@@ -1,3 +1,11 @@
+# v0.1.11 - 2018-07-24
+- show debug channel when clicking '...'
+- retry login if connection has failed
+- add server icons (can be disabled via configuration)
+- use a different icon for direct messages
+- fix direct message channel name
+- improve robustness
+
 # v0.1.10 - 2018-07-22
 - add support for creating and deleting channels
 
