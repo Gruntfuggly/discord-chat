@@ -125,16 +125,16 @@ function activate( context )
             limit: vscode.workspace.getConfiguration( 'discord-chat' ).history,
         };
 
-        if( outputChannels[ channel.id ].lastMessage )
+        if( outputChannels[ channel.id.toString() ].lastMessage )
         {
-            options.after = outputChannels[ channel.id ].lastMessage.id;
+            options.after = outputChannels[ channel.id.toString() ].lastMessage.id;
         }
 
         channel.fetchMessages( options ).then( function( messages )
         {
             if( messages.size > 0 )
             {
-                outputChannels[ channel.id ].lastMessage = messages.values().next().value;
+                outputChannels[ channel.id.toString() ].lastMessage = messages.values().next().value;
             }
 
             messages.map( function( message )
@@ -148,7 +148,7 @@ function activate( context )
 
             entries.reverse().map( function( entry )
             {
-                outputChannels[ channel.id ].outputChannel.appendLine( entry );
+                outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
             } );
 
             provider.markRead( channel );
@@ -194,9 +194,9 @@ function activate( context )
                 {
                     if( guild.iconURL )
                     {
-                        var filename = path.join( storagePath, guild.id + path.extname( guild.iconURL ) );
+                        var filename = path.join( storagePath, guild.id.toString() + path.extname( guild.iconURL ) );
                         generalOutputChannel.appendLine( "Fetching icon " + guild.iconURL );
-                        icons[ guild.id ] = filename;
+                        icons[ guild.id.toString() ] = filename;
                         fetchIcon( guild.iconURL, filename, checkFinished );
                     }
                     else
@@ -320,7 +320,7 @@ function activate( context )
                     {
                         currentChannel.delete().then( function()
                         {
-                            outputChannels[ currentChannel.id ].outputChannel.dispose();
+                            outputChannels[ currentChannel.id.toString() ].outputChannel.dispose();
                             refresh();
                         }
                         ).catch(
@@ -414,11 +414,11 @@ function activate( context )
             currentChannel = channel;
             updateSelectionState();
 
-            var outputChannel = outputChannels[ channel.id ];
+            var outputChannel = outputChannels[ channel.id.toString() ];
             if( !outputChannel )
             {
-                outputChannel = vscode.window.createOutputChannel( utils.toOutputChannelName( channel ) + "." + channel.id );
-                outputChannels[ channel.id ] = {
+                outputChannel = vscode.window.createOutputChannel( utils.toOutputChannelName( channel ) + "." + channel.id.toString() );
+                outputChannels[ channel.id.toString() ] = {
                     outputChannel: outputChannel,
                     discordChannel: channel
                 };
@@ -495,8 +495,8 @@ function activate( context )
                 {
                     if( message.channel && message.channel === currentChannel )
                     {
-                        outputChannels[ message.channel.id ].lastMessage = message;
-                        var outputChannel = outputChannels[ message.channel.id ].outputChannel;
+                        outputChannels[ message.channel.toString() ].lastMessage = message;
+                        var outputChannel = outputChannels[ message.channel.id.toString() ].outputChannel;
                         if( outputChannel )
                         {
                             if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )

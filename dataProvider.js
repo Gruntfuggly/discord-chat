@@ -94,8 +94,6 @@ class DiscordChatDataProvider
     {
         var treeItem = new vscode.TreeItem( element.name );
 
-        treeItem.id = element.id;
-
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
 
         if( element.type === DEBUG )
@@ -120,6 +118,7 @@ class DiscordChatDataProvider
             {
                 treeItem.iconPath = this.getIcon( SERVER );
             }
+            treeItem.id = element.id;
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
             treeItem.tooltip = "";
             treeItem.command = {
@@ -132,6 +131,7 @@ class DiscordChatDataProvider
         }
         else if( element.type === CHANNEL )
         {
+            treeItem.id = element.parent.id + element.id;
             treeItem.iconPath = this.getIcon( CHANNEL );
             treeItem.tooltip = "Open channel";
             treeItem.command = {
@@ -184,10 +184,10 @@ class DiscordChatDataProvider
                     servers.push( server );
                 }
 
-                var channelElement = server.channels.find( findChannel, channel.id );
+                var channelElement = server.channels.find( findChannel, channel.id.toString() );
                 if( channelElement === undefined )
                 {
-                    channelElement = { type: CHANNEL, name: utils.toChannelName( channel ), channel: channel, users: [], id: channel.id, unreadCount: 0, parent: server };
+                    channelElement = { type: CHANNEL, name: utils.toChannelName( channel ), channel: channel, users: [], id: channel.id.toString(), unreadCount: 0, parent: server };
                     server.channels.push( channelElement );
                 }
 
@@ -215,7 +215,7 @@ class DiscordChatDataProvider
         var server = servers.find( findServer, utils.toParentId( channel ) );
         if( server )
         {
-            channelElement = server.channels.find( findChannel, channel.id );
+            channelElement = server.channels.find( findChannel, channel.id.toString() );
         }
         return channelElement;
     }

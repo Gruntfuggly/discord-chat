@@ -14,8 +14,8 @@ function setLastRead( channel )
 {
     var now = new Date().toISOString();;
 
-    lastRead[ channel.id ] = now;
-    generalOutputChannel.appendLine( "Channel " + utils.toChannelName( channel ) + " (" + channel.id + ") read at " + now );
+    lastRead[ channel.id.toString() ] = now;
+    generalOutputChannel.appendLine( "Channel " + utils.toChannelName( channel ) + " (" + channel.id.toString() + ") read at " + now );
 }
 
 function updateLastRead()
@@ -26,7 +26,7 @@ function updateLastRead()
 function getLastRead( channel )
 {
     lastRead = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'lastRead', {} );
-    return lastRead[ channel.id ];
+    return lastRead[ channel.id.toString() ];
 }
 
 module.exports.initialize = initialize;

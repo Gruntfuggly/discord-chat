@@ -12,9 +12,9 @@ function toParentId( channel )
 
     if( channel.guild )
     {
-        return channel.guild.id;
+        return channel.guild.id.toString();
     }
-    return channel.ownerID;
+    return channel.ownerID.toString();
 }
 
 function toServerName( channel )
