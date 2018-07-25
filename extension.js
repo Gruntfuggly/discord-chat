@@ -411,7 +411,14 @@ function activate( context )
         {
             if( currentChannel )
             {
-                provider.setChannelMuted( currentChannel, true );
+                if( currentChannel === 'text' )
+                {
+                    provider.setChannelMuted( currentChannel, true );
+                }
+                else
+                {
+                    vscode.window.showInformationMessage( "discord-chat: direct message channels can't be muted" );
+                }
             }
             else if( currentServer )
             {
@@ -559,10 +566,7 @@ function activate( context )
         {
             if( utils.isReadableChannel( client.user, message.channel ) )
             {
-                var channelMuted = storage.getChannelMuted( message.channel );
-                var serverMuted = storage.getServerMuted( message.channel.guild );
-
-                if( channelMuted !== true && serverMuted !== true )
+                if( storage.isChannelMuted( message.channel ) !== true )
                 {
                     var outputChannelName = utils.toOutputChannelName( message.channel );
 

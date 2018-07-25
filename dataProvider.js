@@ -200,7 +200,7 @@ class DiscordChatDataProvider
                         id: utils.toParentId( channel ),
                         unreadCount: 0,
                         iconPath: channel.guild ? me._icons[ channel.guild.id ] : undefined,
-                        muted: storage.getServerMuted( channel.guild )
+                        muted: channel.guild ? storage.getServerMuted( channel.guild ) : false
                     };
                     servers.push( server );
                 }
@@ -230,10 +230,13 @@ class DiscordChatDataProvider
                     }
                 }
 
-                channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
+                if( storage.getChannelMuted( channel ) !== true )
                 {
-                    me.setUnread( channel, messages );
-                } );
+                    channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
+                    {
+                        me.setUnread( channel, messages );
+                    } );
+                }
             }
         } );
     }
