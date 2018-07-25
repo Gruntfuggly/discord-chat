@@ -117,6 +117,15 @@ function activate( context )
     {
         vscode.commands.executeCommand( 'setContext', 'discord-channel-selected', currentChannel !== undefined );
         vscode.commands.executeCommand( 'setContext', 'discord-server-selected', currentServer !== undefined );
+        if( currentServer && currentChannel === undefined )
+        {
+            var serverElement = provider.getServerElement( currentServer );
+            vscode.commands.executeCommand( 'setContext', 'discord-server-has-unread', serverElement && serverElement.unreadCount > 0 );
+        }
+        else
+        {
+            vscode.commands.executeCommand( 'setContext', 'discord-server-has-unread', false );
+        }
     }
 
     function populateChannel( channel, done )
@@ -152,7 +161,7 @@ function activate( context )
                 outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
             } );
 
-            provider.markRead( channel );
+            provider.markChannelRead( channel );
 
             done();
         } ).catch( function( e )
@@ -283,7 +292,7 @@ function activate( context )
             } );
             triggerHighlight();
         }
-        provider.markRead( message.channel );
+        provider.markChannelRead( message.channel );
     }
 
     function register()
@@ -327,6 +336,14 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markAllRead', function()
         {
             provider.markAllRead();
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function()
+        {
+            if( currentServer )
+            {
+                provider.markServerRead( currentServer );
+            }
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.createChannel', function()

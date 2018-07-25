@@ -15,7 +15,8 @@ A tree view will show available servers and channels. Click on a channel to open
 - `discord-chat: Post` - send a message to the selected channel
 - `discord-chat: Create Channel` - create a new channel on the selected server
 - `discord-chat: Delete Channel` - delete the currently selected channel
-- `discord-chat: Mark All Read` - reset unread count on all channels
+- `discord-chat: Mark All Read` - reset unread count on all channels on all servers
+- `discord-chat: Mark All Channels on Server as Read` - reset unread count on all channels on the currently selected server
 - `discord-chat: Refresh` - repopulate the channel list
 - `discord-chat: Mute` - mute the currently selected server or channel
 - `discord-chat: Unmute` - unmute a previously muted server or channel
@@ -33,7 +34,6 @@ A muted channel or server will not generate notifications, update it's unread co
 - [ ] somehow show avatars
 - [ ] support send code
 - [ ] support categories
-- [ ] allow mark all in channels and servers
 - [ ] shorten notifications to include channel
 - [ ] add button for muting
 
@@ -74,4 +74,6 @@ Extension and group icon made by <a href="http://www.freepik.com" title="Freepik
 
 Post icon from made by <a href="https://www.flaticon.com/authors/dave-gandy" title="Dave Gandy">Dave Gandy</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
 
-Direct message icon made by <a href="https://www.flaticon.com/authors/yannick" title="Yannick">Yannick</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+Direct message icon made by <a href="https://www.flaticon.com/authors/yannick" title="Yannick">Yannick</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
+
+Tick icon made by <a href="https://www.flaticon.com/authors/eleonor-wang" title="Eleonor Wang">Eleonor Wang</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>

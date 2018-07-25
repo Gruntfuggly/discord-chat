@@ -1,3 +1,6 @@
+# v0.1.15 - 2018-07-25
+- add support for marking selected server as read
+
 # v0.1.14 - 2018-07-25
 - add support for locally muting servers and channels
 

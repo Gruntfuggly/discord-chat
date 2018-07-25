@@ -262,6 +262,11 @@ class DiscordChatDataProvider
         return channelElement;
     }
 
+    getServerElement( server )
+    {
+        return servers.find( findServer, server.id.toString() );
+    }
+
     unreadCount()
     {
         return servers.reduce( ( total, server ) => total + server.unreadCount, 0 );
@@ -289,7 +294,7 @@ class DiscordChatDataProvider
         }
     }
 
-    markRead( channel, inhibitUpdate )
+    markChannelRead( channel, inhibitUpdate )
     {
         var channelElement = this.getChannelElement( channel );
         if( channelElement )
@@ -312,9 +317,22 @@ class DiscordChatDataProvider
         {
             server.channels.map( channelElement =>
             {
-                me.markRead( channelElement.channel, false );
+                me.markChannelRead( channelElement.channel, false );
             } );
         } );
+        storage.updateLastRead();
+    }
+
+    markServerRead( server )
+    {
+        var server = servers.find( findServer, server.id.toString() );
+        if( server )
+        {
+            server.channels.map( channelElement =>
+            {
+                me.markChannelRead( channelElement.channel, false );
+            } );
+        }
         storage.updateLastRead();
     }
 

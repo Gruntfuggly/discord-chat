@@ -3,7 +3,7 @@
     "displayName": "Discord Chat",
     "description": "A very basic discord text chat client for vscode",
     "keywords": [],
-    "version": "0.1.14",
+    "version": "0.1.15",
     "icon": "resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
@@ -47,16 +47,21 @@
                 {
                     "command": "discord-chat.refresh",
                     "when": "view =~ /discord-chat/",
-                    "group": "navigation@3"
+                    "group": "navigation@4"
                 },
                 {
                     "command": "discord-chat.createChannel",
                     "when": "view =~ /discord-chat/ && discord-server-selected",
-                    "group": "navigation@2"
+                    "group": "navigation@3"
                 },
                 {
                     "command": "discord-chat.post",
                     "when": "view =~ /discord-chat/ && discord-channel-selected",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "discord-chat.markServerRead",
+                    "when": "view =~ /discord-chat/ && discord-server-has-unread",
                     "group": "navigation@1"
                 }
             ]
@@ -79,6 +84,15 @@
                 "icon": {
                     "dark": "resources/icons/dark/refresh.svg",
                     "light": "resources/icons/light/refresh.svg"
+                }
+            },
+            {
+                "command": "discord-chat.markServerRead",
+                "title": "Mark All Channels on Server as Read",
+                "category": "discord-chat",
+                "icon": {
+                    "dark": "resources/icons/dark/mark-read.svg",
+                    "light": "resources/icons/light/mark-read.svg"
                 }
             },
             {
