@@ -34,7 +34,7 @@ function activate( context )
         } );
     }
 
-    function formatMessage( message )
+    function formatMessage( message, short )
     {
         var compact = vscode.workspace.getConfiguration( 'discord-chat' ).compactView;
 
@@ -50,21 +50,26 @@ function activate( context )
 
         var entries = [];
 
-        var timestamp = strftime( "%a %H:%M:%S", new Date( message.createdAt ) );
+        var timestamp = strftime( short ? "%H:%M" : "%a %H:%M:%S", new Date( message.createdAt ) );
+
+        var header =
+            timestamp +
+            ( short ? ( " [" + utils.toServerName( message.channel ) + "/" + utils.toChannelName( message.channel ) + "]" ) : "" ) +
+            " @" + message.author.username;
 
         if( message.author )
         {
             if( message.type == "GUILD_MEMBER_JOIN" )
             {
-                entries.push( timestamp + " @" + message.author.username + " joined" );
+                entries.push( header + " joined" );
             }
             else if( message.cleanContent )
             {
-                entries.push( timestamp + " @" + message.author.username + separator() + content( message.cleanContent ) );
+                entries.push( header + separator() + content( message.cleanContent ) );
             }
             else if( message.content )
             {
-                entries.push( timestamp + " @" + message.author.username + separator() + content( message.content ) );
+                entries.push( header + separator() + content( message.content ) );
             }
             else if( message.embeds.length > 0 )
             {
@@ -72,11 +77,11 @@ function activate( context )
                 {
                     if( embed.image )
                     {
-                        entries.push( timestamp + " @" + message.author.username + " embedded image " + embed.image.url + " (" + embed.description + ")" );
+                        entries.push( header + " embedded image " + embed.image.url + " (" + embed.description + ")" );
                     }
                     if( embed.video )
                     {
-                        entries.push( timestamp + " @" + message.author.username + " embedded video " + embed.video.url + " (" + embed.description + ")" );
+                        entries.push( header + " embedded video " + embed.video.url + " (" + embed.description + ")" );
                     }
                 } );
             }
@@ -85,7 +90,7 @@ function activate( context )
             {
                 message.attachments.map( function( attachment )
                 {
-                    entries.push( timestamp + " @" + message.author.username + " attached " + attachment.url );
+                    entries.push( header + " attached " + attachment.url );
                 } );
             }
         }
@@ -318,7 +323,7 @@ function activate( context )
                     ( notify == "whenHidden" &&
                         ( discordChatExplorerView.visible === false && discordChatView.visible === false ) ) )
                 {
-                    vscode.window.showInformationMessage( formatMessage( message ).join() );
+                    vscode.window.showInformationMessage( formatMessage( message, true ).join() );
                 }
             }
 
@@ -428,7 +433,7 @@ function activate( context )
         {
             if( currentChannel )
             {
-                if( currentChannel === 'text' )
+                if( currentChannel.type === 'text' )
                 {
                     provider.setChannelMuted( currentChannel, true );
                 }

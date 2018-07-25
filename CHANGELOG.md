@@ -1,3 +1,7 @@
+# v0.1.16 - 2018-07-25
+- use better format for notifications
+- fix mute channel bug
+
 # v0.1.15 - 2018-07-25
 - add support for marking selected server as read
 
