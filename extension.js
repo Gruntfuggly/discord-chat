@@ -348,6 +348,7 @@ function activate( context )
             if( currentServer )
             {
                 provider.markServerRead( currentServer );
+                updateSelectionState();
             }
         } ) );
 
