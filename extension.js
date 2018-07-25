@@ -6,11 +6,12 @@ var path = require( 'path' );
 var strftime = require( 'strftime' );
 var vscode = require( 'vscode' );
 
-var lastRead = require( './lastRead' );
+var storage = require( './storage' );
 var treeView = require( './dataProvider' );
 var utils = require( './utils' );
 
 var outputChannels = {};
+var mutedChannels = {};
 var currentServer;
 var currentChannel;
 var decorations = [];
@@ -23,7 +24,7 @@ function activate( context )
     var provider = new treeView.DiscordChatDataProvider( context );
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
 
-    lastRead.initialize( generalOutputChannel );
+    storage.initialize( generalOutputChannel );
 
     function getDecoration( tag )
     {
@@ -406,6 +407,30 @@ function activate( context )
             }
         } ) );
 
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.mute', function()
+        {
+            if( currentChannel )
+            {
+                provider.setChannelMuted( currentChannel, true );
+            }
+            else if( currentServer )
+            {
+                provider.setServerMuted( currentServer, true );
+            }
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.unmute', function()
+        {
+            if( currentChannel )
+            {
+                provider.setChannelMuted( currentChannel, undefined );
+            }
+            else if( currentServer )
+            {
+                provider.setServerMuted( currentServer, undefined );
+            }
+        } ) );
+
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
         {
             if( e.focused )
@@ -534,19 +559,25 @@ function activate( context )
         {
             if( utils.isReadableChannel( client.user, message.channel ) )
             {
-                var outputChannelName = utils.toOutputChannelName( message.channel );
+                var channelMuted = storage.getChannelMuted( message.channel );
+                var serverMuted = storage.getServerMuted( message.channel.guild );
 
-                generalOutputChannel.appendLine( "Received message on " + outputChannelName );
-
-                if( outputChannelName )
+                if( channelMuted !== true && serverMuted !== true )
                 {
-                    if( message.channel && message.channel === currentChannel )
+                    var outputChannelName = utils.toOutputChannelName( message.channel );
+
+                    generalOutputChannel.appendLine( "Received message on " + outputChannelName );
+
+                    if( outputChannelName )
                     {
-                        updateCurrentChannel( message );
-                    }
-                    else
-                    {
-                        updateChannel( message );
+                        if( message.channel && message.channel === currentChannel )
+                        {
+                            updateCurrentChannel( message );
+                        }
+                        else
+                        {
+                            updateChannel( message );
+                        }
                     }
                 }
             }
@@ -557,7 +588,7 @@ function activate( context )
 
     register();
 
-    return lastRead;
+    return storage;
 }
 
 function deactivate()

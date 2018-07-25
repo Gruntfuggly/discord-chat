@@ -1,6 +1,6 @@
 # Discord Chat
 
-A very basic [Discord](https://discordapp.com/) chat client for vscode.
+A [Discord](https://discordapp.com/) chat client for vscode.
 
 After installing, go to your settings and set `discord-chat.token` to your API token. See [here](https://discordhelp.net/discord-token) for one way of finding your token. There are other ways too.
 
@@ -17,19 +17,25 @@ A tree view will show available servers and channels. Click on a channel to open
 - `discord-chat: Delete Channel` - delete the currently selected channel
 - `discord-chat: Mark All Read` - reset unread count on all channels
 - `discord-chat: Refresh` - repopulate the channel list
+- `discord-chat: Mute` - mute the currently selected server or channel
+- `discord-chat: Unmute` - unmute a previously muted server or channel
 
 ### Notifications
 
-Notifications are generated if a message arrives from a channel other that the currently selected channel. By default these these will only be shown if the channel tree is hidden (or collpased). See *Configuration* for other settings.
+Notifications are generated if a message arrives from a channel other that the currently selected channel. By default these these will only be shown if the channel tree is hidden (or collapsed). See *Configuration* for other settings.
+
+### Muting
+
+A muted channel or server will not generate notifications, update it's unread count, or show new messages as they arrive. However, If a muted channel is opened from the tree, the latest messages will be fetched. *Note: This form of muting is local to vscode and does not affect any muted state of discord itself.*
 
 ## TODO
 
 - [ ] somehow show avatars
-- [ ] support channel mute
 - [ ] support send code
 - [ ] support categories
 - [ ] allow mark all in channels and servers
 - [ ] shorten notifications to include channel
+- [ ] add button for muting
 
 ## Installing
 
@@ -57,6 +63,8 @@ The extension can be customised as follows:
 | discord-chat.showInExplorer | true | Set this to false if you would rather only see the channel list in a dedicated view in the activity bar |
 
 ## Known Issues
+
+This extension only provides features that I currently use or know about. If you feel there is something broken or missing, please add a bug report or feature request in the GitHub repository, [here](https://github.com/Gruntfuggly/discord-chat).
 
 ### Credits
 

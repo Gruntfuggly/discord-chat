@@ -5,7 +5,7 @@ Object.defineProperty( exports, "__esModule", { value: true } );
 var path = require( 'path' );
 var vscode = require( 'vscode' );
 
-var lastRead = require( './lastRead' );
+var storage = require( './storage' );
 var utils = require( './utils' );
 
 var servers = [];
@@ -155,14 +155,20 @@ class DiscordChatDataProvider
                     element.channel
                 ]
             };
+
         }
 
         if( element.unreadCount && element.unreadCount > 0 )
         {
-            treeItem.label = element.name +
-                " (" + element.unreadCount +
-                ( element.unreadCount >= vscode.workspace.getConfiguration( 'discord-chat' ).history ? "+" : "" ) +
-                ")";
+            treeItem.label +=
+                ( " (" + element.unreadCount +
+                    ( element.unreadCount >= vscode.workspace.getConfiguration( 'discord-chat' ).history ? "+" : "" ) +
+                    ")" );
+        }
+
+        if( element.muted )
+        {
+            treeItem.label += " \uD83D\uDD07";
         }
 
         return treeItem;
@@ -193,7 +199,8 @@ class DiscordChatDataProvider
                         channels: [],
                         id: utils.toParentId( channel ),
                         unreadCount: 0,
-                        iconPath: channel.guild ? me._icons[ channel.guild.id ] : undefined
+                        iconPath: channel.guild ? me._icons[ channel.guild.id ] : undefined,
+                        muted: storage.getServerMuted( channel.guild )
                     };
                     servers.push( server );
                 }
@@ -203,7 +210,16 @@ class DiscordChatDataProvider
                 var channelElement = server.channels.find( findChannel, channel.id.toString() );
                 if( channelElement === undefined )
                 {
-                    channelElement = { type: CHANNEL, name: channelName, channel: channel, users: [], id: channel.id.toString(), unreadCount: 0, parent: server };
+                    channelElement = {
+                        type: CHANNEL,
+                        name: channelName,
+                        channel: channel,
+                        users: [],
+                        id: channel.id.toString(),
+                        unreadCount: 0,
+                        parent: server,
+                        muted: storage.getChannelMuted( channel )
+                    };
                     server.channels.push( channelElement );
 
                     if( channel.type === "dm" )
@@ -263,7 +279,7 @@ class DiscordChatDataProvider
         var channelElement = this.getChannelElement( channel );
         if( channelElement )
         {
-            var storedDate = lastRead.getLastRead( channel );
+            var storedDate = storage.getLastRead( channel );
             var channelLastRead = new Date( storedDate ? storedDate : 0 );
             channelElement.unreadCount = messages.reduce( ( total, message ) => total + ( message.createdAt > channelLastRead ? 1 : 0 ), 0 );
             this.updateServerCount( servers.find( findServer, utils.toParentId( channel ) ) );
@@ -276,10 +292,10 @@ class DiscordChatDataProvider
         if( channelElement )
         {
             channelElement.unreadCount = 0;
-            lastRead.setLastRead( channel );
+            storage.setLastRead( channel );
             if( inhibitUpdate !== false )
             {
-                lastRead.updateLastRead();
+                storage.updateLastRead();
             }
             this.updateServerCount( servers.find( findServer, utils.toParentId( channel ) ) );
         }
@@ -296,7 +312,29 @@ class DiscordChatDataProvider
                 me.markRead( channelElement.channel, false );
             } );
         } );
-        lastRead.updateLastRead();
+        storage.updateLastRead();
+    }
+
+    setChannelMuted( channel, muted )
+    {
+        var channelElement = this.getChannelElement( channel );
+        if( channelElement )
+        {
+            storage.setChannelMuted( channel, muted );
+            channelElement.muted = muted;
+            this._onDidChangeTreeData.fire( channelElement );
+        }
+    }
+
+    setServerMuted( server, muted )
+    {
+        var server = servers.find( findServer, server.id.toString() );
+        if( server )
+        {
+            storage.setServerMuted( server, muted );
+            server.muted = muted;
+            this._onDidChangeTreeData.fire( server );
+        }
     }
 
     refresh()

@@ -1,3 +1,6 @@
+# v0.1.14 - 2018-07-25
+- add support for locally muting servers and channels
+
 # v0.1.13 - 2018-07-24
 - show avatars in tree for direct messages
 - several smaller fixes

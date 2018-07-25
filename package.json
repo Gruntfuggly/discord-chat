@@ -3,7 +3,7 @@
     "displayName": "Discord Chat",
     "description": "A very basic discord text chat client for vscode",
     "keywords": [],
-    "version": "0.1.13",
+    "version": "0.1.14",
     "icon": "resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
@@ -99,6 +99,16 @@
                 "command": "discord-chat.deleteChannel",
                 "title": "Delete Channel",
                 "category": "discord-chat"
+            },
+            {
+                "command": "discord-chat.mute",
+                "title": "Mute",
+                "category": "discord-chat"
+            },
+            {
+                "command": "discord-chat.unmute",
+                "title": "Unmute",
+                "category": "discord-chat"
             }
         ],
         "configuration": {
@@ -140,15 +150,25 @@
                     "description": "If true, show the tree in the explorer. Set to false if you only want to use the dedicated tree in the activity bar",
                     "default": true
                 },
-                "discord-chat.lastRead": {
-                    "type": "object",
-                    "description": "Channel last read times",
-                    "default": {}
-                },
                 "discord-chat.useIcons": {
                     "type": "boolean",
                     "description": "Set this to false to disable the use of server icons",
                     "default": true
+                },
+                "discord-chat.lastRead": {
+                    "type": "object",
+                    "description": "Channel last read times (updated automatically)",
+                    "default": {}
+                },
+                "discord-chat.mutedChannels": {
+                    "type": "object",
+                    "description": "Channels which are locally muted (updated automatically)",
+                    "default": {}
+                },
+                "discord-chat.mutedServers": {
+                    "type": "object",
+                    "description": "Servers which are locally muted (updated automatically)",
+                    "default": {}
                 }
             }
         }
