@@ -325,6 +325,8 @@ class DiscordChatDataProvider
 
     markServerRead( server )
     {
+        var me = this;
+
         var server = servers.find( findServer, server.id.toString() );
         if( server )
         {

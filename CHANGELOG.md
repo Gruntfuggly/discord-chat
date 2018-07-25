@@ -1,3 +1,6 @@
+# v0.1.17 - 2018-07-25
+- fix mark server read
+
 # v0.1.16 - 2018-07-25
 - use better format for notifications
 - fix mute channel bug
