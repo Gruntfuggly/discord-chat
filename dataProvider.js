@@ -222,7 +222,7 @@ class DiscordChatDataProvider
                     };
                     server.channels.push( channelElement );
 
-                    if( channel.type === "dm" )
+                    if( channel.type === "dm" && channel.recipient && me._context.storagePath )
                     {
                         var filename = path.join( me._context.storagePath, "avatar_" + channel.recipient.id.toString() + utils.urlExt( channel.recipient.avatarURL ) );
                         channelElement.iconPath = filename;
