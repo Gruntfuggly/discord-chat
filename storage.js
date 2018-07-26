@@ -10,11 +10,13 @@ var generalOutputChannel;
 function initialize( outputChannel )
 {
     generalOutputChannel = outputChannel;
+    mutedChannels = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'mutedChannels', {} );
+    mutedServers = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'mutedServers', {} );
 }
 
 function setLastRead( channel )
 {
-    var now = new Date().toISOString();;
+    var now = new Date().toISOString();
 
     lastRead[ channel.id.toString() ] = now;
     generalOutputChannel.appendLine( "Channel " + utils.toChannelName( channel ) + " (" + channel.id.toString() + ") read at " + now );
