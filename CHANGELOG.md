@@ -1,3 +1,7 @@
+# v0.1.18 - 2018-07-26
+- add mute/unmute button to tree
+- improve token entry process
+
 # v0.1.17 - 2018-07-25
 - fix mark server read
 

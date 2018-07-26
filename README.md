@@ -34,8 +34,6 @@ A muted channel or server will not generate notifications, update it's unread co
 - [ ] somehow show avatars
 - [ ] support send code
 - [ ] support categories
-- [ ] shorten notifications to include channel
-- [ ] add button for muting
 
 ## Installing
 
