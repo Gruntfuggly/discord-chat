@@ -121,7 +121,7 @@ function activate( context )
     function updateSelectionState()
     {
         vscode.commands.executeCommand( 'setContext', 'discord-channel-selected', currentChannel !== undefined );
-        vscode.commands.executeCommand( 'setContext', 'discord-server-selected', currentServer !== undefined );
+        vscode.commands.executeCommand( 'setContext', 'discord-server-selected', currentServer !== undefined && currentChannel === undefined );
         if( currentServer && currentChannel === undefined )
         {
             var serverElement = provider.getServerElement( currentServer );
@@ -131,6 +131,20 @@ function activate( context )
         {
             vscode.commands.executeCommand( 'setContext', 'discord-server-has-unread', false );
         }
+        var canMute = false;
+        var canUnmute = false;
+        if( currentChannel )
+        {
+            canUnmute = storage.getChannelMuted( currentChannel ) === true;
+            canMute = !canUnmute;
+        }
+        else if( currentServer )
+        {
+            canUnmute = storage.getServerMuted( currentServer ) === true;
+            canMute = !canUnmute;
+        }
+        vscode.commands.executeCommand( 'setContext', 'discord-can-mute', canMute );
+        vscode.commands.executeCommand( 'setContext', 'discord-can-unmute', canUnmute );
     }
 
     function populateChannel( channel, done )
@@ -447,6 +461,8 @@ function activate( context )
             {
                 provider.setServerMuted( currentServer, true );
             }
+
+            updateSelectionState()
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.unmute', function()
@@ -459,6 +475,8 @@ function activate( context )
             {
                 provider.setServerMuted( currentServer, undefined );
             }
+
+            updateSelectionState()
         } ) );
 
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )

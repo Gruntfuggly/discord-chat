@@ -34,26 +34,30 @@ function getLastRead( channel )
 function setServerMuted( server, muted )
 {
     mutedServers[ server.id.toString() ] = muted;
-    vscode.workspace.getConfiguration( 'discord-chat' ).update( 'mutedServers', mutedServers, true );
+    vscode.workspace.getConfiguration( 'discord-chat' ).update( 'mutedServers', mutedServers, true ).then( function()
+    {
+        mutedServers = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'mutedServers', {} );
+    } );
     generalOutputChannel.appendLine( "Server " + server.name + ( muted ? " muted" : " unmuted" ) );
 }
 
 function getServerMuted( server )
 {
-    mutedServers = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'mutedServers', {} );
     return mutedServers[ server.id.toString() ];
 }
 
 function setChannelMuted( channel, muted )
 {
     mutedChannels[ channel.id.toString() ] = muted;
-    vscode.workspace.getConfiguration( 'discord-chat' ).update( 'mutedChannels', mutedChannels, true );
+    vscode.workspace.getConfiguration( 'discord-chat' ).update( 'mutedChannels', mutedChannels, true ).then( function()
+    {
+        mutedChannels = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'mutedChannels', {} );
+    } );
     generalOutputChannel.appendLine( "Channel " + utils.toChannelName( channel ) + ( muted ? " muted" : " unmuted" ) );
 }
 
 function getChannelMuted( channel )
 {
-    mutedChannels = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'mutedChannels', {} );
     return mutedChannels[ channel.id.toString() ];
 }
 

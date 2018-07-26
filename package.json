@@ -55,13 +55,23 @@
                     "group": "navigation@3"
                 },
                 {
-                    "command": "discord-chat.post",
-                    "when": "view =~ /discord-chat/ && discord-channel-selected",
+                    "command": "discord-chat.mute",
+                    "when": "view =~ /discord-chat/ && discord-can-mute",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "discord-chat.unmute",
+                    "when": "view =~ /discord-chat/ && discord-can-unmute",
                     "group": "navigation@2"
                 },
                 {
                     "command": "discord-chat.markServerRead",
                     "when": "view =~ /discord-chat/ && discord-server-has-unread",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "discord-chat.post",
+                    "when": "view =~ /discord-chat/ && discord-channel-selected",
                     "group": "navigation@1"
                 }
             ]
@@ -117,12 +127,20 @@
             {
                 "command": "discord-chat.mute",
                 "title": "Mute",
-                "category": "discord-chat"
+                "category": "discord-chat",
+                "icon": {
+                    "dark": "resources/icons/dark/mute.svg",
+                    "light": "resources/icons/light/mute.svg"
+                }
             },
             {
                 "command": "discord-chat.unmute",
                 "title": "Unmute",
-                "category": "discord-chat"
+                "category": "discord-chat",
+                "icon": {
+                    "dark": "resources/icons/dark/unmute.svg",
+                    "light": "resources/icons/light/unmute.svg"
+                }
             }
         ],
         "configuration": {
