@@ -98,6 +98,36 @@ function activate( context )
         return entries;
     }
 
+    function promptForToken()
+    {
+        vscode.window.showInformationMessage(
+            "Please set your discord-chat.token",
+            "Help",
+            "Enter token",
+            "OK" ).then( button =>
+            {
+                if( button === "Help" )
+                {
+                    vscode.commands.executeCommand( 'vscode.open', vscode.Uri.parse( "https://discordhelp.net/discord-token" ) );
+                    promptForToken();
+                }
+                else if( button === "Enter token" )
+                {
+                    vscode.window.showInputBox( { prompt: "Token:" } ).then( function( token )
+                    {
+                        if( token )
+                        {
+                            vscode.workspace.getConfiguration( 'discord-chat' ).update( 'token', token, true );
+                        }
+                        else
+                        {
+                            promptForToken();
+                        }
+                    } );
+                }
+            } );
+    }
+
     function login()
     {
         generalOutputChannel.appendLine( "Logging in..." );
@@ -114,7 +144,7 @@ function activate( context )
         }
         else
         {
-            vscode.window.showInformationMessage( "Please set discord-chat.token (see https://discordhelp.net/discord-token)" );
+            promptForToken();
         }
     }
 
