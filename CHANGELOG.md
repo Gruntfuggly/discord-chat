@@ -1,3 +1,7 @@
+# v0.1.19 - 2018-07-26
+- set mute state at startup
+- use "(mute)" instead of unicode
+
 # v0.1.18 - 2018-07-26
 - add mute/unmute button to tree
 - improve token entry process

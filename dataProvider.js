@@ -168,7 +168,7 @@ class DiscordChatDataProvider
 
         if( element.muted )
         {
-            treeItem.label += " \uD83D\uDD07";
+            treeItem.label += " (muted)";
         }
 
         return treeItem;
