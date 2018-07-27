@@ -546,43 +546,6 @@ function activate( context )
             updateSelectionState()
         } ) );
 
-        context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
-        {
-            if( e.focused )
-            {
-                refresh();
-            }
-        } ) );
-
-        context.subscriptions.push( vscode.window.onDidChangeActiveTextEditor( function( e )
-        {
-            var documents = vscode.workspace.textDocuments;
-
-            documents.map( document =>
-            {
-                if( document.uri && document.uri.scheme === 'output' )
-                {
-                    currentServer = undefined;
-                    currentChannel = undefined;
-
-                    Object.keys( outputChannels ).forEach( channelName =>
-                    {
-                        if( outputChannels[ channelName ].outputChannel._id === document.fileName )
-                        {
-                            currentChannel = outputChannels[ channelName ].discordChannel;
-                            currentServer = currentChannel.guild;
-
-                            updateSelectionState();
-                            var element = provider.getChannelElement( outputChannels[ channelName ].discordChannel );
-                            revealChannel( element, true, true );
-
-                            triggerHighlight();
-                        }
-                    } );
-                }
-            } );
-        } ) );
-
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openDebugConsole', function()
         {
             generalOutputChannel.show();
@@ -619,6 +582,43 @@ function activate( context )
             outputChannel.show( true );
 
             populateChannel( channel, triggerHighlight );
+        } ) );
+
+        context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
+        {
+            if( e.focused )
+            {
+                refresh();
+            }
+        } ) );
+
+        context.subscriptions.push( vscode.window.onDidChangeActiveTextEditor( function( e )
+        {
+            var documents = vscode.workspace.textDocuments;
+
+            documents.map( document =>
+            {
+                if( document.uri && document.uri.scheme === 'output' )
+                {
+                    currentServer = undefined;
+                    currentChannel = undefined;
+
+                    Object.keys( outputChannels ).forEach( channelName =>
+                    {
+                        if( outputChannels[ channelName ].outputChannel._id === document.fileName )
+                        {
+                            currentChannel = outputChannels[ channelName ].discordChannel;
+                            currentServer = currentChannel.guild;
+
+                            updateSelectionState();
+                            var element = provider.getChannelElement( outputChannels[ channelName ].discordChannel );
+                            revealChannel( element, true, true );
+
+                            triggerHighlight();
+                        }
+                    } );
+                }
+            } );
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
