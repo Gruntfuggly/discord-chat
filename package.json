@@ -88,6 +88,16 @@
                 }
             },
             {
+                "command": "discord-chat.postSelection",
+                "title": "Post Selection",
+                "category": "discord-chat",
+                "when": "discord-channel-selected",
+                "icon": {
+                    "dark": "resources/icons/dark/post.svg",
+                    "light": "resources/icons/light/post.svg"
+                }
+            },
+            {
                 "command": "discord-chat.refresh",
                 "title": "Refresh",
                 "category": "discord-chat",

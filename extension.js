@@ -48,6 +48,13 @@ function activate( context )
             return text.split( '\n' ).join( compact ? "\n" : "\n " );
         }
 
+        function isCode( text )
+        {
+            var codeRegex = new RegExp( "```(.+)\n((.*\n)*)```" );
+            var result = codeRegex.exec( text );
+            return result;
+        }
+
         var entries = [];
 
         var timestamp = strftime( short ? "%H:%M" : "%a %H:%M:%S", new Date( message.createdAt ) );
@@ -59,9 +66,15 @@ function activate( context )
 
         if( message.author )
         {
+            var code = isCode( message.content );
+
             if( message.type == "GUILD_MEMBER_JOIN" )
             {
                 entries.push( header + " joined" );
+            }
+            else if( code )
+            {
+                entries.push( header + " posted some " + code[ 1 ] + " code:\n" + code[ 2 ] );
             }
             else if( message.cleanContent )
             {
@@ -467,6 +480,30 @@ function activate( context )
                             currentChannel.send( message );
                         }
                     } );
+            }
+            else
+            {
+                vscode.window.showInformationMessage( "discord-chat: Please select a channel first" );
+            }
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.postSelection', function()
+        {
+            var editor = vscode.window.activeTextEditor;
+
+            if( currentChannel && editor && editor.document )
+            {
+                if( editor.selection && editor.selection.start != editor.selection.end )
+                {
+                    var document = editor.document;
+                    var selection = document.getText().substring( document.offsetAt( editor.selection.start ), document.offsetAt( editor.selection.end ) );
+                    var language = document.languageId;
+                    currentChannel.send( selection, { code: language } );
+                }
+                else
+                {
+                    vscode.window.showInformationMessage( "discord-chat: nothing selected?" );
+                }
             }
             else
             {
