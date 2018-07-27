@@ -4,7 +4,7 @@
     "description": "A discord text chat client for vscode",
     "keywords": [],
     "version": "0.1.19",
-    "icon": "resources/discord-chat.png",
+    "icon": "https://github.com/Gruntfuggly/discord-chat/blob/master/resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
         "vscode": "^1.5.0"
