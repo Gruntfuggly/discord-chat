@@ -13,6 +13,7 @@ A tree view will show available servers and channels. Click on a channel to open
 ### Commands
 
 - `discord-chat: Post` - send a message to the selected channel
+- `discord-chat: Post Selection` - send the currently selected text to the currently selected channel
 - `discord-chat: Create Channel` - create a new channel on the selected server
 - `discord-chat: Delete Channel` - delete the currently selected channel
 - `discord-chat: Mark All Read` - reset unread count on all channels on all servers
@@ -32,7 +33,6 @@ A muted channel or server will not generate notifications, update it's unread co
 ## TODO
 
 - [ ] somehow show avatars
-- [ ] support send code
 - [ ] support categories
 
 ## Installing

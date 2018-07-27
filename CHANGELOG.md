@@ -1,3 +1,6 @@
+# v0.1.20 - 2018-07-27
+- add support for posting selected text from documents
+
 # v0.1.19 - 2018-07-26
 - set mute state at startup
 - use "(mute)" instead of unicode
