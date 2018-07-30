@@ -327,10 +327,10 @@ class DiscordChatDataProvider
     {
         var me = this;
 
-        var server = servers.find( findServer, server.id.toString() );
-        if( server )
+        var serverElement = servers.find( findServer, server.id.toString() );
+        if( serverElement )
         {
-            server.channels.map( channelElement =>
+            serverElement.channels.map( channelElement =>
             {
                 me.markChannelRead( channelElement.channel, false );
             } );
@@ -351,12 +351,12 @@ class DiscordChatDataProvider
 
     setServerMuted( server, muted )
     {
-        var server = servers.find( findServer, server.id.toString() );
-        if( server )
+        var serverElement = servers.find( findServer, server.id.toString() );
+        if( serverElement )
         {
             storage.setServerMuted( server, muted );
-            server.muted = muted;
-            this._onDidChangeTreeData.fire( server );
+            serverElement.muted = muted;
+            this._onDidChangeTreeData.fire( serverElement );
         }
     }
 
