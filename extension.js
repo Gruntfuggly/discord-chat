@@ -202,34 +202,37 @@ function activate( context )
             options.after = outputChannels[ channel.id.toString() ].lastMessage.id;
         }
 
-        channel.fetchMessages( options ).then( function( messages )
+        if( storage.getChannelMuted( channel ) !== true )
         {
-            if( messages.size > 0 )
+            channel.fetchMessages( options ).then( function( messages )
             {
-                outputChannels[ channel.id.toString() ].lastMessage = messages.values().next().value;
-            }
-
-            messages.map( function( message )
-            {
-                entries = entries.concat( formatMessage( message ) );
-                if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
+                if( messages.size > 0 )
                 {
-                    entries.push( "" );
+                    outputChannels[ channel.id.toString() ].lastMessage = messages.values().next().value;
                 }
-            } );
 
-            entries.reverse().map( function( entry )
+                messages.map( function( message )
+                {
+                    entries = entries.concat( formatMessage( message ) );
+                    if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
+                    {
+                        entries.push( "" );
+                    }
+                } );
+
+                entries.reverse().map( function( entry )
+                {
+                    outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
+                } );
+
+                provider.markChannelRead( channel );
+
+                done();
+            } ).catch( function( e )
             {
-                outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
+                console.log( e );
             } );
-
-            provider.markChannelRead( channel );
-
-            done();
-        } ).catch( function( e )
-        {
-            console.log( e );
-        } );
+        }
     }
 
     function refresh()

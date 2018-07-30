@@ -45,7 +45,7 @@ function setServerMuted( server, muted )
 
 function getServerMuted( server )
 {
-    return mutedServers[ server.id.toString() ];
+    return server.id && mutedServers[ server.id.toString() ];
 }
 
 function setChannelMuted( channel, muted )

@@ -230,7 +230,7 @@ class DiscordChatDataProvider
                     }
                 }
 
-                if( storage.getChannelMuted( channel ) !== true )
+                if( !channel.guild || storage.isChannelMuted( channel ) !== true )
                 {
                     channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
                     {
@@ -243,7 +243,7 @@ class DiscordChatDataProvider
 
     updateServerCount( server )
     {
-        if( server )
+        if( server && storage.getServerMuted( server ) !== true )
         {
             server.unreadCount = server.channels.reduce( ( total, channel ) => total + channel.unreadCount, 0 );
             this._onDidChangeTreeData.fire();
