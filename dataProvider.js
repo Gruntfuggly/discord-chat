@@ -25,6 +25,11 @@ function findChannel( e )
     return e.type === CHANNEL && e.id.toString() === this.toString();
 };
 
+function isMuted( element )
+{
+    return element.muted === true || ( element.parent ? isMuted( element.parent ) : false );
+}
+
 var status = vscode.window.createStatusBarItem( vscode.StatusBarAlignment.Left, 0 );
 
 class DiscordChatDataProvider
@@ -39,7 +44,7 @@ class DiscordChatDataProvider
         this._icons = {};
     }
 
-    updateStatus()
+    updateStatusBar()
     {
         var unread = this.unreadCount();
         status.text = "$(comment-discussion) " + unread;
@@ -158,7 +163,7 @@ class DiscordChatDataProvider
 
         }
 
-        if( element.unreadCount && element.unreadCount > 0 )
+        if( element.unreadCount && element.unreadCount > 0 && !isMuted( element ) )
         {
             treeItem.label +=
                 ( " (" + element.unreadCount +
@@ -248,7 +253,7 @@ class DiscordChatDataProvider
             server.unreadCount = server.channels.reduce( ( total, channel ) => total + channel.unreadCount, 0 );
             this._onDidChangeTreeData.fire();
         }
-        this.updateStatus();
+        this.updateStatusBar();
     }
 
     getChannelElement( channel )
@@ -269,7 +274,7 @@ class DiscordChatDataProvider
 
     unreadCount()
     {
-        return servers.reduce( ( total, server ) => total + server.unreadCount, 0 );
+        return servers.reduce( ( total, server ) => total + ( server.muted ? 0 : server.unreadCount ), 0 );
     }
 
     update( message )
@@ -321,6 +326,7 @@ class DiscordChatDataProvider
             } );
         } );
         storage.updateLastRead();
+        this.updateStatusBar();
     }
 
     markServerRead( server )
@@ -337,6 +343,7 @@ class DiscordChatDataProvider
             serverElement.unreadCount = 0;
             storage.updateLastRead();
             this._onDidChangeTreeData.fire( serverElement );
+            this.updateStatusBar();
         }
     }
 
@@ -348,6 +355,7 @@ class DiscordChatDataProvider
             storage.setChannelMuted( channel, muted );
             channelElement.muted = muted;
             this._onDidChangeTreeData.fire( channelElement );
+            this.updateStatusBar();
         }
     }
 
@@ -359,12 +367,14 @@ class DiscordChatDataProvider
             storage.setServerMuted( server, muted );
             serverElement.muted = muted;
             this._onDidChangeTreeData.fire( serverElement );
+            this.updateStatusBar();
         }
     }
 
     refresh()
     {
         this._onDidChangeTreeData.fire();
+        this.updateStatusBar();
     }
 }
 
