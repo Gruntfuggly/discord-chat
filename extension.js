@@ -638,7 +638,7 @@ function activate( context )
                 {
                     outputChannels[ outputChannelName ].outputChannel.clear();
                     outputChannels[ outputChannelName ].lastMessage = undefined;
-                    populateChannel( outputChannels[ outputChannelName ].discordChannel );
+                    populateChannel( outputChannels[ outputChannelName ].discordChannel, triggerHighlight );
                 } );
             }
             else if( e.affectsConfiguration( 'discord-chat.useIcons' ) )
