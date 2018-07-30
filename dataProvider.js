@@ -334,8 +334,10 @@ class DiscordChatDataProvider
             {
                 me.markChannelRead( channelElement.channel, false );
             } );
+            serverElement.unreadCount = 0;
+            storage.updateLastRead();
+            this._onDidChangeTreeData.fire( serverElement );
         }
-        storage.updateLastRead();
     }
 
     setChannelMuted( channel, muted )
