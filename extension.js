@@ -211,9 +211,20 @@ function activate( context )
                     outputChannels[ channel.id.toString() ].lastMessage = messages.values().next().value;
                 }
 
+                var storedDate = storage.getLastRead( channel );
+                var channelLastRead = new Date( storedDate ? storedDate : 0 );
+                var lineAdded = false;
+
                 messages.map( function( message )
                 {
+                    if( lineAdded === false && message.createdAt < channelLastRead )
+                    {
+                        entries.push( "------------" );
+                        lineAdded = true;
+                    }
+
                     entries = entries.concat( formatMessage( message ) );
+
                     if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
                     {
                         entries.push( "" );
