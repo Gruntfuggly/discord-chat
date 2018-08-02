@@ -731,6 +731,7 @@ function activate( context )
                         else
                         {
                             updateChannel( message );
+                            updateSelectionState();
                         }
                     }
                 }
