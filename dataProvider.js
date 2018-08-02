@@ -246,11 +246,11 @@ class DiscordChatDataProvider
         } );
     }
 
-    updateServerCount( server )
+    updateServerCount( serverElement )
     {
-        if( server && storage.getServerMuted( server ) !== true )
+        if( serverElement && storage.getServerMuted( serverElement ) !== true )
         {
-            server.unreadCount = server.channels.reduce( ( total, channel ) => total + channel.unreadCount, 0 );
+            serverElement.unreadCount = serverElement.channels.reduce( ( total, channel ) => total + channel.unreadCount, 0 );
             this._onDidChangeTreeData.fire();
         }
         this.updateStatusBar();
@@ -259,10 +259,10 @@ class DiscordChatDataProvider
     getChannelElement( channel )
     {
         var channelElement;
-        var server = servers.find( findServer, utils.toParentId( channel ) );
-        if( server )
+        var serverElement = servers.find( findServer, utils.toParentId( channel ) );
+        if( serverElement )
         {
-            channelElement = server.channels.find( findChannel, channel.id.toString() );
+            channelElement = serverElement.channels.find( findChannel, channel.id.toString() );
         }
         return channelElement;
     }
@@ -274,7 +274,7 @@ class DiscordChatDataProvider
 
     unreadCount()
     {
-        return servers.reduce( ( total, server ) => total + ( server.muted ? 0 : server.unreadCount ), 0 );
+        return servers.reduce( ( total, serverElement ) => total + ( serverElement.muted ? 0 : serverElement.unreadCount ), 0 );
     }
 
     update( message )
@@ -318,9 +318,9 @@ class DiscordChatDataProvider
     {
         var me = this;
 
-        servers.map( server =>
+        servers.map( serverElement =>
         {
-            server.channels.map( channelElement =>
+            serverElement.channels.map( channelElement =>
             {
                 me.markChannelRead( channelElement.channel, false );
             } );
