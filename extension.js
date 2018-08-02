@@ -490,6 +490,14 @@ function activate( context )
                 {
                     if( response === "Yes" )
                     {
+                        currentServer.channels.map( function( channel )
+                        {
+                            if( outputChannels[ channel.id.toString() ] )
+                            {
+                                outputChannels[ channel.id.toString() ].outputChannel.dispose();
+                            }
+                        } );
+
                         currentServer.leave().then( function()
                         {
                             refresh();
