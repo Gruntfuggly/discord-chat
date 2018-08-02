@@ -520,6 +520,15 @@ function activate( context )
                         if( message )
                         {
                             currentChannel.send( message );
+
+                            if( currentChannel.type === "dm" || currentChannel.type === "group" )
+                            {
+                                populateChannel( currentChannel,
+                                    function()
+                                    {
+                                        provider.markChannelRead( currentChannel );
+                                    } );
+                            }
                         }
                     } );
             }
