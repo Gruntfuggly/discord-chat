@@ -1,5 +1,15 @@
-# v0.1.20 - 2018-08-06
+# v0.1.21 - 2018-08-06
 - handle empty dm groups
+- remove output channels when leaving server
+- refresh dm channels after posting
+- refresh buttons when message is received
+- add leave server command
+- fix marking server read
+- fix some javascript warnings
+- don't update message counts when channels are muted
+- trigger highlight on config change
+
+# v0.1.20 - 2018-07-27
 - add support for posting selected text from documents
 
 # v0.1.19 - 2018-07-26
