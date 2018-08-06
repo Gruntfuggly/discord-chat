@@ -482,6 +482,34 @@ function activate( context )
             }
         } ) );
 
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.leaveServer', function()
+        {
+            if( currentServer )
+            {
+                vscode.window.showInformationMessage( "discord-chat: Are you sure?", "Yes", "No" ).then( response =>
+                {
+                    if( response === "Yes" )
+                    {
+                        currentServer.leave().then( function()
+                        {
+                            refresh();
+                        }
+                        ).catch(
+                            e =>
+                            {
+                                console.log( e.message );
+                                vscode.window.showErrorMessage( "Failed to leave server" );
+                            }
+                        );
+                    }
+                } );
+            }
+            else
+            {
+                vscode.window.showInformationMessage( "discord-chat: Please select a server first" );
+            }
+        } ) );
+
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.post', function()
         {
             if( currentChannel )

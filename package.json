@@ -135,6 +135,11 @@
                 "category": "discord-chat"
             },
             {
+                "command": "discord-chat.leaveServer",
+                "title": "Leave Server",
+                "category": "discord-chat"
+            },
+            {
                 "command": "discord-chat.mute",
                 "title": "Mute",
                 "category": "discord-chat",
