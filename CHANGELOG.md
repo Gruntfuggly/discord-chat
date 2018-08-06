@@ -1,4 +1,5 @@
-# v0.1.20 - 2018-07-27
+# v0.1.20 - 2018-08-06
+- handle empty dm groups
 - add support for posting selected text from documents
 
 # v0.1.19 - 2018-07-26

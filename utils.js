@@ -122,9 +122,13 @@ var isReadableChannel = function( user, channel )
 {
     if( channel && user )
     {
-        if( channel.type === 'dm' || channel.type === 'group' )
+        if( channel.type === 'dm' )
         {
             return true;
+        }
+        else if( channel.type === 'group' )
+        {
+            return channel.recipients.size() > 0;
         }
         else if( channel.type === 'text' )
         {
