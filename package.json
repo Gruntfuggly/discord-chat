@@ -3,7 +3,7 @@
     "displayName": "Discord Chat",
     "description": "A discord text chat client for vscode",
     "keywords": [],
-    "version": "0.1.21",
+    "version": "0.1.22",
     "icon": "resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
@@ -216,12 +216,21 @@
                     "type": "object",
                     "description": "Servers which are locally muted (updated automatically)",
                     "default": {}
+                },
+                "discord-chat.syncToken": {
+                    "type": "string",
+                    "description": "A github token to allow sync via gist"
+                },
+                "discord-chat.syncGistId": {
+                    "type": "string",
+                    "description": "A github gist ID used to store shared settings (generated automatically)"
                 }
             }
         }
     },
     "dependencies": {
         "discord.js": "^11.3.2",
+        "gistore": "^0.1.1",
         "strftime": "^0.10.0"
     }
 }

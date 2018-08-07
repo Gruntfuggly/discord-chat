@@ -1,3 +1,7 @@
+
+# v0.1.22 - 2018-08-07
+- add initial support for syncing of muted servers, channels and last read time
+s
 # v0.1.21 - 2018-08-06
 - handle empty dm groups
 - remove output channels when leaving server

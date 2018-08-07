@@ -10,6 +10,10 @@ A tree view will show available servers and channels. Click on a channel to open
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/discord-chat/master/resources/screenshot.png">
 
+### Syncing
+
+If you use vscode on multiple machines, you may want to sync your muted servers, channels and last read times. To enable this, use github to generate a personal access token (with gist scope) and update `discord-chat.syncToken`. Currently the settings are synced at startup. In a future update, the settings will be updated continously allowing multiple instances of vscode to be running and the same time.
+
 ### Commands
 
 - `discord-chat: Post` - send a message to the selected channel
@@ -59,6 +63,7 @@ The extension can be customised as follows:
 | discord-chat.highlightDelay | 500 | The delay before highlighting user names (in milliseconds) |
 | discord-chat.history | 10 | The number of previous messages to fetch when opening a channel |
 | discord-chat.showInExplorer | true | Set this to false if you would rather only see the channel list in a dedicated view in the activity bar |
+| discord-chat.syncToken || A github token to allow syncing of muted servers, channels and last read times |
 
 ## Known Issues
 
