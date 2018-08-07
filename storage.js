@@ -62,20 +62,28 @@ function initialize( outputChannel )
 
 function sync()
 {
-    var now = new Date();
+    var token = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncToken', undefined );
+    var gistId = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncGistId', undefined );
 
-    gistore.backUp( {
-        discordSync: {
-            mutedServers: mutedServers,
-            mutedChannels: mutedChannels,
-            lastRead: lastRead,
-            lastSync: now
-        }
-    } ).then( function()
+    if( token && gistId )
     {
-        console.log( 'backup succeed' )
-        generalOutputChannel.appendLine( "Synced at " + now.toISOString() );
-    } );
+        var now = new Date();
+
+        gistore.backUp( {
+            discordSync: {
+                mutedServers: mutedServers,
+                mutedChannels: mutedChannels,
+                lastRead: lastRead,
+                lastSync: now
+            }
+        } ).then( function()
+        {
+            generalOutputChannel.appendLine( "Synced at " + now.toISOString() );
+        } ).catch( function( error )
+        {
+            console.log( error );
+        } );
+    }
 }
 
 function setLastRead( channel )
