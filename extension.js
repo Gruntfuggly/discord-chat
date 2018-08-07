@@ -518,6 +518,24 @@ function activate( context )
             }
         } ) );
 
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.acceptInvite', function()
+        {
+            vscode.window.showInputBox( { prompt: "Enter invite URL" } ).then(
+                function( url )
+                {
+                    if( url )
+                    {
+                        client.fetchInvite( url ).then( function( invite )
+                        {
+                            client.user.acceptInvite( invite ).then( function( x )
+                            {
+                                refresh();
+                            } );
+                        } );
+                    }
+                } );
+        } ) );
+
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.post', function()
         {
             if( currentChannel )

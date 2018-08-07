@@ -140,6 +140,11 @@
                 "category": "discord-chat"
             },
             {
+                "command": "discord-chat.acceptInvite",
+                "title": "Accept Invite",
+                "category": "discord-chat"
+            },
+            {
                 "command": "discord-chat.mute",
                 "title": "Mute",
                 "category": "discord-chat",
