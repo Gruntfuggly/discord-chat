@@ -21,7 +21,7 @@ function toParentId( channel )
         return channel.guild.id.toString();
     }
 
-    return 0;
+    return "directMessages";
 }
 
 function toServerName( channel )
