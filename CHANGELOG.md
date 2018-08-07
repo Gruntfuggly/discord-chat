@@ -1,7 +1,10 @@
+# v0.1.23 - 2018-08-07
+- only attempt sync if configured
+- fix direct messages collapsing when marked as read
 
 # v0.1.22 - 2018-08-07
 - add initial support for syncing of muted servers, channels and last read time
-s
+
 # v0.1.21 - 2018-08-06
 - handle empty dm groups
 - remove output channels when leaving server
