@@ -248,53 +248,58 @@ function activate( context )
 
     function refresh()
     {
-        var pending = client.guilds ? client.guilds.size : 0;
-        var icons = {};
+        function onSync()
+        {
+            var pending = client.guilds ? client.guilds.size : 0;
+            var icons = {};
 
-        function checkFinished()
-        {
-            --pending;
-            if( pending === 0 )
+            function checkFinished()
             {
-                provider.setIcons( icons );
-                provider.populate( client.user, client.channels );
-                provider.refresh();
-            }
-        }
-
-        if( client.readyAt === null )
-        {
-            login();
-        }
-        else
-        {
-            var storagePath = context.storagePath;
-            if( context.storagePath && !fs.existsSync( context.storagePath ) )
-            {
-                fs.mkdirSync( context.storagePath );
-            }
-            if( storagePath && client.guilds )
-            {
-                client.guilds.map( guild =>
+                --pending;
+                if( pending === 0 )
                 {
-                    if( guild.iconURL )
-                    {
-                        var filename = path.join( storagePath, "server_" + guild.id.toString() + utils.urlExt( guild.iconURL ) );
-                        icons[ guild.id.toString() ] = filename;
-                        utils.fetchIcon( guild.iconURL, filename, checkFinished );
-                    }
-                    else
-                    {
-                        checkFinished();
-                    }
-                } );
+                    provider.setIcons( icons );
+                    provider.populate( client.user, client.channels );
+                    provider.refresh();
+                }
+            }
+
+            if( client.readyAt === null )
+            {
+                login();
             }
             else
             {
-                provider.populate( client.user, client.channels );
-                provider.refresh();
+                var storagePath = context.storagePath;
+                if( context.storagePath && !fs.existsSync( context.storagePath ) )
+                {
+                    fs.mkdirSync( context.storagePath );
+                }
+                if( storagePath && client.guilds )
+                {
+                    client.guilds.map( guild =>
+                    {
+                        if( guild.iconURL )
+                        {
+                            var filename = path.join( storagePath, "server_" + guild.id.toString() + utils.urlExt( guild.iconURL ) );
+                            icons[ guild.id.toString() ] = filename;
+                            utils.fetchIcon( guild.iconURL, filename, checkFinished );
+                        }
+                        else
+                        {
+                            checkFinished();
+                        }
+                    } );
+                }
+                else
+                {
+                    provider.populate( client.user, client.channels );
+                    provider.refresh();
+                }
             }
         }
+
+        storage.sync( onSync )
     }
 
     function triggerHighlight()
@@ -703,6 +708,11 @@ function activate( context )
             else if( e.affectsConfiguration( 'discord-chat.useIcons' ) )
             {
                 refresh();
+            }
+            else if( e.affectsConfiguration( 'discord-chat.syncToken' ) ||
+                e.affectsConfiguration( 'discord-chat.syncGistId' ) )
+            {
+                storage.initializeSync();
             }
         } ) );
 

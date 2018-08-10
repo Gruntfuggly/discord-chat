@@ -1,3 +1,6 @@
+# v0.1.24 - 2018-08-10
+- make syncing work
+
 # v0.1.23 - 2018-08-07
 - only attempt sync if configured
 - fix direct messages collapsing when marked as read
