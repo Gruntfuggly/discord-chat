@@ -1,3 +1,6 @@
+# v0.1.25 - 2018-08-21
+- allow hiding of muted servers and/or channels
+
 # v0.1.24 - 2018-08-10
 - make syncing work
 

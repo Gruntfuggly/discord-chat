@@ -695,7 +695,8 @@ function activate( context )
             {
                 login();
             }
-            else if( e.affectsConfiguration( 'discord-chat.compactView' ) ||
+            else if(
+                e.affectsConfiguration( 'discord-chat.compactView' ) ||
                 e.affectsConfiguration( 'discord-chat.history' ) )
             {
                 Object.keys( outputChannels ).map( outputChannelName =>
@@ -709,7 +710,14 @@ function activate( context )
             {
                 refresh();
             }
-            else if( e.affectsConfiguration( 'discord-chat.syncToken' ) ||
+            else if(
+                e.affectsConfiguration( 'discord-chat.hideMutedServers' ) ||
+                e.affectsConfiguration( 'discord-chat.hideMutedChannels' ) )
+            {
+                provider.refresh();
+            }
+            else if(
+                e.affectsConfiguration( 'discord-chat.syncToken' ) ||
                 e.affectsConfiguration( 'discord-chat.syncGistId' ) )
             {
                 storage.initializeSync();

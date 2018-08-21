@@ -128,7 +128,7 @@ var isReadableChannel = function( user, channel )
         }
         else if( channel.type === 'group' )
         {
-            return channel.recipients.size() > 0;
+            return channel.recipients.size > 0;
         }
         else if( channel.type === 'text' )
         {

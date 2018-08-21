@@ -69,15 +69,26 @@ class DiscordChatDataProvider
     {
         if( !element )
         {
-            if( servers.length > 0 )
+            var serverList = servers;
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).hideMutedServers === true )
             {
-                return servers;
+                serverList = serverList.filter( e => !e.muted );
+            }
+
+            if( serverList.length > 0 )
+            {
+                return serverList;
             }
             return [ { name: "...", type: DEBUG } ];
         }
         else if( element.type === SERVER )
         {
-            return element.channels;
+            var channelList = element.channels;
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).hideMutedChannels === true )
+            {
+                channelList = channelList.filter( e => !e.muted );
+            }
+            return channelList;
         }
         else if( element.type === CHANNEL )
         {

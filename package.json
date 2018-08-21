@@ -3,7 +3,7 @@
     "displayName": "Discord Chat",
     "description": "A discord text chat client for vscode",
     "keywords": [],
-    "version": "0.1.24",
+    "version": "0.1.25",
     "icon": "resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
@@ -224,6 +224,16 @@
                 "discord-chat.syncGistId": {
                     "type": "string",
                     "description": "A github gist ID used to store shared settings"
+                },
+                "discord-chat.hideMutedChannels": {
+                    "type":"boolean",
+                    "description": "Set to true to remove muted channels from the tree",
+                    "default": false
+                },
+                "discord-chat.hideMutedServers": {
+                    "type":"boolean",
+                    "description": "Set to true to remove muted servers from the tree",
+                    "default": false
                 }
             }
         }

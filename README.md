@@ -63,7 +63,10 @@ The extension can be customised as follows:
 | discord-chat.highlightDelay | 500 | The delay before highlighting user names (in milliseconds) |
 | discord-chat.history | 10 | The number of previous messages to fetch when opening a channel |
 | discord-chat.showInExplorer | true | Set this to false if you would rather only see the channel list in a dedicated view in the activity bar |
+| discord-chat.hideMutedServers | false | Set this to true to hide muted servers in the tree |
+| discord-chat.hideMutedChannels | false | Set this to true to hide muted channels in the tree |
 | discord-chat.syncToken || A github token to allow syncing of muted servers, channels and last read times |
+| discord-chat.syncGistId || A github gist ID to allow syncing of muted servers, channels and last read times |
 
 ## Known Issues
 
