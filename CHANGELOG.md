@@ -1,5 +1,6 @@
 # v0.1.26 - 2018-08-21
 - show the date instead of day name for messages over a week old
+- improve sync logging
 
 # v0.1.25 - 2018-08-21
 - allow hiding of muted servers and/or channels

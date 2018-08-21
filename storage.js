@@ -15,6 +15,10 @@ function sync( callback )
     {
         gistore.sync().then( function( data )
         {
+            var now = new Date();
+
+            generalOutputChannel.appendLine( "Sync at " + now.toISOString() );
+
             if( lastSync === undefined || data.discordSync.lastSync > lastSync )
             {
                 mutedServers = data.discordSync.mutedServers;
@@ -108,7 +112,7 @@ function backup()
             }
         } ).then( function()
         {
-            generalOutputChannel.appendLine( "Synced at " + now.toISOString() );
+            generalOutputChannel.appendLine( "Backup at " + now.toISOString() );
         } ).catch( function( error )
         {
             console.log( "backup failed: " + error );
