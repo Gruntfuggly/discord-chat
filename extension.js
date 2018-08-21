@@ -57,10 +57,17 @@ function activate( context )
 
         var entries = [];
 
-        var timestamp = strftime( short ? "%H:%M" : "%a %H:%M:%S", new Date( message.createdAt ) );
+        var format = "%a %T";
+        if( short )
+        {
+            format = "%H:%M";
+        } else if( new Date() - message.createdAt > 1000 * 60 * 60 * 24 * 7 )
+        {
+            format = "%D %T";
+        }
 
         var header =
-            timestamp +
+            strftime( format, message.createdAt ) +
             ( short ? ( " [" + utils.toServerName( message.channel ) + "/" + utils.toChannelName( message.channel ) + "]" ) : "" ) +
             " @" + message.author.username;
 
