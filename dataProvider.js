@@ -163,7 +163,6 @@ class DiscordChatDataProvider
             }
 
             treeItem.id = element.parent.id + element.id;
-            treeItem.tooltip = "Open channel";
             treeItem.command = {
                 command: "discord-chat.openChannel",
                 title: "Open channel",
