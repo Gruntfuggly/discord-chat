@@ -1,3 +1,6 @@
+# v0.1.29 - 2018-08-22
+- update discord when channels are read
+
 # v0.1.28 - 2018-08-22
 - fix #2: Update selected server when expanding/collapsing tree elements
 - keep explorer view and dedicated view synchronised

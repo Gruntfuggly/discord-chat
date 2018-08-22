@@ -317,6 +317,7 @@ class DiscordChatDataProvider
         var channelElement = this.getChannelElement( channel );
         if( channelElement )
         {
+            channel.acknowledge();
             channelElement.unreadCount = 0;
             storage.setLastRead( channel );
             if( inhibitUpdate !== false )
