@@ -385,7 +385,7 @@ function activate( context )
 
     function register()
     {
-        function revealChannel( element, focus, select )
+        function revealElement( element, focus, select )
         {
             if( discordChatExplorerView.visible === true )
             {
@@ -420,6 +420,35 @@ function activate( context )
         var discordChatExplorerView = vscode.window.createTreeView( 'discord-chat-view-explorer', { treeDataProvider: provider } );
         var discordChatView = vscode.window.createTreeView( 'discord-chat-view', { treeDataProvider: provider } );
 
+        function selectServer( server )
+        {
+            currentServer = server;
+            currentChannel = undefined;
+            updateSelectionState();
+        }
+
+        context.subscriptions.push( discordChatExplorerView.onDidExpandElement( e => selectServer( e.element.server ) ) );
+        context.subscriptions.push( discordChatExplorerView.onDidCollapseElement( e => selectServer( e.element.server ) ) );
+        context.subscriptions.push( discordChatView.onDidExpandElement( e => selectServer( e.element.server ) ) );
+        context.subscriptions.push( discordChatView.onDidCollapseElement( e => selectServer( e.element.server ) ) );
+
+        function updateViewSelection( e, view )
+        {
+            if( e.visible )
+            {
+                var element = currentChannel ? provider.getChannelElement( currentChannel ) :
+                    ( currentServer ? provider.getServerElement( currentServer ) : undefined );
+
+                if( element )
+                {
+                    view.reveal( element, { focus: false, select: true } )
+                }
+            }
+        }
+
+        context.subscriptions.push( discordChatExplorerView.onDidChangeVisibility( e => updateViewSelection( e, discordChatExplorerView ) ) );
+        context.subscriptions.push( discordChatView.onDidChangeVisibility( e => updateViewSelection( e, discordChatView ) ) );
+
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.refresh', refresh ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markAllRead', function()
         {
@@ -448,7 +477,7 @@ function activate( context )
                             {
                                 refresh();
                                 var element = provider.getChannelElement( channel );
-                                revealChannel( element, true, true );
+                                revealElement( element, true, true );
                             }
                             ).catch(
                                 e =>
@@ -622,12 +651,7 @@ function activate( context )
             generalOutputChannel.show();
         } ) );
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.selectServer', ( server ) =>
-        {
-            currentServer = server;
-            currentChannel = undefined;
-            updateSelectionState();
-        } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.selectServer', ( server ) => selectServer( server ) ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', ( channel ) =>
         {
@@ -683,7 +707,7 @@ function activate( context )
 
                             updateSelectionState();
                             var element = provider.getChannelElement( outputChannels[ channelName ].discordChannel );
-                            revealChannel( element, true, true );
+                            revealElement( element, true, true );
 
                             triggerHighlight();
                         }

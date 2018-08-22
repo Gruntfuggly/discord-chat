@@ -1,8 +1,12 @@
+# v0.1.28 - 2018-08-22
+- fix #2: Update selected server when expanding/collapsing tree elements
+- keep explorer view and dedicated view synchronised
+
 # v0.1.27 - 2018-08-22
 - fix direct messages when user has no avatar
 
 # v0.1.26 - 2018-08-21
-- show the date instead of day name for messages over a week old
+- fix #1: show the date instead of day name for messages over a week old
 - improve sync logging
 
 # v0.1.25 - 2018-08-21
