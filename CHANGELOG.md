@@ -1,3 +1,6 @@
+# v0.1.27 - 2018-08-22
+- fix direct messages when user has no avatar
+
 # v0.1.26 - 2018-08-21
 - show the date instead of day name for messages over a week old
 - improve sync logging

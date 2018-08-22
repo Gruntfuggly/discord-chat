@@ -152,7 +152,7 @@ class DiscordChatDataProvider
 
             if( vscode.workspace.getConfiguration( 'discord-chat' ).useIcons === true )
             {
-                if( element.channel.type === "dm" )
+                if( element.channel.type === "dm" && element.iconPath )
                 {
                     treeItem.iconPath = { dark: element.iconPath, light: element.iconPath };
                 }
@@ -239,9 +239,12 @@ class DiscordChatDataProvider
 
                     if( channel.type === "dm" && channel.recipient && me._context.storagePath )
                     {
-                        var filename = path.join( me._context.storagePath, "avatar_" + channel.recipient.id.toString() + utils.urlExt( channel.recipient.avatarURL ) );
-                        channelElement.iconPath = filename;
-                        utils.fetchIcon( channel.recipient.avatarURL, filename, function() { } );
+                        if( channel.recipient.avatarURL )
+                        {
+                            var filename = path.join( me._context.storagePath, "avatar_" + channel.recipient.id.toString() + utils.urlExt( channel.recipient.avatarURL ) );
+                            channelElement.iconPath = filename;
+                            utils.fetchIcon( channel.recipient.avatarURL, filename, function() { } );
+                        }
                     }
                 }
 
