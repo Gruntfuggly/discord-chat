@@ -3,6 +3,7 @@ var gistore = require( 'gistore' );
 var utils = require( './utils' );
 
 var lastRead = {};
+var lastMessage = {};
 var mutedChannels = {};
 var mutedServers = {};
 var lastSync = undefined;
@@ -24,12 +25,13 @@ function sync( callback )
                 mutedServers = data.discordSync.mutedServers;
                 mutedChannels = data.discordSync.mutedChannels;
                 lastRead = data.discordSync.lastRead;
+                lastMessage = data.discordSync.lastMessage;
                 lastSync = data.discordSync.lastSync;
 
                 vscode.workspace.getConfiguration( 'discord-chat' ).update( 'mutedServers', mutedServers, true );
                 vscode.workspace.getConfiguration( 'discord-chat' ).update( 'mutedChannels', mutedChannels, true );
                 vscode.workspace.getConfiguration( 'discord-chat' ).update( 'lastRead', lastRead, true );
-
+                vscode.workspace.getConfiguration( 'discord-chat' ).update( 'lastMessage', lastMessage, true );
             }
 
             if( callback )
@@ -70,6 +72,7 @@ function initializeSync()
         else
         {
             var lastRead = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'lastRead', {} );
+            var lastMessage = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'lastMessage', {} );
 
             gistore.createBackUp( 'discordSync',
                 {
@@ -77,6 +80,7 @@ function initializeSync()
                         mutedServers: mutedServers,
                         mutedChannels: mutedChannels,
                         lastRead: lastRead,
+                        lastMessage: lastMessage,
                         lastSync: new Date()
                     }
                 } )
@@ -108,6 +112,7 @@ function backup()
                 mutedServers: mutedServers,
                 mutedChannels: mutedChannels,
                 lastRead: lastRead,
+                lastMessage: lastMessage,
                 lastSync: now
             }
         } ).then( function()
@@ -137,6 +142,22 @@ function getLastRead( channel )
 {
     lastRead = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'lastRead', {} );
     return lastRead[ channel.id.toString() ];
+}
+
+function setLastMessage( channel )
+{
+    lastMessage[ channel.id.toString() ] = channel.lastMessageID;
+}
+
+function updateLastMessage()
+{
+    vscode.workspace.getConfiguration( 'discord-chat' ).update( 'lastMessage', lastMessage, true ).then( backup );
+}
+
+function getLastMessage( channel )
+{
+    lastMessage = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'lastMessage', {} );
+    return lastMessage[ channel.id.toString() ];
 }
 
 function setServerMuted( server, muted )
@@ -177,11 +198,38 @@ function isChannelMuted( channel )
     return getServerMuted( channel.guild ) === true || getChannelMuted( channel );
 }
 
+function reset()
+{
+    if( gistore.token )
+    {
+        var now = new Date();
+
+        gistore.backUp( {
+            discordSync: {
+                mutedServers: {},
+                mutedChannels: {},
+                lastSync: now
+            }
+        } ).then( function()
+        {
+            generalOutputChannel.appendLine( "Reset sync at " + now.toISOString() );
+            sync();
+        } ).catch( function( error )
+        {
+            console.log( "reset failed: " + error );
+        } );
+    }
+}
+
 module.exports.initialize = initialize;
 
 module.exports.setLastRead = setLastRead;
 module.exports.updateLastRead = updateLastRead;
 module.exports.getLastRead = getLastRead;
+
+module.exports.setLastMessage = setLastMessage;
+module.exports.updateLastMessage = updateLastMessage;
+module.exports.getLastMessage = getLastMessage;
 
 module.exports.setServerMuted = setServerMuted;
 module.exports.getServerMuted = getServerMuted;
@@ -192,3 +240,4 @@ module.exports.isChannelMuted = isChannelMuted;
 
 module.exports.initializeSync = initializeSync;
 module.exports.sync = sync;
+module.exports.reset = reset;

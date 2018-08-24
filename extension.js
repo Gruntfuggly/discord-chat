@@ -11,11 +11,12 @@ var treeView = require( './dataProvider' );
 var utils = require( './utils' );
 
 var outputChannels = {};
-var mutedChannels = {};
 var currentServer;
 var currentChannel;
 var decorations = [];
 var highlightTimeout;
+
+var previousMessagesMarker = "------------";
 
 function activate( context )
 {
@@ -197,58 +198,128 @@ function activate( context )
         vscode.commands.executeCommand( 'setContext', 'discord-can-unmute', canUnmute );
     }
 
-    function populateChannel( channel, done )
+    function fetchOldMessages( channel, done )
     {
-        var entries = [];
         var options = {
-            limit: vscode.workspace.getConfiguration( 'discord-chat' ).history,
+            limit: Math.max( 0, vscode.workspace.getConfiguration( 'discord-chat' ).history - 1 )
         };
 
-        if( outputChannels[ channel.id.toString() ].lastMessage )
+        var lastMessage = storage.getLastMessage( channel );
+
+        if( lastMessage )
         {
-            options.after = outputChannels[ channel.id.toString() ].lastMessage.id;
+            options.before = lastMessage;
         }
 
-        if( storage.getChannelMuted( channel ) !== true )
+        channel.fetchMessages( options ).then( function( oldMessages )
         {
+            if( lastMessage )
+            {
+                options.limit = 1;
+                options.around = lastMessage;
+                channel.fetchMessages( options ).then( function( lastMessages )
+                {
+                    done( lastMessages.concat( oldMessages ) );
+                } );
+            }
+            else
+            {
+                done( oldMessages );
+            }
+        } ).catch( function( e )
+        {
+            console.log( "failed to fetch old messages: " + e );
+        } );
+    }
+
+    function fetchNewMessages( channel, done )
+    {
+        var lastMessage = storage.getLastMessage( channel );
+
+        if( lastMessage )
+        {
+            var options = {
+                after: lastMessage
+            };
+
             channel.fetchMessages( options ).then( function( messages )
             {
-                if( messages.size > 0 )
-                {
-                    outputChannels[ channel.id.toString() ].lastMessage = messages.values().next().value;
-                }
+                done( messages );
+            } ).catch( function( e )
+            {
+                console.log( "failed to fetch new messages: " + e );
+            } );
+        }
+        else
+        {
+            done( [] );
+        }
+    }
 
-                var storedDate = storage.getLastRead( channel );
-                var channelLastRead = new Date( storedDate ? storedDate : 0 );
-                var lineAdded = false;
+    function populateOutputChannel( channel, messages )
+    {
+        if( messages.size > 0 )
+        {
+            outputChannels[ channel.id.toString() ].lastMessage = messages.values().next().value;
+        }
 
-                messages.map( function( message )
-                {
-                    if( lineAdded === false && message.createdAt < channelLastRead )
-                    {
-                        entries.push( "------------" );
-                        lineAdded = true;
-                    }
+        var storedDate = storage.getLastRead( channel );
+        var channelLastRead = new Date( storedDate ? storedDate : 0 );
 
-                    entries = entries.concat( formatMessage( message ) );
+        var entries = [];
 
-                    if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
-                    {
-                        entries.push( "" );
-                    }
-                } );
+        messages.map( function( message )
+        {
+            if( outputChannels[ channel.id.toString() ].previousMessageMarkerAdded !== true && message.createdAt < channelLastRead )
+            {
+                entries.push( previousMessagesMarker );
+                outputChannels[ channel.id.toString() ].previousMessageMarkerAdded = true;
+            }
 
-                entries.reverse().map( function( entry )
-                {
-                    outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
-                } );
+            entries = entries.concat( formatMessage( message ) );
+
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).compactView !== true )
+            {
+                entries.push( "" );
+            }
+        } );
+
+        entries.reverse().map( function( entry )
+        {
+            outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
+        } );
+
+        if( outputChannels[ channel.id.toString() ].previousMessageMarkerAdded !== true )
+        {
+            outputChannels[ channel.id.toString() ].outputChannel.appendLine( previousMessagesMarker );
+            outputChannels[ channel.id.toString() ].previousMessageMarkerAdded = true;
+        }
+    }
+
+    function addNewMessagesToChannel( channel, done )
+    {
+        if( storage.getChannelMuted( channel ) !== true )
+        {
+            fetchNewMessages( channel, function( messages )
+            {
+                populateOutputChannel( channel, messages );
 
                 provider.markChannelRead( channel );
 
                 done();
-            } ).catch( function( e )
+            } );
+        }
+    }
+
+    function addOldMessagesToChannel( channel, done )
+    {
+        if( storage.getChannelMuted( channel ) !== true )
+        {
+            fetchOldMessages( channel, function( messages )
             {
-                console.log( e );
+                populateOutputChannel( channel, messages );
+
+                done();
             } );
         }
     }
@@ -455,6 +526,11 @@ function activate( context )
             provider.markAllRead();
         } ) );
 
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetSync', function()
+        {
+            storage.reset();
+        } ) );
+
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function()
         {
             if( currentServer )
@@ -572,7 +648,7 @@ function activate( context )
 
                             if( currentChannel.type === "dm" || currentChannel.type === "group" )
                             {
-                                populateChannel( currentChannel, function() { } );
+                                addNewMessagesToChannel( currentChannel, function() { } );
                             }
                         }
                     } );
@@ -661,18 +737,22 @@ function activate( context )
                 outputChannel = vscode.window.createOutputChannel( utils.toOutputChannelName( channel ) + "." + channel.id.toString() );
                 outputChannels[ channel.id.toString() ] = {
                     outputChannel: outputChannel,
-                    discordChannel: channel
+                    discordChannel: channel,
+                    previousMessageMarkerAdded: false
                 };
                 context.subscriptions.push( outputChannel );
+                addOldMessagesToChannel( channel, function()
+                {
+                    addNewMessagesToChannel( channel, triggerHighlight );
+                } );
             }
             else
             {
                 outputChannel = outputChannel.outputChannel;
+                addNewMessagesToChannel( channel, triggerHighlight );
             }
 
             outputChannel.show( true );
-
-            populateChannel( channel, triggerHighlight );
         } ) );
 
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
@@ -730,7 +810,10 @@ function activate( context )
                 {
                     outputChannels[ outputChannelName ].outputChannel.clear();
                     outputChannels[ outputChannelName ].lastMessage = undefined;
-                    populateChannel( outputChannels[ outputChannelName ].discordChannel, triggerHighlight );
+                    addOldMessagesToChannel( channel, function()
+                    {
+                        addNewMessagesToChannel( outputChannels[ outputChannelName ].discordChannel, triggerHighlight );
+                    } );
                 } );
             }
             else if( e.affectsConfiguration( 'discord-chat.useIcons' ) )
