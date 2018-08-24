@@ -197,21 +197,59 @@ function activate( context )
         vscode.commands.executeCommand( 'setContext', 'discord-can-unmute', canUnmute );
     }
 
+    function collectMessages( channel, done )
+    {
+        var options = {};
+
+        var lastMessage = storage.getLastMessage( channel );
+
+        options.limit = vscode.workspace.getConfiguration( 'discord-chat' ).history;
+        if( lastMessage )
+        {
+            options.before = lastMessage;
+        }
+
+        channel.fetchMessages( options ).then( function( messages )
+        {
+            if( lastMessage )
+            {
+                options.limit = undefined;
+                options.before = undefined;
+                options.after = messages.size > 0 ? messages.values().next().value.id : lastMessage;
+                channel.fetchMessages( options ).then( function( moreMessages )
+                {
+                    var totalMessages = moreMessages.concat( messages );
+                    done( totalMessages );
+                } ).catch( function( e )
+                {
+                    console.log( e );
+                } );
+            }
+            else
+            {
+                done( messages );
+            }
+        } ).catch( function( e )
+        {
+            console.log( e );
+        } );
+    }
+
     function populateChannel( channel, done )
     {
         var entries = [];
-        var options = {
-            limit: vscode.workspace.getConfiguration( 'discord-chat' ).history,
-        };
+        // var options = {};
+        // var lastMessage = storage.getLastMessage( channel );
 
-        if( outputChannels[ channel.id.toString() ].lastMessage )
-        {
-            options.after = outputChannels[ channel.id.toString() ].lastMessage.id;
-        }
+        // options.limit = vscode.workspace.getConfiguration( 'discord-chat' ).history;
+        // if( outputChannels[ channel.id.toString() ].lastMessage )
+        // {
+        //     options.after = outputChannels[ channel.id.toString() ].lastMessage.id;
+        // }
 
         if( storage.getChannelMuted( channel ) !== true )
         {
-            channel.fetchMessages( options ).then( function( messages )
+            collectMessages( channel, function( messages )
             {
                 if( messages.size > 0 )
                 {
@@ -246,9 +284,6 @@ function activate( context )
                 provider.markChannelRead( channel );
 
                 done();
-            } ).catch( function( e )
-            {
-                console.log( e );
             } );
         }
     }

@@ -207,6 +207,11 @@
                     "description": "Channel last read times (updated automatically)",
                     "default": {}
                 },
+                "discord-chat.lastMessage": {
+                    "type": "object",
+                    "description": "ID of the last read message (updated automatically)",
+                    "default": {}
+                },
                 "discord-chat.mutedChannels": {
                     "type": "object",
                     "description": "Channels which are locally muted (updated automatically)",
