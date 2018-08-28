@@ -135,7 +135,10 @@ function setLastRead( channel )
 
 function updateLastRead()
 {
-    vscode.workspace.getConfiguration( 'discord-chat' ).update( 'lastRead', lastRead, true ).then( backup );
+    vscode.workspace.getConfiguration( 'discord-chat' ).update( 'lastRead', lastRead, true ).then( function()
+    {
+        vscode.workspace.getConfiguration( 'discord-chat' ).update( 'lastMessage', lastMessage, true ).then( backup );
+    } );
 }
 
 function getLastRead( channel )
@@ -151,7 +154,6 @@ function setLastMessage( channel )
 
 function updateLastMessage()
 {
-    vscode.workspace.getConfiguration( 'discord-chat' ).update( 'lastMessage', lastMessage, true ).then( backup );
 }
 
 function getLastMessage( channel )
@@ -228,7 +230,6 @@ module.exports.updateLastRead = updateLastRead;
 module.exports.getLastRead = getLastRead;
 
 module.exports.setLastMessage = setLastMessage;
-module.exports.updateLastMessage = updateLastMessage;
 module.exports.getLastMessage = getLastMessage;
 
 module.exports.setServerMuted = setServerMuted;

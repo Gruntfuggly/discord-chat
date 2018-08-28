@@ -324,7 +324,6 @@ class DiscordChatDataProvider
             if( inhibitUpdate !== false )
             {
                 storage.updateLastRead();
-                storage.updateLastMessage();
             }
             this.updateServerCount( servers.find( findServer, utils.toParentId( channel ) ) );
         }
@@ -342,7 +341,6 @@ class DiscordChatDataProvider
             } );
         } );
         storage.updateLastRead();
-        storage.updateLastMessage();
         this.updateStatusBar();
     }
 
@@ -359,7 +357,6 @@ class DiscordChatDataProvider
             } );
             serverElement.unreadCount = 0;
             storage.updateLastRead();
-            storage.updateLastMessage();
             this._onDidChangeTreeData.fire( serverElement );
             this.updateStatusBar();
         }
