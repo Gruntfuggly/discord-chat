@@ -595,7 +595,7 @@ function activate( context )
 
                             if( currentChannel.type === "dm" || currentChannel.type === "group" )
                             {
-                                populateChannel( currentChannel, function() { } );
+                                populateChannel( currentChannel, triggerHighlight );
                             }
                         }
                     } );
