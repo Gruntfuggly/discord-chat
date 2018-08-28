@@ -70,7 +70,7 @@ class DiscordChatDataProvider
         if( !element )
         {
             var serverList = servers;
-            if( vscode.workspace.getConfiguration( 'discord-chat' ).hideMutedServers === true )
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideMutedServers' ) === true )
             {
                 serverList = serverList.filter( e => !e.muted );
             }
@@ -84,7 +84,7 @@ class DiscordChatDataProvider
         else if( element.type === SERVER )
         {
             var channelList = element.channels;
-            if( vscode.workspace.getConfiguration( 'discord-chat' ).hideMutedChannels === true )
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideMutedChannels' ) === true )
             {
                 channelList = channelList.filter( e => !e.muted );
             }
@@ -123,7 +123,7 @@ class DiscordChatDataProvider
         }
         else if( element.type === SERVER )
         {
-            if( vscode.workspace.getConfiguration( 'discord-chat' ).useIcons === true && element.iconPath )
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'useIcons' ) === true && element.iconPath )
             {
                 treeItem.iconPath = { dark: element.iconPath, light: element.iconPath };
             }
@@ -150,7 +150,7 @@ class DiscordChatDataProvider
         {
             treeItem.iconPath = this.getIcon( CHANNEL );
 
-            if( vscode.workspace.getConfiguration( 'discord-chat' ).useIcons === true )
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'useIcons' ) === true )
             {
                 if( element.channel.type === "dm" && element.iconPath )
                 {
@@ -177,7 +177,7 @@ class DiscordChatDataProvider
         {
             treeItem.label +=
                 ( " (" + element.unreadCount +
-                    ( element.unreadCount >= vscode.workspace.getConfiguration( 'discord-chat' ).history ? "+" : "" ) +
+                    ( element.unreadCount >= vscode.workspace.getConfiguration( 'discord-chat' ).get( 'history' ) ? "+" : "" ) +
                     ")" );
         }
 
@@ -250,7 +250,7 @@ class DiscordChatDataProvider
 
                 if( !channel.guild || storage.isChannelMuted( channel ) !== true )
                 {
-                    channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).history } ).then( function( messages )
+                    channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).get( 'history' ) } ).then( function( messages )
                     {
                         me.setUnread( channel, messages );
                     } );
