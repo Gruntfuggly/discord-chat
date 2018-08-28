@@ -25,6 +25,8 @@ If you use vscode on multiple machines, you may want to sync your muted servers,
 - `discord-chat: Refresh` - repopulate the channel list
 - `discord-chat: Mute` - mute the currently selected server or channel
 - `discord-chat: Unmute` - unmute a previously muted server or channel
+- `discord-chat: Reset Sync` - clear sync data
+- `discord-chat: Close Channel` - delete the output window for the currently selected channel
 
 ### Notifications
 
