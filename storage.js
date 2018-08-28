@@ -40,7 +40,7 @@ function sync( callback )
             }
         } ).catch( function( error )
         {
-            console.log( "sync failed:" + error );
+            console.error( "sync failed:" + error );
 
             if( callback )
             {
@@ -120,7 +120,7 @@ function backup()
             generalOutputChannel.appendLine( "Backup at " + now.toISOString() );
         } ).catch( function( error )
         {
-            console.log( "backup failed: " + error );
+            console.error( "backup failed: " + error );
         } );
     }
 }
@@ -216,7 +216,7 @@ function reset()
             sync();
         } ).catch( function( error )
         {
-            console.log( "reset failed: " + error );
+            console.error( "reset failed: " + error );
         } );
     }
 }

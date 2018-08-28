@@ -228,7 +228,7 @@ function activate( context )
             }
         } ).catch( function( e )
         {
-            console.log( "failed to fetch old messages: " + e );
+            console.error( "failed to fetch old messages: " + e );
         } );
     }
 
@@ -247,7 +247,7 @@ function activate( context )
                 done( messages );
             } ).catch( function( e )
             {
-                console.log( "failed to fetch new messages: " + e );
+                console.error( "failed to fetch new messages: " + e );
             } );
         }
         else
@@ -554,13 +554,10 @@ function activate( context )
                                 refresh();
                                 var element = provider.getChannelElement( channel );
                                 revealElement( element, true, true );
-                            }
-                            ).catch(
-                                e =>
-                                {
-                                    vscode.window.showErrorMessage( e.message );
-                                }
-                            );
+                            } ).catch( e =>
+                            {
+                                vscode.window.showErrorMessage( e.message );
+                            } );
                         }
                     } );
             }
@@ -583,14 +580,11 @@ function activate( context )
                             outputChannels[ currentChannel.id.toString() ].outputChannel.dispose();
                             currentChannel = undefined;
                             refresh();
-                        }
-                        ).catch(
-                            e =>
-                            {
-                                console.log( e.message );
-                                vscode.window.showErrorMessage( "Failed to delete channel" );
-                            }
-                        );
+                        } ).catch( e =>
+                        {
+                            console.error( e.message );
+                            vscode.window.showErrorMessage( "Failed to delete channel" );
+                        } );
                     }
                 } );
             }
@@ -638,13 +632,11 @@ function activate( context )
                         {
                             refresh();
                         }
-                        ).catch(
-                            e =>
-                            {
-                                console.log( e.message );
-                                vscode.window.showErrorMessage( "Failed to leave server" );
-                            }
-                        );
+                        ).catch( e =>
+                        {
+                            console.error( e.message );
+                            vscode.window.showErrorMessage( "Failed to leave server" );
+                        } );
                     }
                 } );
             }
