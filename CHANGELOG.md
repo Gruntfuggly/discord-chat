@@ -1,3 +1,10 @@
+# v0.1.30 - 2018-08-28
+- improve fetching of old messages
+- add reset sync command
+- add close channel command
+- log errors to console.error instead of console.log
+- make debug logging configurable
+
 # v0.1.29 - 2018-08-22
 - update discord when channels are read
 

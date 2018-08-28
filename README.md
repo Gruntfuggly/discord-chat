@@ -69,6 +69,7 @@ The extension can be customised as follows:
 | discord-chat.hideMutedChannels | false | Set this to true to hide muted channels in the tree |
 | discord-chat.syncToken || A github token to allow syncing of muted servers, channels and last read times |
 | discord-chat.syncGistId || A github gist ID to allow syncing of muted servers, channels and last read times |
+| discord-chat.debug | false | Controls logging of discord.js client |
 
 ## Known Issues
 
