@@ -655,12 +655,18 @@ function activate( context )
                     {
                         if( message )
                         {
-                            currentChannel.send( message );
-
-                            if( currentChannel.type === "dm" || currentChannel.type === "group" )
+                            currentChannel.send( message ).then( message =>
                             {
-                                addNewMessagesToChannel( currentChannel, triggerHighlight );
-                            }
+                                generalOutputChannel.appendLine( "Sent message to channel " + currentChannel.name + " at " + new Date().toISOString() );
+
+                                if( currentChannel.type === "dm" || currentChannel.type === "group" )
+                                {
+                                    addNewMessagesToChannel( currentChannel, triggerHighlight );
+                                }
+                            } ).catch( e =>
+                            {
+                                console.error( "Failed to send: " + e );
+                            } );
                         }
                     } );
             }
