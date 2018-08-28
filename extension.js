@@ -667,7 +667,7 @@ function activate( context )
 
                             if( currentChannel.type === "dm" || currentChannel.type === "group" )
                             {
-                                addNewMessagesToChannel( currentChannel, function() { } );
+                                addNewMessagesToChannel( currentChannel, triggerHighlight );
                             }
                         }
                     } );
