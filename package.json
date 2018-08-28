@@ -161,6 +161,11 @@
                 "command": "discord-chat.resetSync",
                 "title": "Reset Sync",
                 "category": "discord-chat"
+            },
+            {
+                "command": "discord-chat.closeChannel",
+                "title": "Close Channel",
+                "category": "discord-chat"
             }
         ],
         "configuration": {

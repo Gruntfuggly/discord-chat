@@ -581,6 +581,7 @@ function activate( context )
                         currentChannel.delete().then( function()
                         {
                             outputChannels[ currentChannel.id.toString() ].outputChannel.dispose();
+                            currentChannel = undefined;
                             refresh();
                         }
                         ).catch(
@@ -598,6 +599,24 @@ function activate( context )
                 vscode.window.showInformationMessage( "discord-chat: Please select a channel first" );
             }
         } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.closeChannel', function()
+        {
+            if( currentChannel )
+            {
+                if( outputChannels[ currentChannel.id.toString() ] )
+                {
+                    outputChannels[ currentChannel.id.toString() ].outputChannel.dispose();
+                    outputChannels[ currentChannel.id.toString() ] = undefined;
+                    currentChannel = undefined;
+                }
+            }
+            else
+            {
+                vscode.window.showInformationMessage( "discord-chat: Please select a channel first" );
+            }
+        } ) );
+
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.leaveServer', function()
         {
@@ -720,7 +739,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openDebugConsole', function()
         {
-            generalOutputChannel.show();
+            generalOutputChannel.show( true );
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.selectServer', ( server ) => selectServer( server ) ) );
