@@ -177,6 +177,29 @@ function isChannelMuted( channel )
     return getServerMuted( channel.guild ) === true || getChannelMuted( channel );
 }
 
+function reset()
+{
+    if( gistore.token )
+    {
+        var now = new Date();
+
+        gistore.backUp( {
+            discordSync: {
+                mutedServers: {},
+                mutedChannels: {},
+                lastSync: now
+            }
+        } ).then( function()
+        {
+            generalOutputChannel.appendLine( "Reset sync at " + now.toISOString() );
+            sync();
+        } ).catch( function( error )
+        {
+            console.log( "reset failed: " + error );
+        } );
+    }
+}
+
 module.exports.initialize = initialize;
 
 module.exports.setLastRead = setLastRead;
@@ -192,3 +215,4 @@ module.exports.isChannelMuted = isChannelMuted;
 
 module.exports.initializeSync = initializeSync;
 module.exports.sync = sync;
+module.exports.reset = reset;

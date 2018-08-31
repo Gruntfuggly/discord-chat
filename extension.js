@@ -11,7 +11,6 @@ var treeView = require( './dataProvider' );
 var utils = require( './utils' );
 
 var outputChannels = {};
-var mutedChannels = {};
 var currentServer;
 var currentChannel;
 var decorations = [];
@@ -453,6 +452,11 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markAllRead', function()
         {
             provider.markAllRead();
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetSync', function()
+        {
+            storage.reset();
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function()

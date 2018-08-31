@@ -156,6 +156,11 @@
                     "dark": "resources/icons/dark/unmute.svg",
                     "light": "resources/icons/light/unmute.svg"
                 }
+            },
+            {
+                "command": "discord-chat.resetSync",
+                "title": "Reset Sync",
+                "category": "discord-chat"
             }
         ],
         "configuration": {
