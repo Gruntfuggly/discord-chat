@@ -1,3 +1,10 @@
+# v0.1.30 - 2018-09-03
+- add reset sync command
+- add close channel command
+- trigger highlight correctly when updating DM or group channels
+- log errors to console.error
+- make debug logging configurable
+
 # v0.1.29 - 2018-08-22
 - update discord when channels are read
 

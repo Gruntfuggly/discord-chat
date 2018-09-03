@@ -212,41 +212,41 @@ function activate( context )
         {
             channel.fetchMessages( options ).then( function( messages )
             {
-        if( messages.size > 0 )
-        {
-            outputChannels[ channel.id.toString() ].lastMessage = messages.values().next().value;
-        }
+                if( messages.size > 0 )
+                {
+                    outputChannels[ channel.id.toString() ].lastMessage = messages.values().next().value;
+                }
 
-        var storedDate = storage.getLastRead( channel );
-        var channelLastRead = new Date( storedDate ? storedDate : 0 );
+                var storedDate = storage.getLastRead( channel );
+                var channelLastRead = new Date( storedDate ? storedDate : 0 );
                 var lineAdded = false;
 
-        messages.map( function( message )
-        {
+                messages.map( function( message )
+                {
                     if( lineAdded === false && message.createdAt < channelLastRead )
-            {
+                    {
                         entries.push( "------------" );
                         lineAdded = true;
-            }
+                    }
 
-            entries = entries.concat( formatMessage( message ) );
+                    entries = entries.concat( formatMessage( message ) );
 
-            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' ) !== true )
-            {
-                entries.push( "" );
-            }
-        } );
+                    if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' ) !== true )
+                    {
+                        entries.push( "" );
+                    }
+                } );
 
-        entries.reverse().map( function( entry )
-        {
-            outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
-        } );
+                entries.reverse().map( function( entry )
+                {
+                    outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
+                } );
 
                 provider.markChannelRead( channel );
 
                 done();
             } ).catch( function( e )
-    {
+            {
                 console.log( e );
             } );
         }
