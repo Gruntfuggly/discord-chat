@@ -10,6 +10,10 @@ A tree view will show available servers and channels. Click on a channel to open
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/discord-chat/master/resources/screenshot.png">
 
+### Image Preview
+
+Chats are shown in the output view which means that attached images are shown as links. If you install the excellent [Image Preview](https://marketplace.visualstudio.com/items?itemName=kisstkondoros.vscode-gutter-preview) by Kiss Tamás, hovering the mouse over the links will show the image in a pop up.
+
 ### Syncing
 
 If you use vscode on multiple machines, you may want to sync your muted servers, channels and last read times. To enable this, use github to generate a personal access token (with gist scope) and update `discord-chat.syncToken`. The first time a sync is attempted, a gist will be created and the ID will be stored in your settings in `discord-chat.syncGistId`. To sync other instances of vscode, you'll need to copy the `discord-chat.syncToken` and `discord-chat.syncGistId` settings.

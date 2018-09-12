@@ -1,3 +1,6 @@
+# v0.1.31 - 2018-09-12
+- add note about Image Preview to README.md
+
 # v0.1.30 - 2018-09-03
 - add reset sync command
 - add close channel command

@@ -3,7 +3,7 @@
     "displayName": "Discord Chat",
     "description": "A discord text chat client for vscode",
     "keywords": [],
-    "version": "0.1.30",
+    "version": "0.1.31",
     "icon": "resources/discord-chat.png",
     "publisher": "Gruntfuggly",
     "engines": {
