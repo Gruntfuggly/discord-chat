@@ -194,6 +194,28 @@ class DiscordChatDataProvider
         this._icons = icons;
     }
 
+    countUnreadMessages( provider, channel, messages, before )
+    {
+        channel.fetchMessages( { limit: 100, before: before } ).then( function( newMessages )
+        {
+            var storedDate = storage.getLastRead( channel );
+            var channelLastRead = new Date( storedDate ? storedDate : 0 );
+            var unreadMessages = newMessages.filter( function( message )
+            {
+                return message.createdAt > channelLastRead;
+            } );
+            messages = messages ? messages.concat( unreadMessages.clone() ) : unreadMessages.clone();
+            if( unreadMessages.array().length > 0 )
+            {
+                provider.countUnreadMessages( provider, channel, messages, unreadMessages.last().id );
+            }
+            else
+            {
+                provider.setUnread( channel, messages );
+            }
+        } );
+    }
+
     populate( user, channels )
     {
         var me = this;
@@ -250,10 +272,7 @@ class DiscordChatDataProvider
 
                 if( !channel.guild || storage.isChannelMuted( channel ) !== true )
                 {
-                    channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).get( 'history' ) } ).then( function( messages )
-                    {
-                        me.setUnread( channel, messages );
-                    } );
+                    me.countUnreadMessages( me, channel );
                 }
             }
         } );
