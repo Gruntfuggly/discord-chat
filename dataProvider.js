@@ -60,6 +60,26 @@ class DiscordChatDataProvider
         }
     }
 
+    isChannelVisible( channelElement )
+    {
+        var isVisible = true;
+
+        if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideMutedChannels' ) === true && channelElement.muted )
+        {
+            isVisible = false;
+        }
+        if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showUnreadOnly' ) === true )
+        {
+            var currentChannelId = this._currentChannel ? this._currentChannel.id.toString() : undefined;
+            if( channelElement.unreadCount === 0 && ( currentChannelId === undefined || channelElement.id != currentChannelId ) )
+            {
+                isVisible = false;
+            }
+        }
+
+        return isVisible;
+    }
+
     getParent( element )
     {
         return element ? element.parent : undefined;
@@ -89,18 +109,10 @@ class DiscordChatDataProvider
         else if( element.type === SERVER )
         {
             var channelList = element.channels;
-            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideMutedChannels' ) === true )
+            channelList = channelList.filter( function( channelElement )
             {
-                channelList = channelList.filter( e => !e.muted );
-            }
-            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showUnreadOnly' ) === true )
-            {
-                var currentChannelId = this._currentChannel ? this._currentChannel.id.toString() : undefined;
-                channelList = channelList.filter( function( e )
-                {
-                    return e.unreadCount > 0 || e.id === currentChannelId;
-                }, this );
-            }
+                return this.isChannelVisible( channelElement );
+            }, this );
             return channelList;
         }
         else if( element.type === CHANNEL )
