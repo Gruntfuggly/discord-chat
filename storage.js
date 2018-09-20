@@ -29,7 +29,6 @@ function sync( callback )
                 vscode.workspace.getConfiguration( 'discord-chat' ).update( 'mutedServers', mutedServers, true );
                 vscode.workspace.getConfiguration( 'discord-chat' ).update( 'mutedChannels', mutedChannels, true );
                 vscode.workspace.getConfiguration( 'discord-chat' ).update( 'lastRead', lastRead, true );
-
             }
 
             if( callback )
