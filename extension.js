@@ -689,9 +689,6 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', ( channel ) =>
         {
             currentServer = channel.guild;
-            setCurrentChannel( channel );
-
-            updateSelectionState();
 
             var outputChannel = outputChannels[ channel.id.toString() ];
             if( !outputChannel )
@@ -710,7 +707,12 @@ function activate( context )
 
             outputChannel.show( true );
 
-            populateChannel( channel, triggerHighlight );
+            populateChannel( channel, function()
+            {
+                setCurrentChannel( channel );
+                updateSelectionState();
+                triggerHighlight();
+            } );
         } ) );
 
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
