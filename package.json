@@ -32,7 +32,7 @@
                 {
                     "id": "discord-chat-view-explorer",
                     "name": "Discord",
-                    "when": "discord-chat-in-explorer"
+                    "when": "discord-chat-in-explorer && discord-chat-tree-not-empty"
                 }
             ],
             "discord-chat-container": [
@@ -253,6 +253,11 @@
                 "discord-chat.showUnreadOnly": {
                     "type": "boolean",
                     "description": "Set to true to only show channels and servers with unread messages",
+                    "default": false
+                },
+                "discord-chat.hideEmptyTree": {
+                    "type":"boolean",
+                    "description": "Set to true to hide the tree in the explorer view when there is nothing in it",
                     "default": false
                 }
             }

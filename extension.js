@@ -203,6 +203,11 @@ function activate( context )
         }
         vscode.commands.executeCommand( 'setContext', 'discord-can-mute', canMute );
         vscode.commands.executeCommand( 'setContext', 'discord-can-unmute', canUnmute );
+
+        var children = provider.getChildren();
+        var empty = children.length === 1 && children[ 0 ].name === "...";
+        vscode.commands.executeCommand( 'setContext', 'discord-chat-tree-not-empty',
+            vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideEmptyTree' ) === false || empty === false );
     }
 
     function populateChannel( channel, done )
@@ -785,6 +790,10 @@ function activate( context )
             if( e.affectsConfiguration( 'discord-chat.showInExplorer' ) )
             {
                 vscode.commands.executeCommand( 'setContext', 'discord-chat-in-explorer', vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showInExplorer' ) );
+            }
+            else if( e.affectsConfiguration( 'discord-chat.hideEmptyTree' ) )
+            {
+                updateSelectionState();
             }
             else if( e.affectsConfiguration( 'discord-chat.token' ) && client.readyAt === null )
             {
