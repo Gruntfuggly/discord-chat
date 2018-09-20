@@ -250,6 +250,11 @@ class DiscordChatDataProvider
                     };
                     servers.push( server );
                 }
+                else
+                {
+                    server.iconPath = channel.guild ? this._icons[ channel.guild.id ] : undefined;
+                    server.muted = channel.guild ? storage.getServerMuted( channel.guild ) : false;
+                }
 
                 var channelName = utils.toChannelName( channel );
 
