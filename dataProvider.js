@@ -74,6 +74,11 @@ class DiscordChatDataProvider
             {
                 serverList = serverList.filter( e => !e.muted );
             }
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showUnreadOnly' ) === true )
+            {
+                var currentServerId = this._currentChannel ? this._currentChannel.guild.id.toString() : undefined;
+                serverList = serverList.filter( e => e.unreadCount > 0 || e.id === currentServerId );
+            }
 
             if( serverList.length > 0 )
             {
@@ -87,6 +92,14 @@ class DiscordChatDataProvider
             if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideMutedChannels' ) === true )
             {
                 channelList = channelList.filter( e => !e.muted );
+            }
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showUnreadOnly' ) === true )
+            {
+                var currentChannelId = this._currentChannel ? this._currentChannel.id.toString() : undefined;
+                channelList = channelList.filter( function( e )
+                {
+                    return e.unreadCount > 0 || e.id === currentChannelId;
+                }, this );
             }
             return channelList;
         }
@@ -136,7 +149,7 @@ class DiscordChatDataProvider
                 treeItem.iconPath = this.getIcon( SERVER );
             }
             treeItem.id = element.id;
-            treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+            treeItem.collapsibleState = element.unreadCount > 0 ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
             treeItem.tooltip = "";
             treeItem.command = {
                 command: "discord-chat.selectServer",
@@ -218,10 +231,6 @@ class DiscordChatDataProvider
 
     populate( user, channels )
     {
-        var me = this;
-
-        servers = [];
-
         channels.map( function( channel )
         {
             if( utils.isReadableChannel( user, channel ) )
@@ -236,7 +245,7 @@ class DiscordChatDataProvider
                         channels: [],
                         id: utils.toParentId( channel ),
                         unreadCount: 0,
-                        iconPath: channel.guild ? me._icons[ channel.guild.id ] : undefined,
+                        iconPath: channel.guild ? this._icons[ channel.guild.id ] : undefined,
                         muted: channel.guild ? storage.getServerMuted( channel.guild ) : false
                     };
                     servers.push( server );
@@ -259,11 +268,11 @@ class DiscordChatDataProvider
                     };
                     server.channels.push( channelElement );
 
-                    if( channel.type === "dm" && channel.recipient && me._context.storagePath )
+                    if( channel.type === "dm" && channel.recipient && this._context.storagePath )
                     {
                         if( channel.recipient.avatarURL )
                         {
-                            var filename = path.join( me._context.storagePath, "avatar_" + channel.recipient.id.toString() + utils.urlExt( channel.recipient.avatarURL ) );
+                            var filename = path.join( this._context.storagePath, "avatar_" + channel.recipient.id.toString() + utils.urlExt( channel.recipient.avatarURL ) );
                             channelElement.iconPath = filename;
                             utils.fetchIcon( channel.recipient.avatarURL, filename, function() { } );
                         }
@@ -272,10 +281,10 @@ class DiscordChatDataProvider
 
                 if( !channel.guild || storage.isChannelMuted( channel ) !== true )
                 {
-                    me.countUnreadMessages( me, channel );
+                    this.countUnreadMessages( this, channel );
                 }
             }
-        } );
+        }, this );
     }
 
     updateServerCount( serverElement )
@@ -349,29 +358,25 @@ class DiscordChatDataProvider
 
     markAllRead()
     {
-        var me = this;
-
         servers.map( serverElement =>
         {
             serverElement.channels.map( channelElement =>
             {
-                me.markChannelRead( channelElement.channel, false );
+                this.markChannelRead( channelElement.channel, false );
             } );
-        } );
+        }, this );
         storage.updateLastRead();
         this.updateStatusBar();
     }
 
     markServerRead( server )
     {
-        var me = this;
-
         var serverElement = servers.find( findServer, server.id.toString() );
         if( serverElement )
         {
             serverElement.channels.map( channelElement =>
             {
-                me.markChannelRead( channelElement.channel, false );
+                this.markChannelRead( channelElement.channel, false );
             } );
             serverElement.unreadCount = 0;
             storage.updateLastRead();
@@ -402,6 +407,11 @@ class DiscordChatDataProvider
             this._onDidChangeTreeData.fire( serverElement );
             this.updateStatusBar();
         }
+    }
+
+    setCurrentChannel( currentChannel )
+    {
+        this._currentChannel = currentChannel;
     }
 
     refresh()

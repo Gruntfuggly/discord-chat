@@ -16,6 +16,8 @@ var currentChannel;
 var decorations = [];
 var highlightTimeout;
 
+var currentVisibleEditors = [];
+
 function activate( context )
 {
     const client = new discord.Client();
@@ -24,6 +26,13 @@ function activate( context )
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
 
     storage.initialize( generalOutputChannel );
+
+    function setCurrentChannel( channel )
+    {
+        currentChannel = channel;
+        provider.setCurrentChannel( channel );
+        updateSelectionState();
+    }
 
     function getDecoration( tag )
     {
@@ -242,12 +251,13 @@ function activate( context )
                     outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
                 } );
 
+                provider.setCurrentChannel( channel );
                 provider.markChannelRead( channel );
 
                 done();
             } ).catch( function( e )
             {
-                console.log( e );
+                console.error( e );
             } );
         }
     }
@@ -396,14 +406,12 @@ function activate( context )
             }
         }
 
-        function updateChannel( message )
+        function updateChannel( message, hidden )
         {
             function showNotification()
             {
                 var notify = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'notify' );
-                if( notify === "always" ||
-                    ( notify == "whenHidden" &&
-                        ( discordChatExplorerView.visible === false && discordChatView.visible === false ) ) )
+                if( notify === "always" || ( notify == "whenHidden" && hidden === true ) )
                 {
                     vscode.window.showInformationMessage( formatMessage( message, true ).join() );
                 }
@@ -422,7 +430,7 @@ function activate( context )
         function selectServer( server )
         {
             currentServer = server;
-            currentChannel = undefined;
+            setCurrentChannel( undefined );
             updateSelectionState();
         }
 
@@ -506,7 +514,7 @@ function activate( context )
                         currentChannel.delete().then( function()
                         {
                             outputChannels[ currentChannel.id.toString() ].outputChannel.dispose();
-                            currentChannel = undefined;
+                            setCurrentChannel( undefined );
                             refresh();
                         } ).catch( e =>
                         {
@@ -530,7 +538,7 @@ function activate( context )
                 {
                     outputChannels[ currentChannel.id.toString() ].outputChannel.dispose();
                     outputChannels[ currentChannel.id.toString() ] = undefined;
-                    currentChannel = undefined;
+                    setCurrentChannel( undefined );
                 }
             }
             else
@@ -673,7 +681,8 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', ( channel ) =>
         {
             currentServer = channel.guild;
-            currentChannel = channel;
+            setCurrentChannel( channel );
+
             updateSelectionState();
 
             var outputChannel = outputChannels[ channel.id.toString() ];
@@ -682,7 +691,7 @@ function activate( context )
                 outputChannel = vscode.window.createOutputChannel( utils.toOutputChannelName( channel ) + "." + channel.id.toString() );
                 outputChannels[ channel.id.toString() ] = {
                     outputChannel: outputChannel,
-                    discordChannel: channel
+                    discordChannel: channel,
                 };
                 context.subscriptions.push( outputChannel );
             }
@@ -713,13 +722,13 @@ function activate( context )
                 if( document.uri && document.uri.scheme === 'output' )
                 {
                     currentServer = undefined;
-                    currentChannel = undefined;
+                    setCurrentChannel( undefined );
 
                     Object.keys( outputChannels ).forEach( channelName =>
                     {
                         if( outputChannels[ channelName ].outputChannel._id === document.fileName )
                         {
-                            currentChannel = outputChannels[ channelName ].discordChannel;
+                            setCurrentChannel( outputChannels[ channelName ].discordChannel );
                             currentServer = currentChannel.guild;
 
                             updateSelectionState();
@@ -731,6 +740,41 @@ function activate( context )
                     } );
                 }
             } );
+        } ) );
+
+        context.subscriptions.push( vscode.window.onDidChangeVisibleTextEditors( function( editors )
+        {
+            currentVisibleEditors = editors;
+
+            var currentOutputChannelFilename;
+
+            if( currentChannel !== undefined )
+            {
+                Object.keys( outputChannels ).map( function( id )
+                {
+                    if( id === currentChannel.id.toString() )
+                    {
+                        currentOutputChannelFilename = outputChannels[ id ].outputChannel._id;
+                    }
+                } );
+
+                if( currentOutputChannelFilename )
+                {
+                    var found = false;
+                    currentVisibleEditors.map( function( editor )
+                    {
+                        if( editor.document && editor.document.fileName === currentOutputChannelFilename )
+                        {
+                            found = true;
+                        }
+                    } );
+
+                    if( found === false )
+                    {
+                        setCurrentChannel( undefined );
+                    }
+                }
+            }
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
@@ -760,7 +804,8 @@ function activate( context )
             }
             else if(
                 e.affectsConfiguration( 'discord-chat.hideMutedServers' ) ||
-                e.affectsConfiguration( 'discord-chat.hideMutedChannels' ) )
+                e.affectsConfiguration( 'discord-chat.hideMutedChannels' ) ||
+                e.affectsConfiguration( 'discord-chat.showUnreadOnly' ) )
             {
                 provider.refresh();
             }
@@ -800,6 +845,22 @@ function activate( context )
 
         client.on( 'message', message =>
         {
+            function isOutputChannelVisible( id )
+            {
+                var visible = false;
+                if( outputChannels[ id ] !== undefined )
+                {
+                    currentVisibleEditors.map( function( editor )
+                    {
+                        if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+                        {
+                            visible = true;
+                        }
+                    } );
+                }
+                return visible;
+            }
+
             if( utils.isReadableChannel( client.user, message.channel ) )
             {
                 if( storage.isChannelMuted( message.channel ) !== true )
@@ -810,14 +871,15 @@ function activate( context )
 
                     if( outputChannelName )
                     {
-                        if( message.channel && message.channel === currentChannel )
+                        var hidden = isOutputChannelVisible( message.channel.id.toString() ) === false;
+                        if( hidden )
                         {
-                            updateCurrentChannel( message );
+                            updateChannel( message, hidden );
+                            updateSelectionState();
                         }
                         else
                         {
-                            updateChannel( message );
-                            updateSelectionState();
+                            updateCurrentChannel( message );
                         }
                     }
                 }
