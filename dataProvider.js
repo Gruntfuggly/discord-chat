@@ -96,7 +96,7 @@ class DiscordChatDataProvider
             }
             if( this._context.workspaceState.get( 'showUnreadOnly', false ) === true )
             {
-                var currentServerId = this._currentChannel ? this._currentChannel.guild.id.toString() : undefined;
+                var currentServerId = this._currentChannel ? utils.toParentId( this._currentChannel ) : undefined;
                 serverList = serverList.filter( e => e.unreadCount > 0 || e.id === currentServerId );
             }
 
@@ -104,6 +104,7 @@ class DiscordChatDataProvider
             {
                 return serverList;
             }
+
             return [ { name: "...", type: DEBUG } ];
         }
         else if( element.type === SERVER )
@@ -322,6 +323,7 @@ class DiscordChatDataProvider
         {
             channelElement = serverElement.channels.find( findChannel, channel.id.toString() );
         }
+
         return channelElement;
     }
 
