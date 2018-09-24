@@ -48,6 +48,8 @@ If you use vscode on multiple machines, you may want to sync your muted servers,
 - `discord-chat: Unmute` - unmute a previously muted server or channel
 - `discord-chat: Reset Sync` - clear sync data
 - `discord-chat: Close Channel` - delete the output window for the currently selected channel
+- `discord-chat: Show Unread Only` - only show servers and channels with unread content
+- `discord-chat: Show All` - show all servers and channels
 
 ### Notifications
 
@@ -65,10 +67,6 @@ A muted channel or server will not generate notifications, update it's unread co
 ## Installing
 
 You can install the latest version of the extension via the Visual Studio Marketplace [here](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.discord-chat).
-
-Alternatively, open Visual Studio code, press `Ctrl+P` or `Cmd+P` and type:
-
-    > ext install discord-chat
 
 ### Source Code
 
@@ -99,7 +97,7 @@ This extension only provides features that I currently use or know about. If you
 
 Container icon from [iconscout](https://iconscout.com/icon/discord-3).
 
-Extension and group icon made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
+Extension, Group and Read/Unread icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
 
 Unmute and Post icon from made by <a href="https://www.flaticon.com/authors/dave-gandy" title="Dave Gandy">Dave Gandy</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
 
@@ -108,3 +106,5 @@ Direct message icon made by <a href="https://www.flaticon.com/authors/yannick" t
 Tick icon made by <a href="https://www.flaticon.com/authors/eleonor-wang" title="Eleonor Wang">Eleonor Wang</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
 
 Mute icon made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
+
+<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>

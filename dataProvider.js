@@ -68,7 +68,7 @@ class DiscordChatDataProvider
         {
             isVisible = false;
         }
-        if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showUnreadOnly' ) === true )
+        if( this._context.workspaceState.get( 'showUnreadOnly', false ) === true )
         {
             var currentChannelId = this._currentChannel ? this._currentChannel.id.toString() : undefined;
             if( channelElement.unreadCount === 0 && ( currentChannelId === undefined || channelElement.id != currentChannelId ) )
@@ -94,7 +94,7 @@ class DiscordChatDataProvider
             {
                 serverList = serverList.filter( e => !e.muted );
             }
-            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showUnreadOnly' ) === true )
+            if( this._context.workspaceState.get( 'showUnreadOnly', false ) === true )
             {
                 var currentServerId = this._currentChannel ? this._currentChannel.guild.id.toString() : undefined;
                 serverList = serverList.filter( e => e.unreadCount > 0 || e.id === currentServerId );

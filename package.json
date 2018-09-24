@@ -47,6 +47,16 @@
                 {
                     "command": "discord-chat.refresh",
                     "when": "view =~ /discord-chat/",
+                    "group": "navigation@5"
+                },
+                {
+                    "command":"discord-chat.showAll",
+                    "when": "view =~ /discord-chat/ && discord-show-unread-only == true",
+                    "group": "navigation@4"
+                },
+                {
+                    "command":"discord-chat.showUnreadOnly",
+                    "when": "view =~ /discord-chat/ && discord-show-unread-only == false",
                     "group": "navigation@4"
                 },
                 {
@@ -130,22 +140,30 @@
                 }
             },
             {
-                "command": "discord-chat.deleteChannel",
-                "title": "Delete Channel",
-                "category": "discord-chat"
-            },
-            {
-                "command": "discord-chat.leaveServer",
-                "title": "Leave Server",
-                "category": "discord-chat"
-            },
-            {
                 "command": "discord-chat.mute",
                 "title": "Mute",
                 "category": "discord-chat",
                 "icon": {
                     "dark": "resources/icons/dark/mute.svg",
                     "light": "resources/icons/light/mute.svg"
+                }
+            },
+            {
+                "command": "discord-chat.showAll",
+                "title": "Show All",
+                "category": "discord-chat",
+                "icon": {
+                    "dark": "resources/icons/dark/read.svg",
+                    "light": "resources/icons/light/read.svg"
+                }
+            },
+            {
+                "command": "discord-chat.showUnreadOnly",
+                "title": "Show Unread Only",
+                "category": "discord-chat",
+                "icon": {
+                    "dark": "resources/icons/dark/unread.svg",
+                    "light": "resources/icons/light/unread.svg"
                 }
             },
             {
@@ -156,6 +174,16 @@
                     "dark": "resources/icons/dark/unmute.svg",
                     "light": "resources/icons/light/unmute.svg"
                 }
+            },
+            {
+                "command": "discord-chat.deleteChannel",
+                "title": "Delete Channel",
+                "category": "discord-chat"
+            },
+            {
+                "command": "discord-chat.leaveServer",
+                "title": "Leave Server",
+                "category": "discord-chat"
             },
             {
                 "command": "discord-chat.resetSync",
