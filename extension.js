@@ -381,10 +381,30 @@ function activate( context )
         } );
     }
 
+    function hideOutputChannel( outputChannel )
+    {
+        outputChannel.hide();
+    }
+
+    function setAutoClose( channelId )
+    {
+        var autoHidePeriod = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoHide' );
+        if( autoHidePeriod > 0 )
+        {
+            var timer = outputChannels[ channelId ].autoHideTimer;
+            if( timer )
+            {
+                clearTimeout( timer );
+            }
+            outputChannels[ channelId ].autoHideTimer = setTimeout( hideOutputChannel, autoHidePeriod * 1000, outputChannels[ channelId ].outputChannel );
+        }
+    }
+
     function updateCurrentChannel( message )
     {
-        outputChannels[ message.channel.id.toString() ].lastMessage = message;
-        var outputChannel = outputChannels[ message.channel.id.toString() ].outputChannel;
+        var channelId = message.channel.id.toString();
+        outputChannels[ channelId ].lastMessage = message;
+        var outputChannel = outputChannels[ channelId ].outputChannel;
         if( outputChannel )
         {
             if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' ) !== true )
@@ -395,6 +415,9 @@ function activate( context )
             {
                 outputChannel.appendLine( entry );
             } );
+
+            setAutoClose( channelId );
+
             triggerHighlight();
         }
         provider.markChannelRead( message.channel );
@@ -700,15 +723,16 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.selectServer', ( server ) => selectServer( server ) ) );
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', ( channel ) =>
+        function openChannel( channel )
         {
             currentServer = channel.guild;
 
-            var outputChannel = outputChannels[ channel.id.toString() ];
+            var channelId = channel.id.toString();
+            var outputChannel = outputChannels[ channelId ];
             if( !outputChannel )
             {
-                outputChannel = vscode.window.createOutputChannel( utils.toOutputChannelName( channel ) + "." + channel.id.toString() );
-                outputChannels[ channel.id.toString() ] = {
+                outputChannel = vscode.window.createOutputChannel( utils.toOutputChannelName( channel ) + "." + channelId );
+                outputChannels[ channelId ] = {
                     outputChannel: outputChannel,
                     discordChannel: channel,
                 };
@@ -721,13 +745,17 @@ function activate( context )
 
             outputChannel.show( true );
 
+            setAutoClose( channelId );
+
             populateChannel( channel, function()
             {
                 setCurrentChannel( channel );
                 updateSelectionState();
                 triggerHighlight();
             } );
-        } ) );
+        }
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', openChannel ) );
 
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
         {
@@ -904,6 +932,40 @@ function activate( context )
                     if( outputChannelName )
                     {
                         var hidden = isOutputChannelVisible( message.channel.id.toString() ) === false;
+
+                        if( hidden === true && vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoShow' ) === true )
+                        {
+                            var outputChannelAlreadyVisible = false;
+                            Object.keys( outputChannels ).map( function( id )
+                            {
+                                currentVisibleEditors.map( function( editor )
+                                {
+                                    if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+                                    {
+                                        outputChannelAlreadyVisible = true;
+                                    }
+                                } );
+
+                                if( outputChannels[ id ].outputChannel.visible === true )
+                                {
+                                    outputChannelAlreadyVisible = true;
+                                }
+                            } );
+
+                            if( outputChannelAlreadyVisible === false )
+                            {
+                                hidden = false;
+                                if( outputChannels[ message.channel.id.toString() ] === undefined )
+                                {
+                                    openChannel( message.channel );
+                                }
+                                else
+                                {
+                                    outputChannels[ message.channel.id.toString() ].outputChannel.show();
+                                }
+                            }
+                        }
+
                         if( hidden )
                         {
                             updateChannel( message, hidden );
