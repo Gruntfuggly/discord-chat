@@ -50,12 +50,12 @@
                     "group": "navigation@5"
                 },
                 {
-                    "command":"discord-chat.showAll",
+                    "command": "discord-chat.showAll",
                     "when": "view =~ /discord-chat/ && discord-show-unread-only == true",
                     "group": "navigation@4"
                 },
                 {
-                    "command":"discord-chat.showUnreadOnly",
+                    "command": "discord-chat.showUnreadOnly",
                     "when": "view =~ /discord-chat/ && discord-show-unread-only == false",
                     "group": "navigation@4"
                 },
@@ -284,9 +284,19 @@
                     "default": false
                 },
                 "discord-chat.hideEmptyTree": {
-                    "type":"boolean",
+                    "type": "boolean",
                     "description": "Set to true to hide the tree in the explorer view when there is nothing in it",
                     "default": false
+                },
+                "discord-chat.autoShow": {
+                    "type": "boolean",
+                    "description": "Set to true to automatically open the output channel when a message is received (and no other channels are open)",
+                    "default": false
+                },
+                "discord-chat.autoHide": {
+                    "type": "integer",
+                    "description": "If no messages are received after this many seconds, close the output channel (Set to 0 to disable)",
+                    "default": 0
                 }
             }
         }
