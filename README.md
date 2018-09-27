@@ -51,6 +51,8 @@ If you use vscode on multiple machines, you may want to sync your muted servers,
 - `discord-chat: Show Unread Only` - only show servers and channels with unread content
 - `discord-chat: Show All` - show all servers and channels
 
+*Note: To prevent a chat from auto hiding while you are reading it, click in the window.*
+
 ### Notifications
 
 Notifications are generated if a message arrives from a channel other that the currently selected channel. By default these these will only be shown if the channel tree is hidden (or collapsed). See *Configuration* for other settings.
