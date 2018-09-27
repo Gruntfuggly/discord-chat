@@ -124,6 +124,16 @@ function activate( context )
             }
         }
 
+        entries = entries.map( function( entry )
+        {
+            entry = entry.replace( '’', '\'' );
+            entry = entry.replace( '‘', '\'' );
+            entry = entry.replace( '“', '"' );
+            entry = entry.replace( '”', '"' );
+            entry = entry.replace( '–', '-' );
+            entry = entry.replace( '—', '-' );
+            return entry;
+        } );
         return entries;
     }
 
