@@ -16,6 +16,7 @@ var currentChannel;
 var decorations = [];
 var highlightTimeout;
 
+var currentEditor;
 var currentVisibleEditors = [];
 
 function activate( context )
@@ -383,7 +384,10 @@ function activate( context )
 
     function hideOutputChannel( outputChannel )
     {
-        outputChannel.hide();
+        if( outputChannel._id !== currentEditor )
+        {
+            outputChannel.hide();
+        }
     }
 
     function setAutoClose( channelId )
@@ -767,6 +771,18 @@ function activate( context )
 
         context.subscriptions.push( vscode.window.onDidChangeActiveTextEditor( function( e )
         {
+            if( e && e.document && e.document.uri )
+            {
+                currentEditor = e.document.fileName;
+                Object.keys( outputChannels ).forEach( channelName =>
+                {
+                    if( outputChannels[ channelName ].outputChannel._id === e.document.fileName )
+                    {
+                        clearTimeout( outputChannels[ channelName ].autoHideTimer );
+                    }
+                } );
+            }
+
             var documents = vscode.workspace.textDocuments;
 
             documents.map( document =>
@@ -784,7 +800,7 @@ function activate( context )
 
                             if( provider.isChannelVisible( element ) === true )
                             {
-                                revealElement( element, true, true );
+                                revealElement( element, false, true );
                             }
 
                             setCurrentChannel( outputChannels[ channelName ].discordChannel );
