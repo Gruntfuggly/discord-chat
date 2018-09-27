@@ -635,7 +635,15 @@ function activate( context )
         {
             if( currentChannel )
             {
-                vscode.window.showInputBox( { prompt: "Post message to #" + currentChannel.name } ).then(
+                Object.keys( outputChannels ).forEach( channelName =>
+                {
+                    if( outputChannels[ channelName ].discordChannel === currentChannel )
+                    {
+                        clearTimeout( outputChannels[ channelName ].autoHideTimer );
+                    }
+                } );
+
+                vscode.window.showInputBox( { prompt: "Post message to " + utils.toChannelName( currentChannel ) } ).then(
                     function( message )
                     {
                         if( message )
