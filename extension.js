@@ -26,7 +26,7 @@ function activate( context )
     var provider = new treeView.DiscordChatDataProvider( context );
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
 
-    storage.initialize( generalOutputChannel );
+    storage.initialize( generalOutputChannel, context.workspaceState );
 
     function setCurrentChannel( channel )
     {
