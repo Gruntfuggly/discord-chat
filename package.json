@@ -240,21 +240,6 @@
                     "description": "Set this to false to disable the use of server icons",
                     "default": true
                 },
-                "discord-chat.lastRead": {
-                    "type": "object",
-                    "description": "Channel last read times (updated automatically)",
-                    "default": {}
-                },
-                "discord-chat.mutedChannels": {
-                    "type": "object",
-                    "description": "Channels which are locally muted (updated automatically)",
-                    "default": {}
-                },
-                "discord-chat.mutedServers": {
-                    "type": "object",
-                    "description": "Servers which are locally muted (updated automatically)",
-                    "default": {}
-                },
                 "discord-chat.syncToken": {
                     "type": "string",
                     "description": "A github token to allow sync via gist"
@@ -297,6 +282,18 @@
                     "type": "integer",
                     "description": "If no messages are received after this many seconds, close the output channel (Set to 0 to disable)",
                     "default": 0
+                },
+                "discord-chat.mutedChannels": {
+                    "type": "object",
+                    "markdownDescription": "*No longer required - do not use*"
+                },
+                "discord-chat.mutedServers": {
+                    "type": "object",
+                    "markdownDescription": "*No longer required - do not use*"
+                },
+                "discord-chat.lastRead": {
+                    "type": "object",
+                    "markdownDescription": "*No longer required - do not use*"
                 }
             }
         }
