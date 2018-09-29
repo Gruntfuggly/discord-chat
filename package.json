@@ -194,6 +194,11 @@
                 "command": "discord-chat.closeChannel",
                 "title": "Close Channel",
                 "category": "discord-chat"
+            },
+            {
+                "command":"discord-chat.resetChannelUnread",
+                "title":"Reset Channel Unread",
+                "category":"discord-chat"
             }
         ],
         "configuration": {

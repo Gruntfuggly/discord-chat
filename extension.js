@@ -479,11 +479,6 @@ function activate( context )
             updateSelectionState();
         }
 
-        context.subscriptions.push( discordChatExplorerView.onDidExpandElement( e => selectServer( e.element.server ) ) );
-        context.subscriptions.push( discordChatExplorerView.onDidCollapseElement( e => selectServer( e.element.server ) ) );
-        context.subscriptions.push( discordChatView.onDidExpandElement( e => selectServer( e.element.server ) ) );
-        context.subscriptions.push( discordChatView.onDidCollapseElement( e => selectServer( e.element.server ) ) );
-
         function updateViewSelection( e, view )
         {
             if( e.visible )
@@ -498,11 +493,6 @@ function activate( context )
             }
         }
 
-        context.subscriptions.push( discordChatExplorerView.onDidChangeVisibility( e => updateViewSelection( e, discordChatExplorerView ) ) );
-        context.subscriptions.push( discordChatView.onDidChangeVisibility( e => updateViewSelection( e, discordChatView ) ) );
-
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.refresh', refresh ) );
-
         function setShowUnreadOnly( enabled )
         {
             context.workspaceState.update( 'showUnreadOnly', enabled );
@@ -510,17 +500,23 @@ function activate( context )
             provider.refresh();
         }
 
+        context.subscriptions.push( discordChatExplorerView.onDidExpandElement( e => selectServer( e.element.server ) ) );
+        context.subscriptions.push( discordChatExplorerView.onDidCollapseElement( e => selectServer( e.element.server ) ) );
+        context.subscriptions.push( discordChatView.onDidExpandElement( e => selectServer( e.element.server ) ) );
+        context.subscriptions.push( discordChatView.onDidCollapseElement( e => selectServer( e.element.server ) ) );
+        context.subscriptions.push( discordChatExplorerView.onDidChangeVisibility( e => updateViewSelection( e, discordChatExplorerView ) ) );
+        context.subscriptions.push( discordChatView.onDidChangeVisibility( e => updateViewSelection( e, discordChatView ) ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.refresh', refresh ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', openChannel ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.showAll', function() { setShowUnreadOnly( false ); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.showUnreadOnly', function() { setShowUnreadOnly( true ); } ) );
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markAllRead', function()
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markAllRead', provider.markAllRead ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetSync', storage.resetSync ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetChannelUnread', function()
         {
-            provider.markAllRead();
-        } ) );
-
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetSync', function()
-        {
-            storage.reset();
+            storage.resetChannel( currentChannel );
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function()
@@ -777,8 +773,6 @@ function activate( context )
             } );
         }
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openChannel', openChannel ) );
-
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
         {
             if( e.focused )
@@ -966,8 +960,8 @@ function activate( context )
                     if( outputChannelName )
                     {
                         var hidden = isOutputChannelVisible( message.channel.id.toString() ) === false;
-
-                        if( hidden === true && vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoShow' ) === true )
+                        var focused = vscode.window.state.focused;
+                        if( hidden === true && focused === true && vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoShow' ) === true )
                         {
                             var outputChannelAlreadyVisible = false;
                             Object.keys( outputChannels ).map( function( id )
