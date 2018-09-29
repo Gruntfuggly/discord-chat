@@ -19,6 +19,8 @@ var highlightTimeout;
 var currentEditor;
 var currentVisibleEditors = [];
 
+var fishMessages = {};
+
 function activate( context )
 {
     const client = new discord.Client();
@@ -221,6 +223,45 @@ function activate( context )
             ( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideEmptyTree' ) === false ) || ( empty === false ) );
     }
 
+    function getUnreadMessages( channel, messages, before )
+    {
+        channel.fetchMessages( { limit: 100, before: before } ).then( function( newMessages )
+        {
+            var storedDate = storage.getLastRead( channel );
+            var channelLastRead = new Date( storedDate ? storedDate : 0 );
+            var unreadMessages = newMessages.filter( function( message )
+            {
+                return message.createdAt > channelLastRead;
+            } );
+
+            messages = messages ? messages.concat( unreadMessages.clone() ) : unreadMessages.clone();
+
+            if( unreadMessages.array().length > 0 )
+            {
+                getUnreadMessages( channel, messages, unreadMessages.last().id );
+            }
+            else
+            {
+                fishMessages[ channel.id.toString() ] = messages;
+                provider.setUnread( channel, messages );
+            }
+        } );
+    }
+
+    function setUnreadCounts( user, channels )
+    {
+        channels.map( function( channel )
+        {
+            if( utils.isReadableChannel( user, channel ) )
+            {
+                if( !channel.guild || storage.isChannelMuted( channel ) !== true )
+                {
+                    getUnreadMessages( channel );
+                }
+            }
+        }, this );
+    }
+
     function populateChannel( channel, done )
     {
         var entries = [];
@@ -235,46 +276,40 @@ function activate( context )
 
         if( storage.getChannelMuted( channel ) !== true )
         {
-            channel.fetchMessages( options ).then( function( messages )
+            if( fishMessages[ channel.id.toString() ].size > 0 )
             {
-                if( messages.size > 0 )
+                outputChannels[ channel.id.toString() ].lastMessage = fishMessages[ channel.id.toString() ].values().next().value;
+            }
+
+            var storedDate = storage.getLastRead( channel );
+            var channelLastRead = new Date( storedDate ? storedDate : 0 );
+            var lineAdded = false;
+
+            fishMessages[ channel.id.toString() ].map( function( message )
+            {
+                if( lineAdded === false && message.createdAt < channelLastRead )
                 {
-                    outputChannels[ channel.id.toString() ].lastMessage = messages.values().next().value;
+                    entries.push( "------------" );
+                    lineAdded = true;
                 }
 
-                var storedDate = storage.getLastRead( channel );
-                var channelLastRead = new Date( storedDate ? storedDate : 0 );
-                var lineAdded = false;
+                entries = entries.concat( formatMessage( message ) );
 
-                messages.map( function( message )
+                if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' ) !== true )
                 {
-                    if( lineAdded === false && message.createdAt < channelLastRead )
-                    {
-                        entries.push( "------------" );
-                        lineAdded = true;
-                    }
-
-                    entries = entries.concat( formatMessage( message ) );
-
-                    if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' ) !== true )
-                    {
-                        entries.push( "" );
-                    }
-                } );
-
-                entries.reverse().map( function( entry )
-                {
-                    outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
-                } );
-
-                provider.setCurrentChannel( channel );
-                provider.markChannelRead( channel );
-
-                done();
-            } ).catch( function( e )
-            {
-                console.error( e );
+                    entries.push( "" );
+                }
             } );
+
+            entries.reverse().map( function( entry )
+            {
+                outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
+            } );
+
+            provider.setCurrentChannel( channel );
+            provider.markChannelRead( channel );
+
+            done();
         }
     }
 
@@ -292,6 +327,9 @@ function activate( context )
                 {
                     provider.setIcons( icons );
                     provider.populate( client.user, client.channels );
+
+                    setUnreadCounts( client.user, client.channels );
+
                     provider.refresh();
                 }
             }
@@ -332,6 +370,7 @@ function activate( context )
         }
 
         provider.populate( client.user, client.channels );
+        setUnreadCounts( client.user, client.channels );
         provider.refresh();
 
         storage.sync( onSync )
@@ -512,12 +551,9 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.showAll', function() { setShowUnreadOnly( false ); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.showUnreadOnly', function() { setShowUnreadOnly( true ); } ) );
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markAllRead', provider.markAllRead ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetSync', storage.resetSync ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetChannelUnread', function()
-        {
-            storage.resetChannel( currentChannel );
-        } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markAllRead', function() { provider.markAllRead(); } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetSync', function() { storage.resetSync(); } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetChannelUnread', function() { storage.resetChannel( currentChannel ); } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function()
         {
