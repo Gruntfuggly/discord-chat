@@ -2,8 +2,6 @@ var vscode = require( 'vscode' );
 var gistore = require( 'gistore' );
 var utils = require( './utils' );
 
-var lastSync = undefined;
-
 var generalOutputChannel;
 var state;
 var backupTimer;
@@ -18,7 +16,7 @@ function sync( callback )
 
             generalOutputChannel.appendLine( "Sync at " + now.toISOString() );
 
-            if( lastSync === undefined || data.discordSync.lastSync > lastSync )
+            if( state.get( 'lastSync' ) === undefined || data.discordSync.lastSync > state.get( 'lastSync' ) )
             {
                 state.update( 'mutedServers', data.discordSync.mutedServers );
                 state.update( 'mutedChannels', data.discordSync.mutedChannels );
@@ -190,11 +188,11 @@ function resetSync()
     if( gistore.token )
     {
         var now = new Date();
-
         gistore.backUp( {
             discordSync: {
                 mutedServers: {},
                 mutedChannels: {},
+                lastRead: {},
                 lastSync: now
             }
         } ).then( function()
@@ -214,6 +212,14 @@ function resetState()
     state.update( 'mutedChannels', {} );
 }
 
+function resetChannel( channel )
+{
+    var lastRead = state.get( 'lastRead' );
+    lastRead[ channel.id.toString() ] = undefined;
+    state.update( 'lastRead', lastRead );
+    backup();
+}
+
 module.exports.initialize = initialize;
 
 module.exports.setLastRead = setLastRead;
@@ -230,3 +236,4 @@ module.exports.initializeSync = initializeSync;
 module.exports.sync = sync;
 module.exports.resetSync = resetSync;
 module.exports.resetState = resetState;
+module.exports.resetChannel = resetChannel;
