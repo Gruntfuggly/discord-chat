@@ -18,12 +18,12 @@ const GROUP = "group";
 function findServer( e )
 {
     return e.type === SERVER && e.id.toString() === this.toString();
-};
+}
 
 function findChannel( e )
 {
     return e.type === CHANNEL && e.id.toString() === this.toString();
-};
+}
 
 function isMuted( element )
 {
@@ -221,28 +221,6 @@ class DiscordChatDataProvider
         this._icons = icons;
     }
 
-    countUnreadMessages( provider, channel, messages, before )
-    {
-        channel.fetchMessages( { limit: 100, before: before } ).then( function( newMessages )
-        {
-            var storedDate = storage.getLastRead( channel );
-            var channelLastRead = new Date( storedDate ? storedDate : 0 );
-            var unreadMessages = newMessages.filter( function( message )
-            {
-                return message.createdAt > channelLastRead;
-            } );
-            messages = messages ? messages.concat( unreadMessages.clone() ) : unreadMessages.clone();
-            if( unreadMessages.array().length > 0 )
-            {
-                provider.countUnreadMessages( provider, channel, messages, unreadMessages.last().id );
-            }
-            else
-            {
-                provider.setUnread( channel, messages );
-            }
-        } );
-    }
-
     populate( user, channels )
     {
         channels.map( function( channel )
@@ -296,11 +274,6 @@ class DiscordChatDataProvider
                             utils.fetchIcon( channel.recipient.avatarURL, filename, function() { } );
                         }
                     }
-                }
-
-                if( !channel.guild || storage.isChannelMuted( channel ) !== true )
-                {
-                    this.countUnreadMessages( this, channel );
                 }
             }
         }, this );
@@ -360,7 +333,7 @@ class DiscordChatDataProvider
         }
     }
 
-    markChannelRead( channel, inhibitUpdate )
+    markChannelRead( channel )
     {
         var channelElement = this.getChannelElement( channel );
         if( channelElement )
@@ -378,7 +351,7 @@ class DiscordChatDataProvider
         {
             serverElement.channels.map( channelElement =>
             {
-                this.markChannelRead( channelElement.channel, false );
+                this.markChannelRead( channelElement.channel );
             } );
         }, this );
         this.updateStatusBar();
@@ -391,8 +364,8 @@ class DiscordChatDataProvider
         {
             serverElement.channels.map( channelElement =>
             {
-                this.markChannelRead( channelElement.channel, false );
-            } );
+                this.markChannelRead( channelElement.channel );
+            }, this );
             serverElement.unreadCount = 0;
             this._onDidChangeTreeData.fire( serverElement );
             this.updateStatusBar();
