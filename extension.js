@@ -9,6 +9,7 @@ var vscode = require( 'vscode' );
 var storage = require( './storage' );
 var treeView = require( './dataProvider' );
 var utils = require( './utils' );
+var chats = require( './chats' );
 
 var outputChannels = {};
 var currentServer;
@@ -20,6 +21,8 @@ var currentEditor;
 var currentVisibleEditors = [];
 
 var channelMessages = {};
+
+var oldMessageMask = vscode.window.createTextEditorDecorationType( { textDecoration: 'none; opacity: 0.5' } );
 
 function activate( context )
 {
@@ -124,6 +127,11 @@ function activate( context )
                     entries.push( header + " attached " + attachment.url );
                 } );
             }
+
+            if( compact !== true && short !== true )
+            {
+                entries.push( "" );
+            }
         }
 
         entries = entries.map( function( entry )
@@ -223,7 +231,7 @@ function activate( context )
             ( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideEmptyTree' ) === false ) || ( empty === false ) );
     }
 
-    function getUnreadMessages( channel, messages, before )
+    function getUnreadMessages( done, channel, messages, before )
     {
         channel.fetchMessages( { limit: 100, before: before } ).then( function( newMessages )
         {
@@ -233,23 +241,23 @@ function activate( context )
             {
                 return message.createdAt > channelLastRead;
             } );
-            // console.log( ( channel.name ? channel.name : "" ) + " got " + unreadMessages.size + " new" );
 
             messages = messages ? messages.concat( unreadMessages.clone() ) : unreadMessages.clone();
 
             if( unreadMessages.array().length > 0 )
             {
-                getUnreadMessages( channel, messages, unreadMessages.last().id );
+                getUnreadMessages( done, channel, messages, unreadMessages.last().id );
             }
             else
             {
                 channelMessages[ channel.id.toString() ] = messages;
                 provider.setUnread( channel, messages );
+                done();
             }
         } );
     }
 
-    function populateChannelMesssges( user, channels )
+    function populateChannelMessages( user, channels )
     {
         channels.map( function( channel )
         {
@@ -258,55 +266,70 @@ function activate( context )
                 // TODO populate if muted?
                 if( !channel.guild || storage.isChannelMuted( channel ) !== true )
                 {
-                    getUnreadMessages( channel );
-                }
+                    getUnreadMessages( function()
+                    {
+                        var channelId = channel.id.toString();
 
-                var messages = channelMessages[ channel.id.toString() ];
-                var before = messages && messages.size > 0 ? messages.last().id : undefined;
-                channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).get( 'history' ), before: before } ).then( function( oldMessages )
-                {
-                    // console.log( ( channel.name ? channel.name : "" ) + " got " + oldMessages.size + " old" );
-                    channelMessages[ channel.id.toString() ] = messages ? messages.concat( oldMessages.clone() ) : oldMessages.clone();
-                } );
+                        var messages = channelMessages[ channel.id.toString() ];
+                        var before = messages && messages.size > 0 ? messages.last().id : undefined;
+
+                        channel.fetchMessages( { limit: vscode.workspace.getConfiguration( 'discord-chat' ).get( 'history' ), before: before } ).then( function( oldMessages )
+                        {
+                            channelMessages[ channelId ] = messages ? messages.concat( oldMessages.clone() ) : oldMessages.clone();
+
+                            channelMessages[ channelId ].map( function( message )
+                            {
+                                chats.addMessage( channelId, formatMessage( message ), message.createdAt );
+                            } );
+                        } );
+                    }, channel );
+                }
             }
         }, this );
     }
 
+    function dimOldMessages()
+    {
+        var visibleEditors = vscode.window.visibleTextEditors;
+
+        visibleEditors.map( editor =>
+        {
+            if( editor.document && editor.document.uri && editor.document.uri.scheme === 'output' )
+            {
+                Object.keys( outputChannels ).forEach( channelId =>
+                {
+                    if( outputChannels[ channelId ].outputChannel._id === editor.document.fileName )
+                    {
+                        var length = chats.getReadMessages( channelId ).reduce( ( total, value ) => total += ( value.length + 1 ), 0 );
+
+                        const fullRange = new vscode.Range(
+                            editor.document.positionAt( 0 ),
+                            editor.document.positionAt( length - 1 )
+                        )
+
+                        editor.setDecorations( oldMessageMask, [ fullRange ] );
+                    }
+                } );
+            }
+        } );
+    }
+
     function populateChannel( channel, done )
     {
-        var entries = [];
-        outputChannels[ channel.id.toString() ].outputChannel.clear();
+        var id = channel.id.toString();
+
+        outputChannels[ id ].outputChannel.clear();
 
         if( storage.getChannelMuted( channel ) !== true )
         {
-            if( channelMessages[ channel.id.toString() ].size > 0 )
+            chats.getReadMessages( id ).reverse().map( function( entry )
             {
-                outputChannels[ channel.id.toString() ].lastMessage = channelMessages[ channel.id.toString() ].values().next().value;
-            }
-
-            var storedDate = storage.getLastRead( channel );
-            var channelLastRead = new Date( storedDate ? storedDate : 0 );
-            var lineAdded = false;
-
-            channelMessages[ channel.id.toString() ].map( function( message )
-            {
-                if( lineAdded === false && message.createdAt < channelLastRead )
-                {
-                    entries.push( "------------" );
-                    lineAdded = true;
-                }
-
-                entries = entries.concat( formatMessage( message ) );
-
-                if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' ) !== true )
-                {
-                    entries.push( "" );
-                }
+                outputChannels[ id ].outputChannel.appendLine( entry.text );
             } );
 
-            entries.reverse().map( function( entry )
+            chats.getUnreadMessages( id ).reverse().map( function( entry )
             {
-                outputChannels[ channel.id.toString() ].outputChannel.appendLine( entry );
+                outputChannels[ id ].outputChannel.appendLine( entry.text );
             } );
 
             provider.setCurrentChannel( channel );
@@ -331,7 +354,7 @@ function activate( context )
                     provider.setIcons( icons );
                     provider.populate( client.user, client.channels );
 
-                    populateChannelMesssges( client.user, client.channels );
+                    populateChannelMessages( client.user, client.channels );
 
                     provider.refresh();
                 }
@@ -367,7 +390,7 @@ function activate( context )
                 else
                 {
                     provider.populate( client.user, client.channels );
-                    populateChannelMesssges( client.user, client.channels );
+                    populateChannelMessages( client.user, client.channels );
 
                     provider.refresh();
                 }
@@ -430,6 +453,8 @@ function activate( context )
                 }
             }
         } );
+
+        dimOldMessages();
     }
 
     function hideOutputChannel( outputChannel )
@@ -461,12 +486,9 @@ function activate( context )
         var outputChannel = outputChannels[ channelId ].outputChannel;
         if( outputChannel )
         {
-            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' ) !== true )
-            {
-                outputChannel.appendLine( "" );
-            }
             formatMessage( message ).map( entry =>
             {
+                newEntries[ channelId ] = entry;
                 outputChannel.appendLine( entry );
             } );
 
@@ -500,6 +522,18 @@ function activate( context )
                 {
                     vscode.window.showInformationMessage( formatMessage( message, true ).join() );
                 }
+            }
+
+            var channelId = message.channel.id.toString();
+            outputChannels[ channelId ].lastMessage = message;
+            var outputChannel = outputChannels[ channelId ].outputChannel;
+            if( outputChannel )
+            {
+                formatMessage( message ).map( entry =>
+                {
+                    newEntries[ channelId ] = entry;
+                    outputChannel.appendLine( entry );
+                } );
             }
 
             provider.update( message );
@@ -965,7 +999,7 @@ function activate( context )
 
         client.on( 'ready', () =>
         {
-            generalOutputChannel.appendLine( `Logged in as ${client.user.tag}!` );
+            generalOutputChannel.appendLine( "Logged in as " + client.user.tag );
             refresh();
         } );
 
