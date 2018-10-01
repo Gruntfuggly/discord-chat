@@ -7,16 +7,20 @@ function addMessage( id, message, timeOfMessage )
         messages[ id ] = [];
     }
 
-    messages[ id ].push( { text: message, timeOfMessage: timeOfMessage, read: false } );
+    message.map( function( line )
+    {
+        messages[ id ].push( { text: line, timeOfMessage: timeOfMessage, read: false } );
+    } );
 }
 
-function chatRead( id, time )
+function chatRead( id )
 {
     if( messages[ id ] )
     {
-        messages[ id ].foreach( function( message )
+        var now = new Date();
+        messages[ id ].forEach( function( message )
         {
-            message.read = timeOfMessage < time;
+            message.read = message.timeOfMessage < now;
         } );
     }
 }

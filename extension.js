@@ -300,7 +300,8 @@ function activate( context )
                 {
                     if( outputChannels[ channelId ].outputChannel._id === editor.document.fileName )
                     {
-                        var length = chats.getReadMessages( channelId ).reduce( ( total, value ) => total += ( value.length + 1 ), 0 );
+                        var rm = chats.getReadMessages( channelId );
+                        var length = chats.getReadMessages( channelId ).reduce( ( total, value ) => total += ( value.text.length + 1 ), 0 );
 
                         const fullRange = new vscode.Range(
                             editor.document.positionAt( 0 ),
@@ -334,6 +335,7 @@ function activate( context )
 
             provider.setCurrentChannel( channel );
             provider.markChannelRead( channel );
+            chats.chatRead( id );
 
             done();
         }
@@ -497,6 +499,7 @@ function activate( context )
             triggerHighlight();
         }
         provider.markChannelRead( message.channel );
+        chats.chatRead( id );
     }
 
     function register()
