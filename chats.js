@@ -13,14 +13,13 @@ function addMessage( id, message, timeOfMessage )
     } );
 }
 
-function chatRead( id )
+function chatRead( id, time )
 {
     if( messages[ id ] )
     {
-        var now = new Date();
         messages[ id ].forEach( function( message )
         {
-            message.read = message.timeOfMessage < now;
+            message.read = message.timeOfMessage < time;
         } );
     }
 }

@@ -277,7 +277,7 @@ function activate( context )
                         {
                             channelMessages[ channelId ] = messages ? messages.concat( oldMessages.clone() ) : oldMessages.clone();
 
-                            channelMessages[ channelId ].map( function( message )
+                            channelMessages[ channelId ].array().reverse().map( function( message )
                             {
                                 chats.addMessage( channelId, formatMessage( message ), message.createdAt );
                             } );
@@ -315,27 +315,42 @@ function activate( context )
         } );
     }
 
-    function populateChannel( channel, done )
+    function refreshChannel( channel )
     {
-        var id = channel.id.toString();
+        var channelId = channel.id.toString();
 
-        outputChannels[ id ].outputChannel.clear();
+        outputChannels[ channelId ].outputChannel.clear();
 
         if( storage.getChannelMuted( channel ) !== true )
         {
-            chats.getReadMessages( id ).reverse().map( function( entry )
+            chats.getReadMessages( channelId ).map( function( entry )
             {
-                outputChannels[ id ].outputChannel.appendLine( entry.text );
+                outputChannels[ channelId ].outputChannel.appendLine( entry.text );
             } );
 
-            chats.getUnreadMessages( id ).reverse().map( function( entry )
+            chats.getUnreadMessages( channelId ).map( function( entry )
             {
-                outputChannels[ id ].outputChannel.appendLine( entry.text );
+                outputChannels[ channelId ].outputChannel.appendLine( entry.text );
             } );
+        }
+    }
+
+    function populateChannel( channel, done )
+    {
+        var channelId = channel.id.toString();
+
+        outputChannels[ channelId ].outputChannel.clear();
+
+        if( storage.getChannelMuted( channel ) !== true )
+        {
+            refreshChannel( channel );
+
+            var storedDate = storage.getLastRead( channel );
+            var channelLastRead = new Date( storedDate ? storedDate : 0 );
 
             provider.setCurrentChannel( channel );
             provider.markChannelRead( channel );
-            chats.chatRead( id );
+            chats.chatRead( channelId, channelLastRead );
 
             done();
         }
@@ -481,25 +496,27 @@ function activate( context )
         }
     }
 
-    function updateCurrentChannel( message )
+    function addMessageToChannel( message )
     {
         var channelId = message.channel.id.toString();
-        outputChannels[ channelId ].lastMessage = message;
-        var outputChannel = outputChannels[ channelId ].outputChannel;
+        var outputChannel = outputChannels[ channelId ] && outputChannels[ channelId ].outputChannel;
         if( outputChannel )
         {
-            formatMessage( message ).map( entry =>
+            var formattedMessage = formatMessage( message );
+            chats.addMessage( channelId, formattedMessage, message.createdAt );
+            formattedMessage.map( function( line )
             {
-                newEntries[ channelId ] = entry;
-                outputChannel.appendLine( entry );
+                outputChannel.appendLine( line );
             } );
-
-            setAutoClose( channelId );
-
-            triggerHighlight();
         }
+    }
+
+    function updateCurrentChannel( message )
+    {
+        addMessageToChannel( message );
+        setAutoClose( message.channel.id.toString() );
+        triggerHighlight();
         provider.markChannelRead( message.channel );
-        chats.chatRead( id );
     }
 
     function register()
@@ -527,17 +544,7 @@ function activate( context )
                 }
             }
 
-            var channelId = message.channel.id.toString();
-            outputChannels[ channelId ].lastMessage = message;
-            var outputChannel = outputChannels[ channelId ].outputChannel;
-            if( outputChannel )
-            {
-                formatMessage( message ).map( entry =>
-                {
-                    newEntries[ channelId ] = entry;
-                    outputChannel.appendLine( entry );
-                } );
-            }
+            addMessageToChannel( message );
 
             provider.update( message );
 
@@ -830,6 +837,13 @@ function activate( context )
                     discordChannel: channel,
                 };
                 context.subscriptions.push( outputChannel );
+
+                populateChannel( channel, function()
+                {
+                    // setCurrentChannel( channel );
+                    // updateSelectionState();
+                    // triggerHighlight();
+                } );
             }
             else
             {
@@ -838,14 +852,12 @@ function activate( context )
 
             outputChannel.show( true );
 
+            setCurrentChannel( channel );
+            updateSelectionState();
+            triggerHighlight();
+
             setAutoClose( channelId );
 
-            populateChannel( channel, function()
-            {
-                setCurrentChannel( channel );
-                updateSelectionState();
-                triggerHighlight();
-            } );
         }
 
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
@@ -957,7 +969,6 @@ function activate( context )
                 Object.keys( outputChannels ).map( outputChannelName =>
                 {
                     outputChannels[ outputChannelName ].outputChannel.clear();
-                    outputChannels[ outputChannelName ].lastMessage = undefined;
                     populateChannel( outputChannels[ outputChannelName ].discordChannel, triggerHighlight );
                 } );
             }
