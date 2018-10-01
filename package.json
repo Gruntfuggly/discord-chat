@@ -153,8 +153,8 @@
                 "title": "Show All",
                 "category": "discord-chat",
                 "icon": {
-                    "dark": "resources/icons/dark/read.svg",
-                    "light": "resources/icons/light/read.svg"
+                    "dark": "resources/icons/dark/unread.svg",
+                    "light": "resources/icons/light/unread.svg"
                 }
             },
             {
@@ -162,8 +162,8 @@
                 "title": "Show Unread Only",
                 "category": "discord-chat",
                 "icon": {
-                    "dark": "resources/icons/dark/unread.svg",
-                    "light": "resources/icons/light/unread.svg"
+                    "dark": "resources/icons/dark/read.svg",
+                    "light": "resources/icons/light/read.svg"
                 }
             },
             {
