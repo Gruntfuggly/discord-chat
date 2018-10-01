@@ -6,6 +6,7 @@ var lastSync = undefined;
 
 var generalOutputChannel;
 var state;
+var backupTimer;
 
 function sync( callback )
 {
@@ -124,8 +125,16 @@ function backup()
         } ).catch( function( error )
         {
             console.error( "backup failed: " + error );
+            triggerBackup();
         } );
     }
+}
+
+function triggerBackup()
+{
+    generalOutputChannel.appendLine( "Backing up in 1 second..." );
+    clearTimeout( backupTimer );
+    backupTimer = setTimeout( backup, 1000 );
 }
 
 function setLastRead( channel )
@@ -134,7 +143,7 @@ function setLastRead( channel )
     var lastRead = state.get( 'lastRead' );
     lastRead[ channel.id.toString() ] = now;
     state.update( 'lastRead', lastRead );
-    backup();
+    triggerBackup();
     generalOutputChannel.appendLine( "Channel " + utils.toChannelName( channel ) + " (" + channel.id.toString() + ") read at " + now );
 }
 
@@ -148,7 +157,7 @@ function setServerMuted( server, muted )
     var mutedServers = state.get( 'mutedServers' );
     mutedServers[ server.id.toString() ] = muted;
     state.update( 'mutedServers', mutedServers );
-    backup();
+    triggerBackup();
     generalOutputChannel.appendLine( "Server " + server.name + ( muted ? " muted" : " unmuted" ) );
 }
 
@@ -162,7 +171,7 @@ function setChannelMuted( channel, muted )
     var mutedChannels = state.get( 'mutedChannels' );
     mutedChannels[ channel.id.toString() ] = muted;
     state.update( 'mutedChannels', mutedChannels );
-    backup();
+    triggerBackup();
     generalOutputChannel.appendLine( "Channel " + utils.toChannelName( channel ) + ( muted ? " muted" : " unmuted" ) );
 }
 
