@@ -139,7 +139,8 @@ function getReadMessages( id )
         return messages[ id ].filter( function( message )
         {
             return message.read === true;
-        } );
+        } ).map( message => message.text );
+
     }
     return [];
 }
@@ -151,7 +152,7 @@ function getUnreadMessages( id )
         return messages[ id ].filter( function( message )
         {
             return message.read === false;
-        } );
+        } ).map( message => message.text );
     }
     return [];
 }

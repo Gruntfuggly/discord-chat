@@ -203,12 +203,12 @@ function activate( context )
         {
             chats.getReadMessages( channelId ).map( function( entry )
             {
-                outputChannels[ channelId ].outputChannel.appendLine( entry.text );
+                outputChannels[ channelId ].outputChannel.appendLine( entry );
             } );
 
             chats.getUnreadMessages( channelId ).map( function( entry )
             {
-                outputChannels[ channelId ].outputChannel.appendLine( entry.text );
+                outputChannels[ channelId ].outputChannel.appendLine( entry );
             } );
         }
     }
@@ -355,7 +355,7 @@ function activate( context )
                     if( outputChannels[ channelId ].outputChannel._id === editor.document.fileName )
                     {
                         var rm = chats.getReadMessages( channelId );
-                        var length = chats.getReadMessages( channelId ).reduce( ( total, value ) => total += ( value.text.length + 1 ), 0 );
+                        var length = chats.getReadMessages( channelId ).reduce( ( total, value ) => total += ( value.length + 1 ), 0 );
 
                         const fullRange = new vscode.Range(
                             editor.document.positionAt( 0 ),
