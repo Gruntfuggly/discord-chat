@@ -7,12 +7,12 @@ function sanitizeUnicode( entries )
 {
     entries = entries.map( function( entry )
     {
-        entry = entry.replace( '’', '\'' );
-        entry = entry.replace( '‘', '\'' );
-        entry = entry.replace( '“', '"' );
-        entry = entry.replace( '”', '"' );
-        entry = entry.replace( '–', '-' );
-        entry = entry.replace( '—', '-' );
+        entry = entry.replace( /’/g, '\'' );
+        entry = entry.replace( /‘/g, '\'' );
+        entry = entry.replace( /“/g, '"' );
+        entry = entry.replace( /”/g, '"' );
+        entry = entry.replace( /–/g, '-' );
+        entry = entry.replace( /—/g, '-' );
         return entry;
     } );
     return entries;
