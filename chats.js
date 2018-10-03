@@ -97,6 +97,10 @@ function formatMessage( message, compact, short )
             } );
         }
 
+        if( message.reactions )
+        {
+        }
+
         if( compact !== true && short !== true )
         {
             entries.push( "" );
