@@ -11,7 +11,6 @@ var utils = require( './utils' );
 var chats = require( './chats' );
 
 var outputChannels = {};
-var currentServer;
 var decorations = [];
 
 var currentEditor;
@@ -71,15 +70,6 @@ function activate( context )
             } );
         }
         return result;
-    }
-
-    function setCurrentChannel( channel )
-    {
-        // currentChannel = channel;
-        provider.setCurrentChannel( channel );
-        updateSelectionState();
-
-        // selectedChannel();
     }
 
     function getDecoration( tag )
@@ -143,13 +133,14 @@ function activate( context )
     function updateSelectionState()
     {
         var sc = selectedChannel();
+        var ss = selectedServer();
         vscode.commands.executeCommand( 'setContext', 'discord-channel-selected', sc !== undefined );
-        console.log( "CC:" + sc + " CS:" + currentServer );
-        console.log( "server selected: " + ( currentServer !== undefined && sc === undefined ) );
-        vscode.commands.executeCommand( 'setContext', 'discord-server-selected', currentServer !== undefined && sc === undefined );
-        if( currentServer && sc === undefined )
+        console.log( "CC:" + sc + " CS:" + ss );
+        console.log( "server selected: " + ( ss !== undefined && sc === undefined ) );
+        vscode.commands.executeCommand( 'setContext', 'discord-server-selected', ss !== undefined && sc === undefined );
+        if( ss && sc === undefined )
         {
-            var serverElement = provider.getServerElement( currentServer );
+            var serverElement = provider.getServerElement( ss );
             vscode.commands.executeCommand( 'setContext', 'discord-server-has-unread', serverElement && serverElement.unreadCount > 0 );
         }
         else
@@ -163,9 +154,9 @@ function activate( context )
             canUnmute = storage.getChannelMuted( sc ) === true;
             canMute = !canUnmute;
         }
-        else if( currentServer )
+        else if( ss )
         {
-            canUnmute = storage.getServerMuted( currentServer ) === true;
+            canUnmute = storage.getServerMuted( ss ) === true;
             canMute = !canUnmute;
         }
         vscode.commands.executeCommand( 'setContext', 'discord-can-mute', canMute );
@@ -231,7 +222,7 @@ function activate( context )
         }, this );
     }
 
-    function refreshChannel( channel )
+    function populateChannel( channel )
     {
         var channelId = channel.id.toString();
 
@@ -249,20 +240,10 @@ function activate( context )
                 outputChannels[ channelId ].outputChannel.appendLine( entry );
             } );
         }
-    }
-
-    function populateChannel( channel )
-    {
-        var channelId = channel.id.toString();
-
-        outputChannels[ channelId ].outputChannel.clear();
-
-        refreshChannel( channel );
 
         var storedDate = storage.getLastRead( channel );
         var channelLastRead = new Date( storedDate ? storedDate : 0 );
 
-        provider.setCurrentChannel( channel );
         provider.markChannelRead( channel );
         chats.chatRead( channelId, channelLastRead );
     }
@@ -463,10 +444,6 @@ function activate( context )
         {
             return;
         }
-
-        currentServer = server;
-        setCurrentChannel( undefined );
-        updateSelectionState();
     }
 
     function revealElement( element, focus, select )
@@ -505,8 +482,9 @@ function activate( context )
         if( e.visible )
         {
             var sc = selectedChannel();
+            var ss = selectedServer();
             var element = sc ? provider.getChannelElement( sc ) :
-                ( currentServer ? provider.getServerElement( currentServer ) : undefined );
+                ( ss ? provider.getServerElement( ss ) : undefined );
 
             if( element )
             {
@@ -517,17 +495,22 @@ function activate( context )
 
     function selectionChanged()
     {
-        console.log( "Selected channel:" + selectedChannel() );
-        console.log( "Selected server:" + selectedServer() );
+        var sc = selectedChannel();
 
-        if( selectedChannel() )
+        if( sc )
         {
-            openChannel( selectedChannel() )
+            openChannel( sc )
         }
-        else if( selectedServer() )
+        else
         {
-            selectServer( selectedServer() );
+            // TODO hide output channel?
+            if( selectedServer() )
+            {
+                selectServer( selectedServer() );
+            }
         }
+        provider.setCurrentChannel( sc );
+        updateSelectionState();
     }
 
     function setShowUnreadOnly( enabled )
@@ -543,9 +526,6 @@ function activate( context )
         {
             return;
         }
-
-        console.log( "OPEN CHANNEL" );
-        currentServer = channel.guild;
 
         var channelId = channel.id.toString();
         var outputChannel = outputChannels[ channelId ];
@@ -569,8 +549,6 @@ function activate( context )
         outputChannel.show( true );
 
         provider.markChannelRead( channel );
-
-        setCurrentChannel( channel );
     }
 
     function register()
@@ -604,23 +582,25 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function()
         {
-            if( currentServer )
+            var ss = selectedServer();
+            if( ss )
             {
-                provider.markServerRead( currentServer );
+                provider.markServerRead( ss );
                 updateSelectionState();
             }
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.createChannel', function()
         {
-            if( currentServer )
+            var ss = selectedServer();
+            if( ss )
             {
                 vscode.window.showInputBox( { prompt: "Channel name:" } ).then(
                     function( name )
                     {
                         if( name )
                         {
-                            currentServer.createChannel( name, 'text' ).then( function( channel )
+                            ss.createChannel( name, 'text' ).then( function( channel )
                             {
                                 refresh();
                                 var element = provider.getChannelElement( channel );
@@ -653,7 +633,8 @@ function activate( context )
                         sc.delete().then( function()
                         {
                             outputChannels[ sc.id.toString() ].outputChannel.dispose();
-                            setCurrentChannel( undefined );
+                            // setCurrentChannel( undefined );
+                            // TODO clear selection
                             refresh();
                         } ).catch( e =>
                         {
@@ -678,7 +659,8 @@ function activate( context )
                 {
                     outputChannels[ sc.id.toString() ].outputChannel.dispose();
                     delete outputChannels[ sc.id.toString() ];
-                    setCurrentChannel( undefined );
+                    // setCurrentChannel( undefined );
+                    // TODO clear selection
                 }
             }
             else
@@ -690,13 +672,14 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.leaveServer', function()
         {
-            if( currentServer )
+            var ss = selectedServer();
+            if( ss )
             {
                 vscode.window.showInformationMessage( "discord-chat: Are you sure?", "Yes", "No" ).then( response =>
                 {
                     if( response === "Yes" )
                     {
-                        currentServer.channels.map( function( channel )
+                        ss.channels.map( function( channel )
                         {
                             if( outputChannels[ channel.id.toString() ] )
                             {
@@ -704,7 +687,7 @@ function activate( context )
                             }
                         } );
 
-                        currentServer.leave().then( function()
+                        ss.leave().then( function()
                         {
                             refresh();
                         }
@@ -790,6 +773,7 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.mute', function()
         {
             var sc = selectedChannel();
+            var ss = selectedServer();
             if( screen )
             {
                 if( sc.type === 'text' )
@@ -801,9 +785,9 @@ function activate( context )
                     vscode.window.showInformationMessage( "discord-chat: direct message channels can't be muted" );
                 }
             }
-            else if( currentServer )
+            else if( ss )
             {
-                provider.setServerMuted( currentServer, true );
+                provider.setServerMuted( ss, true );
             }
 
             updateSelectionState();
@@ -812,13 +796,14 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.unmute', function()
         {
             var sc = selectedChannel();
+            var ss = selectedServer();
             if( sc )
             {
                 provider.setChannelMuted( sc, undefined );
             }
-            else if( currentServer )
+            else if( ss )
             {
-                provider.setServerMuted( currentServer, undefined );
+                provider.setServerMuted( ss, undefined );
             }
 
             updateSelectionState();
@@ -841,57 +826,31 @@ function activate( context )
 
         context.subscriptions.push( vscode.window.onDidChangeVisibleTextEditors( function( editors )
         {
+            console.log( "onDidChangeVisibleTextEditors" );
+
             currentVisibleEditors = editors;
 
-            var currentOutputChannelFilename;
-
-            // TODO set server unselected even if no channel selected?
             var sc = selectedChannel();
 
-            if( sc !== undefined )
+            var outputChannelVisible = false;
+            currentVisibleEditors.map( function( editor )
             {
                 Object.keys( outputChannels ).map( function( id )
                 {
-                    if( id === sc.id.toString() )
+                    if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
                     {
-                        currentOutputChannelFilename = outputChannels[ id ].outputChannel._id;
-                    }
-                } );
-
-                if( currentOutputChannelFilename )
-                {
-                    var currentOutputChannelVisible = false;
-                    currentVisibleEditors.map( function( editor )
-                    {
-                        if( editor.document && editor.document.fileName === currentOutputChannelFilename )
-                        {
-                            currentOutputChannelVisible = true;
-                        }
-                    } );
-
-                    if( currentOutputChannelVisible === false )
-                    {
-                        setCurrentChannel( undefined );
-                        currentServer = undefined;
+                        outptuChannelVisible = true;
+                        // TODO reveal
                         updateSelectionState();
+                        decorateOutputChannel();
+                        setAutoClose( id );
                     }
-                }
-            }
-            else
-            {
-                currentVisibleEditors.map( function( editor )
-                {
-                    Object.keys( outputChannels ).map( function( id )
-                    {
-                        if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
-                        {
-                            setCurrentChannel( outputChannels[ id ].discordChannel );
-                            updateSelectionState();
-                            decorateOutputChannel();
-                            setAutoClose( id );
-                        }
-                    } );
                 } );
+            } );
+
+            if( outputChannelVisible === false )
+            {
+                // TODO clear selection?
             }
         } ) );
 
