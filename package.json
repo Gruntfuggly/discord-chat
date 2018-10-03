@@ -196,9 +196,9 @@
                 "category": "discord-chat"
             },
             {
-                "command":"discord-chat.resetChannelUnread",
-                "title":"Reset Channel Unread",
-                "category":"discord-chat"
+                "command": "discord-chat.resetChannelUnread",
+                "title": "Reset Channel Unread",
+                "category": "discord-chat"
             }
         ],
         "configuration": {
@@ -224,11 +224,6 @@
                     ],
                     "description": "When to show popup notifications",
                     "default": "whenHidden"
-                },
-                "discord-chat.highlightDelay": {
-                    "type": "integer",
-                    "description": "Number of milliseconds before highlighting user names after an update",
-                    "default": 500
                 },
                 "discord-chat.history": {
                     "type": "integer",
