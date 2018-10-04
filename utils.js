@@ -190,6 +190,30 @@ function urlExt( url )
     return path.extname( filePath );
 }
 
+
+function setVisibleEditors( editors )
+{
+    visibleEditors = editors;
+}
+
+function outputChannelVisible()
+{
+    currentVisibleEditors.map( function( editor )
+    {
+        Object.keys( outputChannels ).map( function( id )
+        {
+            if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+            {
+                outptuChannelVisible = true;
+                // TODO reveal
+                updateSelectionState();
+                decorateOutputChannel();
+                setAutoClose( id );
+            }
+        } );
+    } );
+}
+
 module.exports.initialize = initialize;
 module.exports.log = log;
 module.exports.toParentId = toParentId;
@@ -202,3 +226,4 @@ module.exports.isReadableChannel = isReadableChannel;
 module.exports.directMessagesServerName = directMessagesServerName;
 module.exports.fetchIcon = fetchIcon;
 module.exports.urlExt = urlExt;
+module.exports.setVisibleEditors = setVisibleEditors;
