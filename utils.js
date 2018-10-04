@@ -4,9 +4,28 @@ var path = require( 'path' );
 
 var fetchedIcons = {};
 
+var generalOutputChannel;
+
 var directMessagesServerName = function()
 {
     return "Direct Messages";
+}
+
+function initialize( outputChannel )
+{
+    generalOutputChannel = outputChannel
+}
+
+function log( text )
+{
+    if( generalOutputChannel )
+    {
+        generalOutputChannel.appendLine( new Date().toLocaleTimeString() + " " + text );
+    }
+    else
+    {
+        console.log( text );
+    }
 }
 
 function toParentId( channel )
@@ -171,6 +190,8 @@ function urlExt( url )
     return path.extname( filePath );
 }
 
+module.exports.initialize = initialize;
+module.exports.log = log;
 module.exports.toParentId = toParentId;
 module.exports.toServerName = toServerName;
 module.exports.toChannelName = toChannelName;
