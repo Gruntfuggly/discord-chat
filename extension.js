@@ -30,7 +30,8 @@ function activate( context )
     var provider = new treeView.DiscordChatDataProvider( context );
     var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
 
-    storage.initialize( generalOutputChannel, context.workspaceState );
+    utils.initialize( generalOutputChannel );
+    storage.initialize( context.workspaceState );
 
     function selectedChannel()
     {
@@ -112,7 +113,7 @@ function activate( context )
 
     function login()
     {
-        generalOutputChannel.appendLine( "Logging in..." );
+        utils.log( "Logging in..." );
 
         var token = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'token' );
         if( token )
@@ -121,7 +122,7 @@ function activate( context )
             {
             } ).catch( function( reason )
             {
-                generalOutputChannel.appendLine( reason );
+                utils.log( reason );
             } );
         }
         else
@@ -725,7 +726,7 @@ function activate( context )
                         {
                             sc.send( message ).then( message =>
                             {
-                                generalOutputChannel.appendLine( "Sent message to channel " + sc.name + " at " + new Date().toISOString() );
+                                utils.log( "Sent message to channel " + sc.name + " at " + new Date().toISOString() );
 
                                 if( sc.type === "dm" || sc.type === "group" )
                                 {
@@ -917,23 +918,23 @@ function activate( context )
 
         client.on( 'error', error =>
         {
-            generalOutputChannel.appendLine( "error: " + error.message );
+            utils.log( "error: " + error.message );
         } );
         client.on( 'warn', warning =>
         {
-            generalOutputChannel.appendLine( "warning: " + warning );
+            utils.log( "warning: " + warning );
         } );
         client.on( 'debug', message =>
         {
             if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'debug' ) === true )
             {
-                generalOutputChannel.appendLine( "debug: " + message );
+                utils.log( "debug: " + message );
             }
         } );
 
         client.on( 'ready', () =>
         {
-            generalOutputChannel.appendLine( "Logged in as " + client.user.tag );
+            utils.log( "Logged in as " + client.user.tag );
             refresh();
         } );
 
@@ -961,7 +962,7 @@ function activate( context )
                 {
                     var outputChannelName = utils.toOutputChannelName( message.channel );
 
-                    generalOutputChannel.appendLine( "Received message on " + outputChannelName );
+                    utils.log( "Received message on " + outputChannelName );
 
                     if( outputChannelName )
                     {
