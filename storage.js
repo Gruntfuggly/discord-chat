@@ -4,11 +4,16 @@ var utils = require( './utils' );
 
 var state;
 var backupTimer;
+var backupInProgress = false;
 
 function sync( callback )
 {
     if( gistore.token )
     {
+        if( backupInProgress === true )
+        {
+            utils.log( "WTF!?" );
+        }
         gistore.sync().then( function( data )
         {
             var now = new Date();
@@ -108,6 +113,8 @@ function backup()
     {
         var now = new Date();
 
+        backupInProgress = true;
+
         gistore.backUp( {
             discordSync: {
                 mutedServers: state.get( 'mutedServers' ),
@@ -117,6 +124,7 @@ function backup()
             }
         } ).then( function()
         {
+            backupInProgress = false;
             utils.log( "Backup at " + now.toISOString() );
         } ).catch( function( error )
         {
