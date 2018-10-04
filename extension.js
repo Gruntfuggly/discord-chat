@@ -9,12 +9,13 @@ var storage = require( './storage' );
 var treeView = require( './dataProvider' );
 var utils = require( './utils' );
 var chats = require( './chats' );
+var streams = require( './streams' );
 
-var outputChannels = {};
+// var outputChannels = {};
 var decorations = [];
 
 var currentEditor;
-var currentVisibleEditors = [];
+// var currentVisibleEditors = [];
 
 var channelMessages = {};
 
@@ -226,21 +227,23 @@ function activate( context )
     function populateChannel( channel )
     {
         var channelId = channel.id.toString();
-
-        outputChannels[ channelId ].outputChannel.clear();
-
-        if( storage.getChannelMuted( channel ) !== true )
+        streams.outputChannel( channelId, function( outputChannel )
         {
-            chats.getReadMessages( channelId ).map( function( entry )
-            {
-                outputChannels[ channelId ].outputChannel.appendLine( entry );
-            } );
+            outputChannel.clear();
 
-            chats.getUnreadMessages( channelId ).map( function( entry )
+            if( storage.getChannelMuted( channel ) !== true )
             {
-                outputChannels[ channelId ].outputChannel.appendLine( entry );
-            } );
-        }
+                chats.getReadMessages( channelId ).map( function( entry )
+                {
+                    outputChannel.appendLine( entry );
+                } );
+
+                chats.getUnreadMessages( channelId ).map( function( entry )
+                {
+                    outputChannel.appendLine( entry );
+                } );
+            }
+        } );
 
         var storedDate = storage.getLastRead( channel );
         var channelLastRead = new Date( storedDate ? storedDate : 0 );
@@ -367,21 +370,25 @@ function activate( context )
         {
             if( editor.document && editor.document.uri && editor.document.uri.scheme === 'output' )
             {
-                Object.keys( outputChannels ).forEach( channelId =>
-                {
-                    if( outputChannels[ channelId ].outputChannel._id === editor.document.fileName )
-                    {
-                        var rm = chats.getReadMessages( channelId );
-                        var length = chats.getReadMessages( channelId ).reduce( ( total, value ) => total += ( value.length + 1 ), 0 );
+                var channelId = streams.getChannelId( editor.document.fileName );
+                // outputChannels.findOutputChannel( editor.document.fileName, function( outputChannel, channelId )
+                // {
+                // Object.keys( outputChannels ).forEach( channelId =>
+                // {
+                //     if( outputChannels[ channelId ].outputChannel._id === editor.document.fileName )
+                //     {
+                // var rm = chats.getReadMessages( channelId );
+                var length = chats.getReadMessages( channelId ).reduce( ( total, value ) => total += ( value.length + 1 ), 0 );
 
-                        const fullRange = new vscode.Range(
-                            editor.document.positionAt( 0 ),
-                            editor.document.positionAt( length - 1 )
-                        )
+                const fullRange = new vscode.Range(
+                    editor.document.positionAt( 0 ),
+                    editor.document.positionAt( length - 1 )
+                )
 
-                        editor.setDecorations( oldMessageMask, [ fullRange ] );
-                    }
-                } );
+                editor.setDecorations( oldMessageMask, [ fullRange ] );
+                // } );
+                //     }
+                // } );
             }
         } );
     }
@@ -829,7 +836,8 @@ function activate( context )
         {
             console.log( "onDidChangeVisibleTextEditors" );
 
-            currentVisibleEditors = editors;
+            utils.setVisibleEditors( editors );
+            // currentVisibleEditors = editors;
 
             var sc = selectedChannel();
 
