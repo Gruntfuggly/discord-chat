@@ -11,15 +11,7 @@ var utils = require( './utils' );
 var chats = require( './chats' );
 var streams = require( './streams' );
 
-// var outputChannels = {};
-var decorations = [];
-
-var currentEditor;
-// var currentVisibleEditors = [];
-
 var channelMessages = {};
-
-var oldMessageMask = vscode.window.createTextEditorDecorationType( { textDecoration: 'none; opacity: 0.5' } );
 
 var discordChatExplorerView;
 var discordChatView;
@@ -33,6 +25,7 @@ function activate( context )
 
     utils.initialize( generalOutputChannel );
     storage.initialize( context.workspaceState );
+    streams.initialize( client );
 
     function selectedChannel()
     {
@@ -72,14 +65,6 @@ function activate( context )
             } );
         }
         return result;
-    }
-
-    function getDecoration( tag )
-    {
-        return vscode.window.createTextEditorDecorationType( {
-            light: { color: utils.toDarkColour( tag ) },
-            dark: { color: utils.toLightColour( tag ) },
-        } );
     }
 
     function promptForToken()
@@ -132,14 +117,14 @@ function activate( context )
         }
     }
 
-    function updateSelectionState()
+    function updateToolbarButtons()
     {
         var sc = selectedChannel();
         var ss = selectedServer();
+
         vscode.commands.executeCommand( 'setContext', 'discord-channel-selected', sc !== undefined );
-        console.log( "CC:" + sc + " CS:" + ss );
-        console.log( "server selected: " + ( ss !== undefined && sc === undefined ) );
         vscode.commands.executeCommand( 'setContext', 'discord-server-selected', ss !== undefined && sc === undefined );
+
         if( ss && sc === undefined )
         {
             var serverElement = provider.getServerElement( ss );
@@ -149,8 +134,10 @@ function activate( context )
         {
             vscode.commands.executeCommand( 'setContext', 'discord-server-has-unread', false );
         }
+
         var canMute = false;
         var canUnmute = false;
+
         if( sc )
         {
             canUnmute = storage.getChannelMuted( sc ) === true;
@@ -161,6 +148,7 @@ function activate( context )
             canUnmute = storage.getServerMuted( ss ) === true;
             canMute = !canUnmute;
         }
+
         vscode.commands.executeCommand( 'setContext', 'discord-can-mute', canMute );
         vscode.commands.executeCommand( 'setContext', 'discord-can-unmute', canUnmute );
 
@@ -313,114 +301,6 @@ function activate( context )
         storage.sync( onSync );
     }
 
-    function highlightUserNames()
-    {
-        function escapeRegExp( str )
-        {
-            return str.replace( /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&" );
-        }
-
-        var visibleEditors = vscode.window.visibleTextEditors;
-
-        visibleEditors.map( editor =>
-        {
-            if( editor.document && editor.document.uri && editor.document.uri.scheme === 'output' )
-            {
-                var highlights = {};
-
-                const text = editor.document.getText();
-                var userList = [];
-                if( client.users.size )
-                {
-                    client.users.map( user => { userList.push( escapeRegExp( "@" + user.username ) ); } );
-                    var regex = new RegExp( "(" + userList.join( "|" ) + ")", 'g' );
-                    let match;
-                    while( ( match = regex.exec( text ) ) !== null )
-                    {
-                        const tag = match[ match.length - 1 ];
-                        const startPos = editor.document.positionAt( match.index );
-                        const endPos = editor.document.positionAt( match.index + match[ 0 ].length );
-                        const decoration = { range: new vscode.Range( startPos, endPos ) };
-                        if( highlights[ tag ] === undefined )
-                        {
-                            highlights[ tag ] = [];
-                        }
-                        highlights[ tag ].push( decoration );
-                    }
-                    decorations.forEach( decoration =>
-                    {
-                        decoration.dispose();
-                    } );
-                    Object.keys( highlights ).forEach( tag =>
-                    {
-                        var decoration = getDecoration( tag );
-                        decorations.push( decoration );
-                        editor.setDecorations( decoration, highlights[ tag ] );
-                    } );
-                }
-            }
-        } );
-    }
-
-    function fadeOldMessages()
-    {
-        var visibleEditors = vscode.window.visibleTextEditors;
-
-        visibleEditors.map( editor =>
-        {
-            if( editor.document && editor.document.uri && editor.document.uri.scheme === 'output' )
-            {
-                var channelId = streams.getChannelId( editor.document.fileName );
-                // outputChannels.findOutputChannel( editor.document.fileName, function( outputChannel, channelId )
-                // {
-                // Object.keys( outputChannels ).forEach( channelId =>
-                // {
-                //     if( outputChannels[ channelId ].outputChannel._id === editor.document.fileName )
-                //     {
-                // var rm = chats.getReadMessages( channelId );
-                var length = chats.getReadMessages( channelId ).reduce( ( total, value ) => total += ( value.length + 1 ), 0 );
-
-                const fullRange = new vscode.Range(
-                    editor.document.positionAt( 0 ),
-                    editor.document.positionAt( length - 1 )
-                )
-
-                editor.setDecorations( oldMessageMask, [ fullRange ] );
-                // } );
-                //     }
-                // } );
-            }
-        } );
-    }
-
-    function decorateOutputChannel()
-    {
-        highlightUserNames();
-        fadeOldMessages();
-    }
-
-    function hideOutputChannel( outputChannel )
-    {
-        if( outputChannel._id !== currentEditor )
-        {
-            outputChannel.hide();
-        }
-    }
-
-    function setAutoClose( channelId )
-    {
-        var autoHidePeriod = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoHide' );
-        if( autoHidePeriod > 0 )
-        {
-            var timer = outputChannels[ channelId ].autoHideTimer;
-            if( timer )
-            {
-                clearTimeout( timer );
-            }
-            outputChannels[ channelId ].autoHideTimer = setTimeout( hideOutputChannel, autoHidePeriod * 1000, outputChannels[ channelId ].outputChannel );
-        }
-    }
-
     function addMessageToChannel( message )
     {
         var channelId = message.channel.id.toString();
@@ -429,20 +309,19 @@ function activate( context )
         var formattedMessage = chats.formatMessage( message, compact );
         chats.addMessage( channelId, formattedMessage, message.createdAt );
 
-        var outputChannel = outputChannels[ channelId ] && outputChannels[ channelId ].outputChannel;
-        if( outputChannel )
+        streams.outputChannel( channelId, function( outputChannel )
         {
             formattedMessage.map( function( line )
             {
                 outputChannel.appendLine( line );
             } );
-        }
+        } );
     }
 
     function updateCurrentChannel( message )
     {
         addMessageToChannel( message );
-        setAutoClose( message.channel.id.toString() );
+        streams.autoHide( message.channel.id.toString() );
         provider.markChannelRead( message.channel );
     }
 
@@ -487,6 +366,7 @@ function activate( context )
 
     function updateViewSelection( e, view )
     {
+        // TODO is this working?
         if( e.visible )
         {
             var sc = selectedChannel();
@@ -501,13 +381,24 @@ function activate( context )
         }
     }
 
+    function openChannel( channel )
+    {
+        if( channel )
+        {
+            streams.open( channel, context.subscriptions, populateChannel, function()
+            {
+                provider.markChannelRead( channel );
+            } );
+        }
+    }
+
     function selectionChanged()
     {
         var sc = selectedChannel();
 
         if( sc )
         {
-            openChannel( sc )
+            openChannel( sc );
         }
         else
         {
@@ -518,7 +409,7 @@ function activate( context )
             }
         }
         provider.setCurrentChannel( sc );
-        updateSelectionState();
+        updateToolbarButtons();
     }
 
     function setShowUnreadOnly( enabled )
@@ -528,40 +419,20 @@ function activate( context )
         provider.refresh();
     }
 
-    function openChannel( channel )
+    function onOutputChannelVisible()
     {
-        if( channel === undefined )
-        {
-            return;
-        }
+        updateToolbarButtons();
+        streams.highlightUserNames();
+        streams.fadeOldMessages();
+    }
 
-        var channelId = channel.id.toString();
-        var outputChannel = outputChannels[ channelId ];
-        if( !outputChannel )
-        {
-            outputChannel = vscode.window.createOutputChannel( utils.toOutputChannelName( channel ) + "." + channelId );
-            outputChannel.clear();
-            outputChannels[ channelId ] = {
-                outputChannel: outputChannel,
-                discordChannel: channel,
-            };
-            context.subscriptions.push( outputChannel );
-
-            populateChannel( channel );
-        }
-        else
-        {
-            outputChannel = outputChannel.outputChannel;
-        }
-
-        outputChannel.show( true );
-
-        provider.markChannelRead( channel );
+    function onNoOutputChannelVisible()
+    {
     }
 
     function register()
     {
-        updateSelectionState();
+        updateToolbarButtons();
 
         discordChatExplorerView = vscode.window.createTreeView( 'discord-chat-view-explorer', { treeDataProvider: provider } );
         discordChatView = vscode.window.createTreeView( 'discord-chat-view', { treeDataProvider: provider } );
@@ -594,7 +465,7 @@ function activate( context )
             if( ss )
             {
                 provider.markServerRead( ss );
-                updateSelectionState();
+                updateToolbarButtons();
             }
         } ) );
 
@@ -640,8 +511,7 @@ function activate( context )
                     {
                         sc.delete().then( function()
                         {
-                            outputChannels[ sc.id.toString() ].outputChannel.dispose();
-                            // setCurrentChannel( undefined );
+                            streams.remove( sc.id.toString() );
                             // TODO clear selection
                             refresh();
                         } ).catch( e =>
@@ -663,13 +533,8 @@ function activate( context )
             var sc = selectedChannel();
             if( sc )
             {
-                if( outputChannels[ sc.id.toString() ] )
-                {
-                    outputChannels[ sc.id.toString() ].outputChannel.dispose();
-                    delete outputChannels[ sc.id.toString() ];
-                    // setCurrentChannel( undefined );
-                    // TODO clear selection
-                }
+                streams.remove( sc.id.toString() );
+                // TODO clear selection
             }
             else
             {
@@ -689,10 +554,7 @@ function activate( context )
                     {
                         ss.channels.map( function( channel )
                         {
-                            if( outputChannels[ channel.id.toString() ] )
-                            {
-                                outputChannels[ channel.id.toString() ].outputChannel.dispose();
-                            }
+                            streams.remove( channel.id.toString() );
                         } );
 
                         ss.leave().then( function()
@@ -718,13 +580,7 @@ function activate( context )
             var sc = selectedChannel();
             if( sc )
             {
-                Object.keys( outputChannels ).forEach( channelName =>
-                {
-                    if( outputChannels[ channelName ].discordChannel === sc )
-                    {
-                        clearTimeout( outputChannels[ channelName ].autoHideTimer );
-                    }
-                } );
+                streams.cancelAutoHide( sc );
 
                 vscode.window.showInputBox( { prompt: "Post message to " + utils.toChannelName( sc ) } ).then(
                     function( message )
@@ -782,7 +638,7 @@ function activate( context )
         {
             var sc = selectedChannel();
             var ss = selectedServer();
-            if( screen )
+            if( sc )
             {
                 if( sc.type === 'text' )
                 {
@@ -798,7 +654,7 @@ function activate( context )
                 provider.setServerMuted( ss, true );
             }
 
-            updateSelectionState();
+            updateToolbarButtons();
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.unmute', function()
@@ -814,7 +670,7 @@ function activate( context )
                 provider.setServerMuted( ss, undefined );
             }
 
-            updateSelectionState();
+            updateToolbarButtons();
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openDebugConsole', function()
@@ -836,45 +692,23 @@ function activate( context )
         {
             console.log( "onDidChangeVisibleTextEditors" );
 
-            utils.setVisibleEditors( editors );
-            // currentVisibleEditors = editors;
-
-            var sc = selectedChannel();
-
-            var outputChannelVisible = false;
-            currentVisibleEditors.map( function( editor )
-            {
-                Object.keys( outputChannels ).map( function( id )
-                {
-                    if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
-                    {
-                        outptuChannelVisible = true;
-                        // TODO reveal
-                        updateSelectionState();
-                        decorateOutputChannel();
-                        setAutoClose( id );
-                    }
-                } );
-            } );
-
-            if( outputChannelVisible === false )
-            {
-                // TODO clear selection?
-            }
+            streams.updateVisibleEditors( editors, onOutputChannelVisible, onNoOutputChannelVisible );
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeTextDocument( function( e )
         {
-            currentVisibleEditors.map( function( editor )
+            streams.highlightUserNames();
+        } ) );
+
+        context.subscriptions.push( vscode.window.onDidChangeActiveTextEditor( function( e )
+        {
+            if( e && e.document )
             {
-                Object.keys( outputChannels ).map( function( id )
+                streams.findOutputChannel( function( channel )
                 {
-                    if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
-                    {
-                        highlightUserNames();
-                    }
+                    streams.cancelAutoHide( channel );
                 } );
-            } );
+            }
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
@@ -885,7 +719,7 @@ function activate( context )
             }
             else if( e.affectsConfiguration( 'discord-chat.hideEmptyTree' ) )
             {
-                updateSelectionState();
+                updateToolbarButtons();
             }
             else if( e.affectsConfiguration( 'discord-chat.token' ) && client.readyAt === null )
             {
@@ -895,11 +729,13 @@ function activate( context )
                 e.affectsConfiguration( 'discord-chat.compactView' ) ||
                 e.affectsConfiguration( 'discord-chat.history' ) )
             {
-                Object.keys( outputChannels ).map( outputChannelName =>
-                {
-                    outputChannels[ outputChannelName ].outputChannel.clear();
-                    populateChannel( outputChannels[ outputChannelName ].discordChannel );
-                } );
+                // TODO rebuild output channels
+
+                // Object.keys( outputChannels ).map( outputChannelName =>
+                // {
+                //     outputChannels[ outputChannelName ].outputChannel.clear();
+                //     populateChannel( outputChannels[ outputChannelName ].discordChannel );
+                // } );
             }
             else if( e.affectsConfiguration( 'discord-chat.useIcons' ) )
             {
@@ -948,22 +784,6 @@ function activate( context )
 
         client.on( 'message', message =>
         {
-            function isOutputChannelVisible( id )
-            {
-                var visible = false;
-                if( outputChannels[ id ] !== undefined )
-                {
-                    currentVisibleEditors.map( function( editor )
-                    {
-                        if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
-                        {
-                            visible = true;
-                        }
-                    } );
-                }
-                return visible;
-            }
-
             if( utils.isReadableChannel( client.user, message.channel ) )
             {
                 if( storage.isChannelMuted( message.channel ) !== true )
@@ -974,45 +794,18 @@ function activate( context )
 
                     if( outputChannelName )
                     {
-                        var hidden = isOutputChannelVisible( message.channel.id.toString() ) === false;
+                        var hidden = streams.isOutputChannelVisible( message.channel.id.toString() ) === false;
                         var focused = vscode.window.state.focused;
                         if( hidden === true && focused === true && vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoShow' ) === true )
                         {
-                            var outputChannelAlreadyVisible = false;
-                            Object.keys( outputChannels ).map( function( id )
-                            {
-                                currentVisibleEditors.map( function( editor )
-                                {
-                                    if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
-                                    {
-                                        outputChannelAlreadyVisible = true;
-                                    }
-                                } );
-
-                                if( outputChannels[ id ].outputChannel.visible === true )
-                                {
-                                    outputChannelAlreadyVisible = true;
-                                }
-                            } );
-
-                            if( outputChannelAlreadyVisible === false )
-                            {
-                                hidden = false;
-                                if( outputChannels[ message.channel.id.toString() ] === undefined )
-                                {
-                                    openChannel( message.channel );
-                                }
-                                else
-                                {
-                                    outputChannels[ message.channel.id.toString() ].outputChannel.show();
-                                }
-                            }
+                            openChannel( message.channel );
+                            hidden = false;
                         }
 
                         if( hidden )
                         {
                             updateChannel( message, hidden );
-                            updateSelectionState();
+                            updateToolbarButtons();
                         }
                         else
                         {
