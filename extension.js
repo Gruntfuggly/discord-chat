@@ -704,10 +704,7 @@ function activate( context )
         {
             if( e && e.document )
             {
-                streams.findOutputChannel( function( channel )
-                {
-                    streams.cancelAutoHide( channel );
-                } );
+                streams.cancelAutoHide( streams.getChannelId( e.document.fileName ) );
             }
         } ) );
 
