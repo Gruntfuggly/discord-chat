@@ -52,7 +52,7 @@ function findOutputChannel( filename, action )
 function getChannelId( filename )
 {
     var result;
-    Object.keys( outputChannels ).forEach( c =>
+    Object.keys( outputChannels ).forEach( function( c )
     {
         if( outputChannels[ c ].outputChannel._id === filename )
         {
@@ -85,20 +85,19 @@ function autoHide( id )
         var period = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoHide' ) * 1000;
         if( period > 0 )
         {
+            utils.log( "Auto hiding in " + period + " milliseconds" );
             outputChannels[ id ].autoHideTimer = setTimeout( hideOutputChannel, period, outputChannels[ id ].outputChannel );
         }
     }
 }
 
-function cancelAutoHide( channel )
+function cancelAutoHide( id )
 {
-    Object.keys( outputChannels ).forEach( function( id )
+    if( outputChannels[ id ] )
     {
-        if( outputChannels[ id ].discordChannel === channel )
-        {
-            clearTimeout( outputChannels[ id ].autoHideTimer );
-        }
-    } );
+        utils.log( "Auto hide cancelled" );
+        clearTimeout( outputChannels[ id ].autoHideTimer );
+    }
 }
 
 function open( channel, subscriptions, populate, callback )
