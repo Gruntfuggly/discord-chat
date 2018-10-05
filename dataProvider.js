@@ -22,7 +22,7 @@ function findServer( e )
 
 function findChannel( e )
 {
-    return e.type === CHANNEL && e.id.toString() === this.toString();
+    return e.id.toString() === this.toString();
 }
 
 function isMuted( element )
@@ -167,10 +167,7 @@ class DiscordChatDataProvider
             treeItem.tooltip = "";
             treeItem.command = {
                 command: "discord-chat.selectServer",
-                title: "Select server",
-                // arguments: [
-                //     element.server
-                // ]
+                title: "Select server"
             };
         }
         else if( element.type === CHANNEL )
@@ -192,12 +189,8 @@ class DiscordChatDataProvider
             treeItem.id = element.parent.id + element.id;
             treeItem.command = {
                 command: "discord-chat.openChannel",
-                title: "Open channel",
-                // arguments: [
-                //     element.channel
-                // ]
+                title: "Open channel"
             };
-
         }
 
         if( element.unreadCount && element.unreadCount > 0 && !isMuted( element ) )
@@ -399,6 +392,23 @@ class DiscordChatDataProvider
     setCurrentChannel( currentChannel )
     {
         this._currentChannel = currentChannel;
+    }
+
+    deleteChannelElement( channel )
+    {
+        var serverElement = servers.find( findServer, utils.toParentId( channel ) );
+        if( serverElement )
+        {
+            for( var c = 0; c < serverElement.channels.length; ++c )
+            {
+                if( serverElement.channels[ c ].id.toString() === channel.id.toString() )
+                {
+                    serverElement.channels.splice( c, 1 );
+                    this.refresh();
+                    break;
+                }
+            }
+        }
     }
 
     refresh()

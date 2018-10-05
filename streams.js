@@ -145,8 +145,7 @@ function updateVisibleEditors( editors, onVisible, onNotVisible )
             if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
             {
                 visible = true;
-                onVisible();
-                // TODO reveal
+                onVisible( outputChannels[ id ].discordChannel );
                 autoHide( id );
             }
         } );
