@@ -83,7 +83,10 @@ function autoHide( id )
             clearTimeout( timer );
         }
         var period = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoHide' ) * 1000;
-        outputChannels[ id ].autoHideTimer = setTimeout( hideOutputChannel, period, outputChannels[ id ].outputChannel );
+        if( period > 0 )
+        {
+            outputChannels[ id ].autoHideTimer = setTimeout( hideOutputChannel, period, outputChannels[ id ].outputChannel );
+        }
     }
 }
 
