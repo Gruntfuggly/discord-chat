@@ -221,10 +221,13 @@ function resetState()
 
 function resetChannel( channel )
 {
-    var lastRead = state.get( 'lastRead' );
-    lastRead[ channel.id.toString() ] = undefined;
-    state.update( 'lastRead', lastRead );
-    backup();
+    if( channel !== undefined )
+    {
+        var lastRead = state.get( 'lastRead' );
+        lastRead[ channel.id.toString() ] = undefined;
+        state.update( 'lastRead', lastRead );
+        backup();
+    }
 }
 
 module.exports.initialize = initialize;
