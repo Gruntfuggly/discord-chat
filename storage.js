@@ -4,48 +4,72 @@ var utils = require( './utils' );
 
 var state;
 var backupTimer;
-var backupInProgress = false;
+var queue = [];
+
+var enqueue = function( fn, context, params )
+{
+    return function()
+    {
+        fn.apply( context, params );
+    };
+};
+
+function processQueue()
+{
+    if( queue.length > 0 )
+    {
+        ( queue.shift() )();
+    }
+}
 
 function sync( callback )
 {
-    if( gistore.token )
+    function doSync( callback )
     {
-        if( backupInProgress === true )
+        if( gistore.token )
         {
-            utils.log( "WTF!?" );
+            gistore.sync().then( function( data )
+            {
+                var now = new Date();
+
+                utils.log( "Sync at " + now.toISOString() );
+
+                if( state.get( 'lastSync' ) === undefined || data.discordSync.lastSync > state.get( 'lastSync' ) )
+                {
+                    state.update( 'mutedServers', data.discordSync.mutedServers );
+                    state.update( 'mutedChannels', data.discordSync.mutedChannels );
+                    state.update( 'lastRead', data.discordSync.lastRead );
+                    state.update( 'lastSync', data.discordSync.lastSync );
+                }
+
+                if( callback )
+                {
+                    callback();
+                }
+
+                processQueue();
+            } ).catch( function( error )
+            {
+                console.error( "sync failed:" + error );
+
+                if( callback )
+                {
+                    callback();
+                }
+
+                processQueue();
+            } );
         }
-        gistore.sync().then( function( data )
+        else
         {
-            var now = new Date();
-
-            utils.log( "Sync at " + now.toISOString() );
-
-            if( state.get( 'lastSync' ) === undefined || data.discordSync.lastSync > state.get( 'lastSync' ) )
-            {
-                state.update( 'mutedServers', data.discordSync.mutedServers );
-                state.update( 'mutedChannels', data.discordSync.mutedChannels );
-                state.update( 'lastRead', data.discordSync.lastRead );
-                state.update( 'lastSync', data.discordSync.lastSync );
-            }
-
-            if( callback )
-            {
-                callback();
-            }
-        } ).catch( function( error )
-        {
-            console.error( "sync failed:" + error );
-
-            if( callback )
-            {
-                callback();
-            }
-        } );
+            callback();
+            processQueue();
+        }
     }
-    else
-    {
-        callback();
-    }
+
+    queue.push( enqueue( doSync, this, [ callback ] ) );
+
+    processQueue();
 }
 
 function initializeSync()
@@ -109,29 +133,40 @@ function initialize( workspaceState )
 
 function backup()
 {
-    if( gistore.token )
+    function doBackup()
     {
-        var now = new Date();
-
-        backupInProgress = true;
-
-        gistore.backUp( {
-            discordSync: {
-                mutedServers: state.get( 'mutedServers' ),
-                mutedChannels: state.get( 'mutedChannels' ),
-                lastRead: state.get( 'lastRead' ),
-                lastSync: now
-            }
-        } ).then( function()
+        if( gistore.token )
         {
-            backupInProgress = false;
-            utils.log( "Backup at " + now.toISOString() );
-        } ).catch( function( error )
-        {
-            console.error( "backup failed: " + error );
-            triggerBackup();
-        } );
+            var now = new Date();
+
+            utils.log( "Starting backup at " + now.toISOString() );
+
+            busy = true;
+
+            gistore.backUp( {
+                discordSync: {
+                    mutedServers: state.get( 'mutedServers' ),
+                    mutedChannels: state.get( 'mutedChannels' ),
+                    lastRead: state.get( 'lastRead' ),
+                    lastSync: now
+                }
+            } ).then( function()
+            {
+                busy = false;
+                utils.log( "Backup at " + now.toISOString() );
+                processQueue();
+            } ).catch( function( error )
+            {
+                console.error( "backup failed: " + error );
+                triggerBackup();
+                processQueue();
+            } );
+        }
     }
+
+    queue.push( enqueue( doBackup, this, [] ) );
+
+    processQueue();
 }
 
 function triggerBackup()
