@@ -106,7 +106,7 @@ class DiscordChatDataProvider
             }
 
             var label = this._context.workspaceState.get( 'showUnreadOnly', false ) === true ? "No new messages" : "...";
-            return [ { name: label, type: DEBUG } ];
+            return [ { name: label, type: DEBUG, empty: true } ];
         }
         else if( element.type === SERVER )
         {

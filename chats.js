@@ -3,6 +3,11 @@ var utils = require( './utils' );
 
 var messages = {};
 
+function reset()
+{
+    messages = {};
+}
+
 function sanitizeUnicode( entries )
 {
     entries = entries.map( function( entry )
@@ -108,17 +113,28 @@ function formatMessage( message, compact, short )
     return entries;
 }
 
-function addMessage( id, message, timeOfMessage )
+function addMessage( channelId, messageId, message, timeOfMessage )
 {
-    if( messages[ id ] === undefined )
+    if( messages[ channelId ] === undefined )
     {
-        messages[ id ] = [];
+        messages[ channelId ] = [];
     }
 
-    message.map( function( line )
+    var isNew = true;
+    messages[ channelId ].map( function( m )
     {
-        messages[ id ].push( { text: line, timeOfMessage: timeOfMessage, read: false } );
+        if( m.id === messageId )
+        {
+            isNew = false;
+        }
     } );
+    if( isNew === true )
+    {
+        message.map( function( line )
+        {
+            messages[ channelId ].push( { text: line, timeOfMessage: timeOfMessage, read: false, id: messageId } );
+        } );
+    }
 }
 
 function chatRead( id, time )
@@ -157,6 +173,7 @@ function getUnreadMessages( id )
     return [];
 }
 
+module.exports.reset = reset;
 module.exports.formatMessage = formatMessage;
 module.exports.addMessage = addMessage;
 module.exports.chatRead = chatRead;

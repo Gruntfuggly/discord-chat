@@ -126,6 +126,14 @@ function open( channel, subscriptions, populate, callback )
     callback( channel );
 }
 
+function reset()
+{
+    Object.keys( outputChannels ).map( function( id )
+    {
+        outputChannels[ id ].outputChannel.clear();
+    } );
+}
+
 function remove( id )
 {
     if( outputChannels[ id ] )
@@ -135,27 +143,53 @@ function remove( id )
     delete outputChannels[ id ];
 }
 
-function updateVisibleEditors( editors, onVisible, onNotVisible )
+function updateVisibleEditors( editors, onVisible, onNoLongerVisible )
 {
+    var previouslyVisible = [];
+    Object.keys( outputChannels ).map( function( id )
+    {
+        visibleEditors.map( function( editor )
+        {
+            if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+            {
+                previouslyVisible.push( id );
+            }
+        } );
+    } );
+
     visibleEditors = editors;
 
-    var visible = false;
-    visibleEditors.map( function( editor )
+    editors.map( function( editor )
     {
         Object.keys( outputChannels ).map( function( id )
         {
             if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
             {
-                visible = true;
                 onVisible( outputChannels[ id ].discordChannel );
                 autoHide( id );
             }
         } );
     } );
-    if( visible === false )
+
+
+    Object.keys( outputChannels ).map( function( id )
     {
-        onNotVisible();
-    }
+        var visible = false;
+        editors.map( function( editor )
+        {
+            if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+            {
+                visible = true;
+            }
+        } );
+        if( visible === false )
+        {
+            if( previouslyVisible.indexOf( id ) > -1 )
+            {
+                onNoLongerVisible( outputChannels[ id ].discordChannel );
+            }
+        }
+    } );
 }
 
 function isOutputChannelVisible( id )
@@ -174,6 +208,20 @@ function isOutputChannelVisible( id )
     return visible;
 }
 
+function hideOutputChannel()
+{
+    visibleEditors.map( function( editor )
+    {
+        Object.keys( outputChannels ).map( function( id )
+        {
+            if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+            {
+                outputChannels[ id ].outputChannel.hide();
+            }
+        } );
+    } );
+}
+
 function fadeOldMessages()
 {
     visibleEditors.map( function( editor )
@@ -187,7 +235,6 @@ function fadeOldMessages()
                 editor.document.positionAt( 0 ),
                 editor.document.positionAt( length - 1 )
             );
-
             editor.setDecorations( oldMessageMask, [ fullRange ] );
         }
     } );
@@ -251,8 +298,10 @@ module.exports.getChannelId = getChannelId;
 module.exports.autoHide = autoHide;
 module.exports.cancelAutoHide = cancelAutoHide;
 module.exports.open = open;
+module.exports.reset = reset;
 module.exports.remove = remove;
 module.exports.updateVisibleEditors = updateVisibleEditors;
 module.exports.isOutputChannelVisible = isOutputChannelVisible;
+module.exports.hideOutputChannel = hideOutputChannel;
 module.exports.fadeOldMessages = fadeOldMessages;
 module.exports.highlightUserNames = highlightUserNames;
