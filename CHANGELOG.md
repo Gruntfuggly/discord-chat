@@ -1,3 +1,9 @@
+# v0.2.0 - 2018-10-08
+- major rewrite
+- add auto open and add auto close
+- fade historic messages instead of inserting a line
+- retrieve all unread messages
+
 # v0.1.31 - 2018-09-12
 - add note about Image Preview to README.md
 
