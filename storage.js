@@ -141,8 +141,6 @@ function backup()
 
             utils.log( "Starting backup at " + now.toISOString() );
 
-            busy = true;
-
             gistore.backUp( {
                 discordSync: {
                     mutedServers: state.get( 'mutedServers' ),
@@ -152,7 +150,6 @@ function backup()
                 }
             } ).then( function()
             {
-                busy = false;
                 utils.log( "Backup at " + now.toISOString() );
                 processQueue();
             } ).catch( function( error )
