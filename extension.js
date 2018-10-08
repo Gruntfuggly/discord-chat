@@ -589,6 +589,7 @@ function activate( context )
                                 {
                                     addMessageToChannel( message );
                                 }
+                                provider.markChannelRead( message.channel );
                             } ).catch( e =>
                             {
                                 console.error( "Failed to send: " + e );
