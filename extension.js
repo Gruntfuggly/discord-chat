@@ -575,7 +575,7 @@ function activate( context )
             var sc = selectedChannel();
             if( sc )
             {
-                streams.cancelAutoHide( sc );
+                streams.cancelAutoHide( sc.id.toString() );
 
                 vscode.window.showInputBox( { prompt: "Post message to " + utils.toChannelName( sc ) } ).then(
                     function( message )
