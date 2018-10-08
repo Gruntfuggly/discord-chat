@@ -376,6 +376,7 @@ function activate( context )
             {
                 provider.markChannelRead( channel );
             } );
+            streams.autoHide( channel.id.toString() );
         }
     }
 
