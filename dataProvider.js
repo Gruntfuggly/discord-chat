@@ -198,10 +198,7 @@ class DiscordChatDataProvider
 
         if( element.unreadCount && element.unreadCount > 0 && !isMuted( element ) )
         {
-            treeItem.label +=
-                ( " (" + element.unreadCount +
-                    ( element.unreadCount >= vscode.workspace.getConfiguration( 'discord-chat' ).get( 'history' ) ? "+" : "" ) +
-                    ")" );
+            treeItem.label += ( " (" + element.unreadCount + ")" );
         }
 
         if( element.muted )
