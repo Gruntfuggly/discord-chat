@@ -791,9 +791,9 @@ function activate( context )
 
                     if( outputChannelName )
                     {
-                        var hidden = streams.isOutputChannelVisible( message.channel.id.toString() ) === false;
+                        var hidden = selectedChannel() === undefined;
                         var focused = vscode.window.state.focused;
-                        if( hidden === true && focused === true && vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoShow' ) === true )
+                        if( hidden && focused === true && vscode.workspace.getConfiguration( 'discord-chat' ).get( 'autoShow' ) === true )
                         {
                             openChannel( message.channel );
                             hidden = false;
