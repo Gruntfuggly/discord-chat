@@ -167,7 +167,9 @@ class DiscordChatDataProvider
             treeItem.tooltip = "";
             treeItem.command = {
                 command: "discord-chat.selectServer",
-                title: "Select server"
+                title: "Select server",
+                arguments: [ element.server ]
+
             };
         }
         else if( element.type === CHANNEL )
@@ -189,7 +191,8 @@ class DiscordChatDataProvider
             treeItem.id = element.parent.id + element.id;
             treeItem.command = {
                 command: "discord-chat.openChannel",
-                title: "Open channel"
+                title: "Open channel",
+                arguments: [ element.channel ]
             };
         }
 
