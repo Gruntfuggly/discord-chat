@@ -9,6 +9,12 @@ var decorations = [];
 
 var oldMessageMask = vscode.window.createTextEditorDecorationType( { textDecoration: 'none; opacity: 0.6' } );
 
+function getOutputChannelId( outputChannel )
+{
+    var id = outputChannel._id;
+    return id._value ? id._value : id;
+}
+
 function initialize( discordClient )
 {
     client = discordClient;
@@ -38,11 +44,11 @@ function getDiscordChannel( id )
     return outputChannels[ id ] && outputChannels[ id ].discordChannel;
 }
 
-function findOutputChannel( filename, action )
+function findOutputChannel( outputChannel, action )
 {
     Object.keys( outputChannels ).forEach( function( c )
     {
-        if( outputChannels[ c ].outputChannel._id === filename )
+        if( getOutputChannelId( outputChannels[ c ].outputChannel ) === getOutputChannelId( outputChannel ) )
         {
             action( outputChannels[ c ].outputChannel, c );
         }
@@ -54,7 +60,7 @@ function getChannelId( filename )
     var result;
     Object.keys( outputChannels ).forEach( function( c )
     {
-        if( outputChannels[ c ].outputChannel._id === filename )
+        if( getOutputChannelId( outputChannels[ c ].outputChannel ) === filename )
         {
             result = c;
         }
@@ -66,7 +72,7 @@ function autoHide( id )
 {
     function hideOutputChannel( outputChannel )
     {
-        findOutputChannel( outputChannel._id, function( channel, id )
+        findOutputChannel( outputChannel, function( channel, id )
         {
             if( isOutputChannelVisible( id ) )
             {
@@ -150,7 +156,7 @@ function updateVisibleEditors( editors, onVisible, onNoLongerVisible )
     {
         visibleEditors.map( function( editor )
         {
-            if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+            if( editor.document && editor.document.fileName === getOutputChannelId( outputChannels[ id ].outputChannel ) )
             {
                 previouslyVisible.push( id );
             }
@@ -163,7 +169,7 @@ function updateVisibleEditors( editors, onVisible, onNoLongerVisible )
     {
         Object.keys( outputChannels ).map( function( id )
         {
-            if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+            if( editor.document && editor.document.fileName === getOutputChannelId( outputChannels[ id ].outputChannel ) )
             {
                 onVisible( outputChannels[ id ].discordChannel );
                 autoHide( id );
@@ -177,7 +183,7 @@ function updateVisibleEditors( editors, onVisible, onNoLongerVisible )
         var visible = false;
         editors.map( function( editor )
         {
-            if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+            if( editor.document && editor.document.fileName === getOutputChannelId( outputChannels[ id ].outputChannel ) )
             {
                 visible = true;
             }
@@ -199,7 +205,7 @@ function isOutputChannelVisible( id )
     {
         visibleEditors.map( function( editor )
         {
-            if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+            if( editor.document && editor.document.fileName === getOutputChannelId( outputChannels[ id ].outputChannel ) )
             {
                 visible = true;
             }
@@ -214,7 +220,7 @@ function hideOutputChannel()
     {
         Object.keys( outputChannels ).map( function( id )
         {
-            if( editor.document && editor.document.fileName === outputChannels[ id ].outputChannel._id )
+            if( editor.document && editor.document.fileName === getOutputChannelId( outputChannels[ id ].outputChannel ) )
             {
                 outputChannels[ id ].outputChannel.hide();
             }
