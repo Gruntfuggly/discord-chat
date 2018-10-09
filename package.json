@@ -98,6 +98,12 @@
                 }
             },
             {
+                "command": "discord-chat.editPost",
+                "title": "Edit Post",
+                "category": "discord-chat",
+                "when": "discord-channel-selected"
+            },
+            {
                 "command": "discord-chat.postSelection",
                 "title": "Post Selection",
                 "category": "discord-chat",

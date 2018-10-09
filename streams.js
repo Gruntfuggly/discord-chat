@@ -34,9 +34,6 @@ function outputChannel( id, action )
     {
         action( outputChannels[ id ].outputChannel );
     }
-    else
-    {
-    }
 }
 
 function getDiscordChannel( id )
@@ -132,12 +129,19 @@ function open( channel, subscriptions, populate, callback )
     callback( channel );
 }
 
-function reset()
+function reset( channelId )
 {
-    Object.keys( outputChannels ).map( function( id )
+    if( channelId === undefined )
     {
-        outputChannels[ id ].outputChannel.clear();
-    } );
+        Object.keys( outputChannels ).map( function( id )
+        {
+            outputChannels[ id ].outputChannel.clear();
+        } );
+    }
+    else
+    {
+        outputChannels[ channelId ].outputChannel.clear();
+    }
 }
 
 function remove( id )
