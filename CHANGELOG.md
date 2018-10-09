@@ -1,3 +1,6 @@
+# v0.1.32 - 2018-10-09
+- Add usage warning to README.md
+
 # v0.1.31 - 2018-09-12
 - add note about Image Preview to README.md
 

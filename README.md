@@ -1,5 +1,22 @@
 # Discord Chat
 
+---
+
+**Important Note: It seems that the way this extension works is not entirely within Discord's terms of service.**
+
+ See [here](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-).
+
+Please note:
+
+- it does not automatically respond to any messages
+- it does not collect information about invites sent in chat channels
+
+**However, by using it, you may run the risk of having your discord account terminated.**
+
+---
+
+If you're happy to proceed...
+
 A [Discord](https://discordapp.com/) chat client for vscode.
 
 After installing, go to your settings and set `discord-chat.token` to your API token. See [here](https://discordhelp.net/discord-token) for one way of finding your token. There are other ways too.
@@ -61,18 +78,18 @@ The source code is available on GitHub [here](https://github.com/Gruntfuggly/dis
 
 The extension can be customised as follows:
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| discord-chat.token | | You need to set this to authenticate with Discord |
-| discord-chat.compactView | false | Set this to true to put the date, time, name and first line of the message on one line |
-| discord-chat.notify | whenHidden | Can also be set to "always" or "never" |
-| discord-chat.highlightDelay | 500 | The delay before highlighting user names (in milliseconds) |
-| discord-chat.history | 10 | The number of previous messages to fetch when opening a channel |
-| discord-chat.showInExplorer | true | Set this to false if you would rather only see the channel list in a dedicated view in the activity bar |
-| discord-chat.hideMutedServers | false | Set this to true to hide muted servers in the tree |
-| discord-chat.hideMutedChannels | false | Set this to true to hide muted channels in the tree |
-| discord-chat.syncToken || A github token to allow syncing of muted servers, channels and last read times |
-| discord-chat.syncGistId || A github gist ID to allow syncing of muted servers, channels and last read times |
+| Setting                        | Default    | Description                                                                                             |
+|:-------------------------------|:-----------|:--------------------------------------------------------------------------------------------------------|
+| discord-chat.token             |            | You need to set this to authenticate with Discord                                                       |
+| discord-chat.compactView       | false      | Set this to true to put the date, time, name and first line of the message on one line                  |
+| discord-chat.notify            | whenHidden | Can also be set to "always" or "never"                                                                  |
+| discord-chat.highlightDelay    | 500        | The delay before highlighting user names (in milliseconds)                                              |
+| discord-chat.history           | 10         | The number of previous messages to fetch when opening a channel                                         |
+| discord-chat.showInExplorer    | true       | Set this to false if you would rather only see the channel list in a dedicated view in the activity bar |
+| discord-chat.hideMutedServers  | false      | Set this to true to hide muted servers in the tree                                                      |
+| discord-chat.hideMutedChannels | false      | Set this to true to hide muted channels in the tree                                                     |
+| discord-chat.syncToken         |            | A github token to allow syncing of muted servers, channels and last read times                          |
+| discord-chat.syncGistId        |            | A github gist ID to allow syncing of muted servers, channels and last read times                        |
 
 ## Known Issues
 
