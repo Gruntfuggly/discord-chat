@@ -4,6 +4,7 @@ var discord = require( 'discord.js' );
 var fs = require( 'fs' );
 var path = require( 'path' );
 var vscode = require( 'vscode' );
+var strftime = require( 'strftime' );
 
 var storage = require( './storage' );
 var treeView = require( './dataProvider' );
@@ -597,6 +598,59 @@ function activate( context )
                             } );
                         }
                     } );
+            }
+            else
+            {
+                vscode.window.showInformationMessage( "discord-chat: Please select a channel first" );
+            }
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.editPost', function()
+        {
+            var sc = selectedChannel();
+            if( sc )
+            {
+                streams.cancelAutoHide( sc );
+
+                var myMessages = channelMessages[ sc.id.toString() ].filter( function( message )
+                {
+                    return message.author.equals( client.user );
+                } );
+                var entries = [];
+                myMessages.array().map( function( message )
+                {
+                    entries.push(
+                        {
+                            label: strftime( utils.messageTimeFormat( message ), message.createdAt ) + " " + message.cleanContent.substr( 0, 30 ),
+                            message: message
+                        } );
+                } );
+                vscode.window.showQuickPick( entries ).then( function( entry )
+                {
+                    if( entry )
+                    {
+                        vscode.window.showInputBox( {
+                            value: entry.message.cleanContent,
+                            prompt: "Please edit your message:"
+                        } ).then( function( newMessage )
+                        {
+                            if( newMessage )
+                            {
+                                var channelId = entry.message.channel.id.toString();
+                                entry.message.edit( newMessage );
+                                // TODO Update message in streams and chats
+                                // streams.reset( channelId );
+                                // chats.reset( channelId );
+                                // channelMessages[ channelId ].array().map( function( message )
+                                // {
+                                //     var compact = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' );
+                                //     chats.addMessage( channelId, message.id, chats.formatMessage( message, compact ), message.createdAt );
+                                // } );
+                                // populateChannel( entry.message.channel );
+                            }
+                        } );
+                    }
+                } );
             }
             else
             {

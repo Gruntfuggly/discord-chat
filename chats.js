@@ -3,9 +3,16 @@ var utils = require( './utils' );
 
 var messages = {};
 
-function reset()
+function reset( channelId )
 {
-    messages = {};
+    if( channelId === undefined )
+    {
+        messages = {};
+    }
+    else
+    {
+        delete messages[ channelId ];
+    }
 }
 
 function sanitizeUnicode( entries )
@@ -44,14 +51,10 @@ function formatMessage( message, compact, short )
 
     var entries = [];
 
-    var format = "%a %T";
+    var format = utils.messageTimeFormat( message );
     if( short )
     {
         format = "%H:%M";
-    }
-    else if( new Date() - message.createdAt > 1000 * 60 * 60 * 24 * 7 )
-    {
-        format = "%D %T";
     }
 
     var header =

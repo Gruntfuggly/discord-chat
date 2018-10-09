@@ -190,6 +190,11 @@ function urlExt( url )
     return path.extname( filePath );
 }
 
+function messageTimeFormat( message )
+{
+    return ( new Date() - message.createdAt > 1000 * 60 * 60 * 24 * 7 ) ? "%D %T" : "%a %T";
+}
+
 module.exports.initialize = initialize;
 module.exports.log = log;
 module.exports.toParentId = toParentId;
@@ -202,3 +207,4 @@ module.exports.isReadableChannel = isReadableChannel;
 module.exports.directMessagesServerName = directMessagesServerName;
 module.exports.fetchIcon = fetchIcon;
 module.exports.urlExt = urlExt;
+module.exports.messageTimeFormat = messageTimeFormat;
