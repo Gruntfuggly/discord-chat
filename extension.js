@@ -587,10 +587,6 @@ function activate( context )
                             {
                                 utils.log( "Sent message to channel " + sc.name + " at " + new Date().toISOString() );
 
-                                if( sc.type === "dm" || sc.type === "group" )
-                                {
-                                    addMessageToChannel( message );
-                                }
                                 provider.markChannelRead( message.channel );
                             } ).catch( e =>
                             {
