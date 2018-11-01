@@ -3,6 +3,7 @@
 - add auto open and add auto close
 - fade historic messages instead of inserting a line
 - retrieve all unread messages
+- close output channel when hiding tree view
 
 # v0.1.32 - 2018-10-09
 - Add usage warning to README.md

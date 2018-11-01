@@ -367,6 +367,7 @@ function activate( context )
     function updateViewSelection()
     {
         streams.updateVisibleEditors( vscode.window.visibleTextEditors, onOutputChannelVisible, onOutputChannelNoLongerVisible );
+        setTimeout( selectionChanged, 200 );
     }
 
     function openChannel( channel )
