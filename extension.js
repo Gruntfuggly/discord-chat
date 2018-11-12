@@ -397,7 +397,7 @@ function activate( context )
             streams.hideOutputChannel();
             if( ss )
             {
-                revealElement( provider.getServerElement( ss ), true, true );
+                revealElement( provider.getServerElement( ss ), false, true );
             }
         }
         provider.setCurrentChannel( sc );
@@ -416,7 +416,7 @@ function activate( context )
         if( channel !== selectedChannel() )
         {
             provider.setCurrentChannel( channel );
-            revealElement( provider.getChannelElement( channel ), true, true );
+            revealElement( provider.getChannelElement( channel ), false, true );
         }
 
         updateToolbarButtons();
@@ -509,7 +509,7 @@ function activate( context )
                         sc.delete().then( function()
                         {
                             streams.remove( sc.id.toString() );
-                            revealElement( provider.getParent( provider.getChannelElement( sc ) ), true, true );
+                            revealElement( provider.getParent( provider.getChannelElement( sc ) ), false, true );
                             provider.deleteChannelElement( sc );
                         } ).catch( e =>
                         {
@@ -531,7 +531,7 @@ function activate( context )
             if( sc )
             {
                 streams.remove( sc.id.toString() );
-                revealElement( provider.getParent( provider.getChannelElement( sc ) ), true, true );
+                revealElement( provider.getParent( provider.getChannelElement( sc ) ), false, true );
             }
             else
             {
