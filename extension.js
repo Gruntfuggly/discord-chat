@@ -461,6 +461,25 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetSync', function() { storage.resetSync(); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetChannelUnread', function() { storage.resetChannel( selectedChannel() ); } ) );
 
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.statusButtonPressed', function()
+        {
+            setShowUnreadOnly( true );
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showInExplorer' ) )
+            {
+                if( discordChatExplorerView && discordChatExplorerView.visible === false )
+                {
+                    discordChatExplorerView.reveal( provider.getFirstVisibleChannel(), { select: true } );
+                }
+            }
+            else
+            {
+                if( discordChatView && discordChatView.visible === false )
+                {
+                    discordChatView.reveal( provider.getFirstVisibleChannel(), { select: true } );
+                }
+            }
+        } ) );
+
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function()
         {
             var ss = selectedServer();

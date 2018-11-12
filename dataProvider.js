@@ -48,8 +48,8 @@ class DiscordChatDataProvider
     {
         var unread = this.unreadCount();
         status.text = "$(comment-discussion) " + unread;
-        status.command = "discord-chat.markAllRead";
-        status.tooltip = "Click to mark all channels as read";
+        status.command = "discord-chat.statusButtonPressed";
+        status.tooltip = "Show unread channels";
         if( unread > 0 )
         {
             status.show();
@@ -409,6 +409,22 @@ class DiscordChatDataProvider
                 }
             }
         }
+    }
+
+    getFirstVisibleChannel()
+    {
+        var result;
+        servers.map( serverElement =>
+        {
+            serverElement.channels.map( channelElement =>
+            {
+                if( result === undefined && channelElement.unreadCount > 0 )
+                {
+                    result = channelElement;
+                }
+            } );
+        }, this );
+        return result;
     }
 
     refresh()
