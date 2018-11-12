@@ -634,16 +634,17 @@ function activate( context )
                             if( newMessage )
                             {
                                 var channelId = entry.message.channel.id.toString();
-                                entry.message.edit( newMessage );
-                                // TODO Update message in streams and chats
-                                // streams.reset( channelId );
-                                // chats.reset( channelId );
-                                // channelMessages[ channelId ].array().map( function( message )
-                                // {
-                                //     var compact = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' );
-                                //     chats.addMessage( channelId, message.id, chats.formatMessage( message, compact ), message.createdAt );
-                                // } );
-                                // populateChannel( entry.message.channel );
+                                entry.message.edit( newMessage ).then( function()
+                                {
+                                    streams.reset( channelId );
+                                    chats.reset( channelId );
+                                    channelMessages[ channelId ].array().map( function( message )
+                                    {
+                                        var compact = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' );
+                                        chats.addMessage( channelId, message.id, chats.formatMessage( message, compact ), message.createdAt );
+                                    } );
+                                    populateChannel( entry.message.channel );
+                                } );
                             }
                         } );
                     }
