@@ -22,7 +22,7 @@ function activate( context )
     const client = new discord.Client();
 
     var provider = new treeView.DiscordChatDataProvider( context );
-    var generalOutputChannel = vscode.window.createOutputChannel( 'discord-chat' );
+    var generalOutputChannel = vscode.window.createOutputChannel( 'Discord Chat' );
 
     utils.initialize( generalOutputChannel );
     storage.initialize( context.workspaceState );
