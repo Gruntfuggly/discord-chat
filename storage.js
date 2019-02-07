@@ -168,9 +168,9 @@ function backup()
 
 function triggerBackup()
 {
-    utils.log( "Backing up in 1 second..." );
+    utils.log( "Backing up in 1 minute..." );
     clearTimeout( backupTimer );
-    backupTimer = setTimeout( backup, 1000 );
+    backupTimer = setTimeout( backup, 60000 );
 }
 
 function setLastRead( channel )
@@ -258,7 +258,7 @@ function resetChannel( channel )
         var lastRead = state.get( 'lastRead' );
         lastRead[ channel.id.toString() ] = undefined;
         state.update( 'lastRead', lastRead );
-        backup();
+        triggerBackup();
     }
 }
 

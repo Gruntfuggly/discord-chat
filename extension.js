@@ -25,7 +25,7 @@ function activate( context )
     var generalOutputChannel = vscode.window.createOutputChannel( 'Discord Chat' );
 
     utils.initialize( generalOutputChannel );
-    storage.initialize( context.workspaceState );
+    storage.initialize( context.globalState );
     streams.initialize( client );
 
     function selectedChannel()
@@ -750,6 +750,7 @@ function activate( context )
         {
             if( e.focused )
             {
+                storage.sync( onSync );
                 refresh();
             }
         } ) );
