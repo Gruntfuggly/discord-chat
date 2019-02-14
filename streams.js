@@ -289,6 +289,7 @@ function highlightUserNames()
                 {
                     decoration.dispose();
                 } );
+                decorations = [];
                 Object.keys( highlights ).map( function( tag )
                 {
                     var decoration = getDecoration( tag );
