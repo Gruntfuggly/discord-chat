@@ -308,5 +308,10 @@
         "discord.js": "^11.3.2",
         "gistore": "^0.1.1",
         "strftime": "^0.10.0"
+    },
+    "__metadata": {
+        "id": "2ff389e9-081e-4c46-bc25-232616d2191c",
+        "publisherDisplayName": "Gruntfuggly",
+        "publisherId": "d4906d2e-f2ee-492d-9c7c-02b6160599ec"
     }
 }
