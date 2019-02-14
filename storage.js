@@ -2,6 +2,7 @@ var vscode = require( 'vscode' );
 var gistore = require( 'gistore' );
 var utils = require( './utils' );
 
+var active = false;
 var state;
 var backupTimer;
 var queue = [];
@@ -131,6 +132,12 @@ function initialize( workspaceState )
     }
 }
 
+function setActive( isActive )
+{
+    active = isActive;
+
+}
+
 function backup()
 {
     function doBackup()
@@ -161,9 +168,16 @@ function backup()
         }
     }
 
-    queue.push( enqueue( doBackup, this, [] ) );
+    if( active )
+    {
+        queue.push( enqueue( doBackup, this, [] ) );
 
-    processQueue();
+        processQueue();
+    }
+    else
+    {
+        utils.log( "not active" );
+    }
 }
 
 function triggerBackup()
@@ -258,11 +272,12 @@ function resetChannel( channel )
         var lastRead = state.get( 'lastRead' );
         lastRead[ channel.id.toString() ] = undefined;
         state.update( 'lastRead', lastRead );
-        backup();
+        triggerBackup();
     }
 }
 
 module.exports.initialize = initialize;
+module.exports.setActive = setActive;
 
 module.exports.setLastRead = setLastRead;
 module.exports.getLastRead = getLastRead;
