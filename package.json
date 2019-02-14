@@ -80,6 +80,11 @@
                     "group": "navigation@1"
                 },
                 {
+                    "command": "discord-chat.markChannelRead",
+                    "when": "view =~ /discord-chat/ && discord-channel-has-unread",
+                    "group": "navigation@1"
+                },
+                {
                     "command": "discord-chat.post",
                     "when": "view =~ /discord-chat/ && discord-channel-selected",
                     "group": "navigation@1"
@@ -120,6 +125,15 @@
                 "icon": {
                     "dark": "resources/icons/dark/refresh.svg",
                     "light": "resources/icons/light/refresh.svg"
+                }
+            },
+            {
+                "command": "discord-chat.markChannelRead",
+                "title": "Mark Channel Read",
+                "category": "discord-chat",
+                "icon": {
+                    "dark": "resources/icons/dark/mark-read.svg",
+                    "light": "resources/icons/light/mark-read.svg"
                 }
             },
             {

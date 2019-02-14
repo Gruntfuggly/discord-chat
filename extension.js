@@ -132,9 +132,12 @@ function activate( context )
         {
             var serverElement = provider.getServerElement( ss );
             vscode.commands.executeCommand( 'setContext', 'discord-server-has-unread', serverElement && serverElement.unreadCount > 0 );
+            vscode.commands.executeCommand( 'setContext', 'discord-channel-has-unread', false );
         }
         else
         {
+            var channelElement = provider.getChannelElement( sc );
+            vscode.commands.executeCommand( 'setContext', 'discord-channel-has-unread', channelElement && channelElement.unreadCount > 0 );
             vscode.commands.executeCommand( 'setContext', 'discord-server-has-unread', false );
         }
 
@@ -239,7 +242,6 @@ function activate( context )
         var storedDate = storage.getLastRead( channel );
         var channelLastRead = new Date( storedDate ? storedDate : 0 );
 
-        provider.markChannelRead( channel );
         chats.chatRead( channelId, channelLastRead );
     }
 
@@ -325,7 +327,6 @@ function activate( context )
     {
         addMessageToChannel( message );
         streams.autoHide( message.channel.id.toString() );
-        provider.markChannelRead( message.channel );
     }
 
     function selectServer()
@@ -377,10 +378,7 @@ function activate( context )
     {
         if( channel )
         {
-            streams.open( channel, context.subscriptions, populateChannel, function()
-            {
-                provider.markChannelRead( channel );
-            } );
+            streams.open( channel, context.subscriptions, populateChannel );
             streams.autoHide( channel.id.toString() );
         }
     }
@@ -480,6 +478,18 @@ function activate( context )
                 {
                     discordChatView.reveal( provider.getFirstVisibleChannel(), { select: true } );
                 }
+            }
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markChannelRead', function()
+        {
+            var sc = selectedChannel();
+            if( sc )
+            {
+                provider.markChannelRead( sc );
+                chats.chatRead( sc.id.toString(), new Date() );
+                updateToolbarButtons();
+                streams.fadeOldMessages();
             }
         } ) );
 
@@ -609,7 +619,6 @@ function activate( context )
                             sc.send( message ).then( message =>
                             {
                                 utils.log( "Sent message to channel " + sc.name + " at " + new Date().toISOString() );
-
                                 provider.markChannelRead( message.channel );
                             } ).catch( e =>
                             {
