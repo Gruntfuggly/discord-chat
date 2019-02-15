@@ -1,3 +1,11 @@
+# v0.3.0 - 2019-02-15
+- Make mark as read a manual step (available from the toolbar)
+- Only backup when window is active
+- Fix slowdown
+- Show unread channels when clicking status bar button
+- Support message edit
+- Many other fixes
+
 # v0.2.0 - 2018-10-08
 - major rewrite
 - add auto open and add auto close
@@ -5,7 +13,7 @@
 - retrieve all unread messages
 - close output channel when hiding tree view
 
-# v0.1.32 - 2018-10-09
+# v0.1.32 - 2018-09-10
 - Add usage warning to README.md
 
 # v0.1.31 - 2018-09-12
