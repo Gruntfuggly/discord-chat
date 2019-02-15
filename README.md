@@ -39,6 +39,7 @@ If you use vscode on multiple machines, you may want to sync your muted servers,
 
 - `discord-chat: Post` - send a message to the selected channel
 - `discord-chat: Post Selection` - send the currently selected text to the currently selected channel
+- `discord-chat: Edit Post` - allows a previously posted message to be changed
 - `discord-chat: Create Channel` - create a new channel on the selected server
 - `discord-chat: Delete Channel` - delete the currently selected channel
 - `discord-chat: Mark All Read` - reset unread count on all channels on all servers
