@@ -326,6 +326,16 @@ class DiscordChatDataProvider
         }
     }
 
+    incrementUnread( channel )
+    {
+        var channelElement = this.getChannelElement( channel );
+        if( channelElement )
+        {
+            channelElement.unreadCount++
+            this.updateServerCount( servers.find( findServer, utils.toParentId( channel ) ) );
+        }
+    }
+
     markChannelRead( channel )
     {
         var channelElement = this.getChannelElement( channel );

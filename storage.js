@@ -166,6 +166,10 @@ function backup()
                 processQueue();
             } );
         }
+        else
+        {
+            processQueue();
+        }
     }
 
     if( active )

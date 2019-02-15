@@ -126,7 +126,10 @@ function open( channel, subscriptions, populate, callback )
     }
 
     outputChannel.show( true );
-    callback( channel );
+    if( callback )
+    {
+        callback( channel );
+    }
 }
 
 function reset( channelId )
