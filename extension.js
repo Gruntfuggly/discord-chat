@@ -263,6 +263,8 @@ function activate( context )
                     populateChannelMessages( client.user, client.channels );
 
                     provider.refresh();
+
+                    updateToolbarButtons();
                 }
             }
 
@@ -299,6 +301,7 @@ function activate( context )
                     populateChannelMessages( client.user, client.channels );
 
                     provider.refresh();
+                    updateToolbarButtons();
                 }
             }
         }
@@ -887,7 +890,6 @@ function activate( context )
                         if( hidden )
                         {
                             updateChannel( message, hidden );
-                            updateToolbarButtons();
                         }
                         else
                         {
@@ -895,6 +897,8 @@ function activate( context )
                             provider.incrementUnread( message.channel );
                         }
                     }
+
+                    updateToolbarButtons();
                 }
             }
         } );
