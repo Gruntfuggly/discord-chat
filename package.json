@@ -89,6 +89,16 @@
                     "when": "view =~ /discord-chat/ && discord-channel-selected",
                     "group": "navigation@1"
                 }
+            ],
+            "view/item/context": [
+                {
+                    "command": "discord-chat.markServerRead",
+                    "when": "view =~ /discord-chat/ && viewItem == server"
+                },
+                {
+                    "command": "discord-chat.markChannelRead",
+                    "when": "view =~ /discord-chat/ && viewItem == channel"
+                }
             ]
         },
         "commands": [

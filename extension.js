@@ -484,9 +484,9 @@ function activate( context )
             }
         } ) );
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markChannelRead', function()
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markChannelRead', function( element )
         {
-            var sc = selectedChannel();
+            var sc = element && element.channel ? element.channel : selectedChannel();
             if( sc )
             {
                 provider.markChannelRead( sc );
@@ -496,9 +496,9 @@ function activate( context )
             }
         } ) );
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function()
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function( element )
         {
-            var ss = selectedServer();
+            var ss = element && element.server ? element.server : selectedServer();
             if( ss )
             {
                 provider.markServerRead( ss );

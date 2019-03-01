@@ -206,6 +206,8 @@ class DiscordChatDataProvider
             treeItem.label += " (muted)";
         }
 
+        treeItem.contextValue = element.type;
+
         return treeItem;
     }
 
