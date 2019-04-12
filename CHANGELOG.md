@@ -1,3 +1,6 @@
+# v0.3.1 - 2019-04-12
+- Track output channels without relying on private properties
+
 # v0.3.0 - 2019-02-15
 - Make mark as read a manual step (available from the toolbar)
 - Only backup when window is active

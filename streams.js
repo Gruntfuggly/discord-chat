@@ -6,13 +6,14 @@ var client;
 var outputChannels = {};
 var visibleEditors = [];
 var decorations = [];
+var pendingOutputChannels = [];
 
 var oldMessageMask = vscode.window.createTextEditorDecorationType( { textDecoration: 'none; opacity: 0.6' } );
 
 function getOutputChannelId( outputChannel )
 {
     var id = outputChannel._id;
-    return id._value ? id._value : id;
+    return id && id._value ? id._value : id;
 }
 
 function initialize( discordClient )
@@ -110,6 +111,7 @@ function open( channel, subscriptions, populate, callback )
     var outputChannel = outputChannels[ id ];
     if( !outputChannel )
     {
+        pendingOutputChannels.push( id );
         outputChannel = vscode.window.createOutputChannel( utils.toOutputChannelName( channel ) + "." + id );
         outputChannel.clear();
         outputChannels[ id ] = {
@@ -305,6 +307,15 @@ function highlightUserNames()
     } );
 }
 
+function outputChannelCreated( id )
+{
+    if( pendingOutputChannels.length > 0 )
+    {
+        var pendingId = pendingOutputChannels.shift();
+        outputChannels[ pendingId ].outputChannel._id = id;
+    }
+}
+
 module.exports.initialize = initialize;
 module.exports.outputChannel = outputChannel;
 module.exports.getDiscordChannel = getDiscordChannel;
@@ -320,3 +331,4 @@ module.exports.isOutputChannelVisible = isOutputChannelVisible;
 module.exports.hideOutputChannel = hideOutputChannel;
 module.exports.fadeOldMessages = fadeOldMessages;
 module.exports.highlightUserNames = highlightUserNames;
+module.exports.outputChannelCreated = outputChannelCreated;

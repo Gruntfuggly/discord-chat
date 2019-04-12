@@ -761,6 +761,14 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.selectServer', selectServer ) );
 
+        context.subscriptions.push( vscode.workspace.onDidOpenTextDocument( function( e )
+        {
+            if( e.uri.scheme === "output" )
+            {
+                streams.outputChannelCreated( e.fileName );
+            }
+        } ) );
+
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
         {
             storage.setActive( e.focused );
