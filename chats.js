@@ -59,7 +59,7 @@ function formatMessage( message, compact, short )
 
     var header =
         strftime( format, message.createdAt ) +
-        ( short ? ( " [" + utils.toServerName( message.channel ) + "/" + utils.toChannelName( message.channel ) + "]" ) : "" ) +
+        ( short ? ( " " + utils.toServerName( message.channel ) + "/" + utils.toChannelName( message.channel ) ) : "" ) +
         " @" + message.author.username;
 
     if( message.author )

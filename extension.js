@@ -19,6 +19,8 @@ var discordChatView;
 
 var selectionChangedTimeout;
 
+var openers = [];
+
 function activate( context )
 {
     const client = new discord.Client();
@@ -359,7 +361,12 @@ function activate( context )
             if( notify === "always" || ( notify == "whenHidden" && hidden === true ) )
             {
                 var compact = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' );
-                vscode.window.showInformationMessage( chats.formatMessage( message, compact, true ).join() );
+                if( openers[ message.channel.id ] === undefined )
+                {
+                    openers[ message.channel.id ] = function() { openChannel( message.channel ); }
+                    vscode.commands.registerCommand( 'discord-chat.openChannel' + message.channel.id, openers[ message.channel.id ] );
+                }
+                vscode.window.showInformationMessage( "[" + chats.formatMessage( message, compact, true ).join() + "](command:discord-chat.openChannel" + message.channel.id + ")" );
             }
         }
 
