@@ -1,3 +1,5 @@
+# v0.3.2 - 2019-05-19
+- Allow opening of channels from notifications
 # v0.3.1 - 2019-04-12
 - Track output channels without relying on private properties
 

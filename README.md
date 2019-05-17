@@ -80,7 +80,7 @@ The source code is available on GitHub [here](https://github.com/Gruntfuggly/dis
 The extension can be customised as follows:
 
 | Setting | Default | Description |
-|:-------------------------------|:-----------|:--------------------------------------------------------------------------------------------------------|
+|:-|:-|:-|
 | discord-chat.token | | You need to set this to authenticate with Discord |
 | discord-chat.compactView | false | Set this to true to put the date, time, name and first line of the message on one line |
 | discord-chat.notify | whenHidden | Can also be set to "always" or "never" |
@@ -91,8 +91,8 @@ The extension can be customised as follows:
 | discord-chat.hideMutedChannels | false | Set this to true to hide muted channels in the tree |
 | discord-chat.syncToken || A github token to allow syncing of muted servers, channels and last read times |
 | discord-chat.syncGistId || A github gist ID to allow syncing of muted servers, channels and last read times |
-| discord-chat.autoOpen | false | Automatically show a channel when a message is received                                                 |
-| discord-chat.autoClose | 0 | Automatically hide a channel after this many seconds of inactivity (Set to 0 to disable)                |
+| discord-chat.autoOpen | false | Automatically show a channel when a message is received |
+| discord-chat.autoClose | 0 | Automatically hide a channel after this many seconds of inactivity (Set to 0 to disable) |
 
 ## Known Issues
 

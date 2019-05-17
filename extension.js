@@ -19,6 +19,7 @@ var discordChatView;
 
 var selectionChangedTimeout;
 
+
 function activate( context )
 {
     const client = new discord.Client();
@@ -359,7 +360,7 @@ function activate( context )
             if( notify === "always" || ( notify == "whenHidden" && hidden === true ) )
             {
                 var compact = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' );
-                vscode.window.showInformationMessage( chats.formatMessage( message, compact, true ).join() );
+                vscode.window.showInformationMessage( "[" + chats.formatMessage( message, compact, true ).join() + "](command:discord-chat.openChannel?" + JSON.stringify( message.channel.id ) + ")" );
             }
         }
 
@@ -379,6 +380,10 @@ function activate( context )
 
     function openChannel( channel )
     {
+        if( typeof channel === 'string' )
+        {
+            channel = client.channels.get( channel );
+        }
         if( channel )
         {
             streams.open( channel, context.subscriptions, populateChannel );
