@@ -167,28 +167,35 @@ function activate( context )
 
     function getUnreadMessages( done, channel, messages, before )
     {
-        channel.fetchMessages( { limit: 100, before: before } ).then( function( newMessages )
+        if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'fetchUnreadMessages' ) !== true )
         {
-            var storedDate = storage.getLastRead( channel );
-            var channelLastRead = new Date( storedDate ? storedDate : 0 );
-            var unreadMessages = newMessages.filter( function( message )
+            done();
+        }
+        else
+        {
+            channel.fetchMessages( { limit: 100, before: before } ).then( function( newMessages )
             {
-                return message.createdAt > channelLastRead;
+                var storedDate = storage.getLastRead( channel );
+                var channelLastRead = new Date( storedDate ? storedDate : 0 );
+                var unreadMessages = newMessages.filter( function( message )
+                {
+                    return message.createdAt > channelLastRead;
+                } );
+
+                messages = messages ? messages.concat( unreadMessages.clone() ) : unreadMessages.clone();
+
+                if( unreadMessages.array().length > 0 )
+                {
+                    getUnreadMessages( done, channel, messages, unreadMessages.last().id );
+                }
+                else
+                {
+                    channelMessages[ channel.id.toString() ] = messages;
+                    provider.setUnread( channel, messages );
+                    done();
+                }
             } );
-
-            messages = messages ? messages.concat( unreadMessages.clone() ) : unreadMessages.clone();
-
-            if( unreadMessages.array().length > 0 )
-            {
-                getUnreadMessages( done, channel, messages, unreadMessages.last().id );
-            }
-            else
-            {
-                channelMessages[ channel.id.toString() ] = messages;
-                provider.setUnread( channel, messages );
-                done();
-            }
-        } );
+        }
     }
 
     function populateChannelMessages( user, channels )

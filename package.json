@@ -313,6 +313,11 @@
                     "description": "If no messages are received after this many seconds, close the output channel (Set to 0 to disable)",
                     "default": 0
                 },
+                "discord-chat.fetchUnreadMessages": {
+                    "type": "boolean",
+                    "description": "Set to false if you don't want to count unread messages at startup",
+                    "default": true
+                },
                 "discord-chat.mutedChannels": {
                     "type": "object",
                     "markdownDescription": "*No longer required - do not use*"

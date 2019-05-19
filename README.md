@@ -93,6 +93,7 @@ The extension can be customised as follows:
 | discord-chat.syncGistId || A github gist ID to allow syncing of muted servers, channels and last read times |
 | discord-chat.autoOpen | false | Automatically show a channel when a message is received |
 | discord-chat.autoClose | 0 | Automatically hide a channel after this many seconds of inactivity (Set to 0 to disable) |
+| discord-chat.fetchUnreadMessages | true | Unread message counts are generated at startup. Set this to false to skip |
 
 ## Known Issues
 
