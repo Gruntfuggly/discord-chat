@@ -99,12 +99,22 @@
                     "command": "discord-chat.markChannelRead",
                     "when": "view =~ /discord-chat/ && viewItem == channel"
                 }
+            ],
+            "editor/context": [
+                {
+                    "command": "discord-chat.markChannelRead",
+                    "when": "discord-channel-focused"
+                },
+                {
+                    "command": "discord-chat.post",
+                    "when": "discord-channel-focused"
+                }
             ]
         },
         "commands": [
             {
                 "command": "discord-chat.post",
-                "title": "Post",
+                "title": "Post Message",
                 "category": "discord-chat",
                 "when": "discord-channel-selected",
                 "icon": {

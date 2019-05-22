@@ -805,7 +805,12 @@ function activate( context )
         {
             if( e && e.document )
             {
-                streams.cancelAutoHide( streams.getChannelId( e.document.fileName ) );
+                var channelId = streams.getChannelId( e.document.fileName );
+                if( channelId )
+                {
+                    streams.cancelAutoHide( channelId );
+                }
+                vscode.commands.executeCommand( 'setContext', 'discord-channel-focused', channelId !== undefined );
             }
         } ) );
 
