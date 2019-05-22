@@ -1,3 +1,6 @@
+# v0.3.3 - 2019-05-22
+- Add context menu to output channels
+
 # v0.3.2 - 2019-05-19
 - Allow opening of channels from notifications
 - Add option to skip loading of unread message counts at startup
