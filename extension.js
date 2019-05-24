@@ -367,7 +367,11 @@ function activate( context )
             if( notify === "always" || ( notify == "whenHidden" && hidden === true ) )
             {
                 var compact = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' );
-                vscode.window.showInformationMessage( "[" + chats.formatMessage( message, compact, true ).join() + "](command:discord-chat.openChannel?" + JSON.stringify( message.channel.id ) + ")" );
+                vscode.window.showInformationMessage( chats.formatMessage( message, compact, true ).join(), "Show" ).then(
+                    function()
+                    {
+                        openChannel( message.channel.id );
+                    } );
             }
         }
 
