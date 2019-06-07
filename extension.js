@@ -317,7 +317,7 @@ function activate( context )
         storage.sync( onSync );
     }
 
-    function addMessageToChannel( message )
+    function addMessageToChannel( message, isEdit )
     {
         var channelId = message.channel.id.toString();
 
@@ -325,18 +325,29 @@ function activate( context )
         var formattedMessage = chats.formatMessage( message, compact );
         chats.addMessage( channelId, message.id, formattedMessage, message.createdAt );
 
-        streams.outputChannel( channelId, function( outputChannel )
+        if( isEdit === true )
         {
-            formattedMessage.map( function( line )
+            streams.outputChannel( channelId, function( outputChannel )
             {
-                outputChannel.appendLine( line );
+                outputChannel.clear();
             } );
-        } );
+            populateChannel( message.channel );
+        }
+        else
+        {
+            streams.outputChannel( channelId, function( outputChannel )
+            {
+                formattedMessage.map( function( line )
+                {
+                    outputChannel.appendLine( line );
+                } );
+            } );
+        }
     }
 
-    function updateCurrentChannel( message )
+    function updateCurrentChannel( message, isEdit )
     {
-        addMessageToChannel( message );
+        addMessageToChannel( message, isEdit );
         streams.autoHide( message.channel.id.toString() );
     }
 
@@ -359,7 +370,7 @@ function activate( context )
         }
     }
 
-    function updateChannel( message, hidden )
+    function updateChannel( message, hidden, isEdit )
     {
         function showNotification()
         {
@@ -371,11 +382,13 @@ function activate( context )
             }
         }
 
-        addMessageToChannel( message );
+        addMessageToChannel( message, isEdit );
 
-        provider.update( message );
-
-        showNotification();
+        if( isEdit !== true )
+        {
+            provider.update( message );
+            showNotification();
+        }
     }
 
     function updateViewSelection()
@@ -914,11 +927,11 @@ function activate( context )
 
                         if( hidden )
                         {
-                            updateChannel( message, hidden );
+                            updateChannel( message, hidden, false );
                         }
                         else
                         {
-                            updateCurrentChannel( message );
+                            updateCurrentChannel( message, false );
                             provider.incrementUnread( message.channel );
                         }
                     }
@@ -928,6 +941,31 @@ function activate( context )
             }
         } );
 
+        client.on( 'messageUpdate', ( oldMessage, newMessage ) =>
+        {
+            if( utils.isReadableChannel( client.user, oldMessage.channel ) )
+            {
+                if( storage.isChannelMuted( oldMessage.channel ) !== true )
+                {
+                    var outputChannelName = utils.toOutputChannelName( oldMessage.channel );
+
+                    utils.log( "Updated message on " + outputChannelName );
+
+                    if( outputChannelName )
+                    {
+                        var hidden = selectedChannel() === undefined;
+                        if( hidden )
+                        {
+                            updateChannel( newMessage, hidden, true );
+                        }
+                        else
+                        {
+                            updateCurrentChannel( newMessage, true );
+                        }
+                    }
+                }
+            }
+        } );
         setTimeout( login, 1000 );
     }
 

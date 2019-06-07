@@ -60,7 +60,8 @@ function formatMessage( message, compact, short )
     var header =
         strftime( format, message.createdAt ) +
         ( short ? ( " " + utils.toServerName( message.channel ) + "/" + utils.toChannelName( message.channel ) ) : "" ) +
-        " @" + message.author.username;
+        " @" + message.author.username +
+        ( ( message.editedAt && message.createdAt !== message.editedAt ) ? " (edited)" : "" );
 
     if( message.author )
     {
@@ -137,6 +138,27 @@ function addMessage( channelId, messageId, message, timeOfMessage )
         {
             messages[ channelId ].push( { text: line, timeOfMessage: timeOfMessage, read: false, id: messageId } );
         } );
+    }
+    else
+    {
+        var inserted = false;
+        var updatedMessages = [];
+        for( var i = 0; i < messages[ channelId ].length; ++i )
+        {
+            if( messages[ channelId ][ i ].id !== messageId )
+            {
+                updatedMessages.push( messages[ channelId ][ i ] );
+            }
+            else if( inserted === false )
+            {
+                message.map( function( line )
+                {
+                    updatedMessages.push( { text: line, timeOfMessage: timeOfMessage, read: false, id: messageId } );
+                } );
+                inserted = true;
+            }
+        }
+        messages[ channelId ] = updatedMessages;
     }
 }
 
