@@ -1,3 +1,8 @@
+# v0.3.5 - 2019-06-11
+- all sync to be enabled/disabled without clearing token
+- trigger highlight and fade after short interval
+- don't fetch unread counts for muted channels
+
 # v0.3.4 - 2019-06-07
 - Add support for message edits
 - Only show popup notifications in active window

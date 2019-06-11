@@ -18,7 +18,7 @@ var discordChatExplorerView;
 var discordChatView;
 
 var selectionChangedTimeout;
-
+var documentChangedTimeout;
 
 function activate( context )
 {
@@ -202,7 +202,7 @@ function activate( context )
     {
         channels.map( function( channel )
         {
-            if( utils.isReadableChannel( user, channel ) )
+            if( utils.isReadableChannel( user, channel ) && storage.isChannelMuted( channel ) !== true )
             {
                 getUnreadMessages( function()
                 {
@@ -221,6 +221,8 @@ function activate( context )
                             chats.addMessage( channelId, message.id, chats.formatMessage( message, compact ), message.createdAt );
                         } );
                     } );
+
+                    updateToolbarButtons();
                 }, channel );
             }
         }, this );
@@ -814,8 +816,12 @@ function activate( context )
 
         context.subscriptions.push( vscode.workspace.onDidChangeTextDocument( function( e )
         {
-            streams.highlightUserNames();
-            streams.fadeOldMessages();
+            clearTimeout( documentChangedTimeout );
+            documentChangedTimeout = setTimeout( function()
+            {
+                streams.highlightUserNames();
+                streams.fadeOldMessages();
+            }, 100 );
         } ) );
 
         context.subscriptions.push( vscode.window.onDidChangeActiveTextEditor( function( e )

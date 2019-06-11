@@ -68,17 +68,25 @@ function sync( callback )
         }
     }
 
-    queue.push( enqueue( doSync, this, [ callback ] ) );
+    if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncEnabled' ) === true )
+    {
+        queue.push( enqueue( doSync, this, [ callback ] ) );
 
-    processQueue();
+        processQueue();
+    }
+    else
+    {
+        callback();
+    }
 }
 
 function initializeSync()
 {
+    var enabled = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncEnabled', undefined );
     var token = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncToken', undefined );
     var gistId = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncGistId', undefined );
 
-    if( token )
+    if( enabled === true && token )
     {
         gistore.setToken( token );
 
@@ -189,9 +197,12 @@ function backup()
 
 function triggerBackup()
 {
-    utils.log( "Backing up in 1 second..." );
-    clearTimeout( backupTimer );
-    backupTimer = setTimeout( backup, 1000 );
+    if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncEnabled' ) === true )
+    {
+        utils.log( "Backing up in 1 second..." );
+        clearTimeout( backupTimer );
+        backupTimer = setTimeout( backup, 1000 );
+    }
 }
 
 function setLastRead( channel )
