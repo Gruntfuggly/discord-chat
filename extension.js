@@ -235,6 +235,11 @@ function activate( context )
                             var compact = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' );
                             chats.addMessage( channelId, message.id, chats.formatMessage( message, compact ), message.createdAt );
                         } );
+
+                        var storedDate = storage.getLastRead( channel );
+                        var channelLastRead = new Date( storedDate ? storedDate : 0 );
+
+                        chats.chatRead( channelId, channelLastRead );
                     } );
 
                     updateToolbarButtons();
