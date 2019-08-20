@@ -10,6 +10,8 @@ var utils = require( './utils' );
 
 var servers = [];
 
+var fetchInProgress = false;
+
 const DEBUG = "debug";
 const SERVER = "server";
 const CHANNEL = "channel";
@@ -439,10 +441,28 @@ class DiscordChatDataProvider
         return result;
     }
 
+    startFetch()
+    {
+        fetchInProgress = true;
+        status.text = "$(comment-discussion) Fetching messages...";
+        status.command = "discord-chat.abort";
+        status.tooltip = "Click to abort";
+        status.show();
+        console.log( "Fetching..." );
+    }
+
+    fetchComplete()
+    {
+        fetchInProgress = false;
+    }
+
     refresh()
     {
         this._onDidChangeTreeData.fire();
-        this.updateStatusBar();
+        if( fetchInProgress !== true )
+        {
+            this.updateStatusBar();
+        }
     }
 }
 

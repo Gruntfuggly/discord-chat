@@ -20,6 +20,8 @@ var discordChatView;
 var selectionChangedTimeout;
 var decorateTimeout;
 
+var aborted = false;
+
 function activate( context )
 {
     const client = new discord.Client();
@@ -167,8 +169,9 @@ function activate( context )
 
     function getUnreadMessages( done, channel, messages, before )
     {
-        if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'fetchUnreadMessages' ) !== true )
+        if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'fetchUnreadMessages' ) !== true || aborted === true )
         {
+            aborted = false;
             done();
         }
         else
@@ -259,6 +262,8 @@ function activate( context )
     {
         function onSync()
         {
+            provider.startFetch();
+
             var pending = client.guilds ? client.guilds.size : 0;
             var icons = {};
 
@@ -495,6 +500,11 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markAllRead', function() { provider.markAllRead(); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetSync', function() { storage.resetSync(); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.resetChannelUnread', function() { storage.resetChannel( selectedChannel() ); } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.abort', function()
+        {
+            aborted = true;
+        } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.statusButtonPressed', function()
         {
