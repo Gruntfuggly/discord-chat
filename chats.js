@@ -5,6 +5,8 @@ var messages = {};
 
 function reset( channelId )
 {
+    console.log( "discord-chat.trace: chats.reset" );
+
     if( channelId === undefined )
     {
         messages = {};
@@ -32,6 +34,8 @@ function sanitizeUnicode( entries )
 
 function formatMessage( message, compact, short )
 {
+    console.log( "discord-chat.trace: chats.formatMessage" );
+
     function separator()
     {
         return compact === true ? ": " : ":\n ";
@@ -119,6 +123,8 @@ function formatMessage( message, compact, short )
 
 function addMessage( channelId, messageId, message, timeOfMessage )
 {
+    console.log( "discord-chat.trace: chats.addMessage" );
+
     if( messages[ channelId ] === undefined )
     {
         messages[ channelId ] = [];
@@ -134,6 +140,7 @@ function addMessage( channelId, messageId, message, timeOfMessage )
     } );
     if( isNew === true )
     {
+        console.log( "discord-chat.trace: chats.addMessage (adding message)" );
         message.map( function( line )
         {
             messages[ channelId ].push( { text: line, timeOfMessage: timeOfMessage, read: false, id: messageId } );
@@ -141,6 +148,7 @@ function addMessage( channelId, messageId, message, timeOfMessage )
     }
     else
     {
+        console.log( "discord-chat.trace: chats.addMessage (updating messages)" );
         var inserted = false;
         var updatedMessages = [];
         for( var i = 0; i < messages[ channelId ].length; ++i )
@@ -164,6 +172,7 @@ function addMessage( channelId, messageId, message, timeOfMessage )
 
 function chatRead( id, time )
 {
+    console.log( "discord-chat.trace: chats.chatRead" );
     if( messages[ id ] )
     {
         messages[ id ].forEach( function( message )
@@ -175,6 +184,7 @@ function chatRead( id, time )
 
 function getReadMessages( id )
 {
+    console.log( "discord-chat.trace: chats.getReadMessages" );
     if( messages[ id ] )
     {
         return messages[ id ].filter( function( message )

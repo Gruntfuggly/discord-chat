@@ -33,8 +33,14 @@ function activate( context )
     storage.initialize( context.globalState );
     streams.initialize( client );
 
+    function trace( text )
+    {
+        console.log( "discord-chat.trace: " + text );
+    }
+
     function selectedChannel()
     {
+        trace( "selectedChannel" );
         var result;
         if( discordChatExplorerView && discordChatExplorerView.visible === true )
         {
@@ -55,6 +61,7 @@ function activate( context )
 
     function selectedServer()
     {
+        trace( "selectedServer" );
         var result;
         if( discordChatExplorerView && discordChatExplorerView.visible === true )
         {
@@ -75,6 +82,7 @@ function activate( context )
 
     function promptForToken()
     {
+        trace( "promptForToken" );
         vscode.window.showInformationMessage(
             "Please set your discord-chat.token",
             "Help",
@@ -105,6 +113,7 @@ function activate( context )
 
     function login()
     {
+        trace( "login" );
         utils.log( "Logging in..." );
 
         var token = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'token' );
@@ -125,6 +134,7 @@ function activate( context )
 
     function updateToolbarButtons()
     {
+        trace( "updateToolbarButtons" );
         var sc = selectedChannel();
         var ss = selectedServer();
 
@@ -169,6 +179,7 @@ function activate( context )
 
     function getUnreadMessages( done, channel, messages, before )
     {
+        trace( "getUnreadMessages" );
         if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'fetchUnreadMessages' ) !== true || aborted === true )
         {
             aborted = false;
@@ -203,6 +214,7 @@ function activate( context )
 
     function populateChannelMessages( user, channels )
     {
+        trace( "populateChannelMessages" );
         channels.map( function( channel )
         {
             if( utils.isReadableChannel( user, channel ) && storage.isChannelMuted( channel ) !== true )
@@ -233,6 +245,7 @@ function activate( context )
 
     function populateChannel( channel )
     {
+        trace( "populateChannel" );
         var channelId = channel.id.toString();
         streams.outputChannel( channelId, function( outputChannel )
         {
@@ -260,8 +273,10 @@ function activate( context )
 
     function refresh()
     {
+        trace( "refresh" );
         function onSync()
         {
+            trace( "onSync" );
             provider.startFetch();
 
             var pending = client.guilds ? client.guilds.size : 0;
@@ -269,6 +284,7 @@ function activate( context )
 
             function checkFinished()
             {
+                trace( "checkFinished" );
                 --pending;
                 if( pending === 0 )
                 {
@@ -326,6 +342,7 @@ function activate( context )
 
     function addMessageToChannel( message, isEdit )
     {
+        trace( "addMessageToChannel" );
         var channelId = message.channel.id.toString();
 
         var compact = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' );
@@ -354,16 +371,19 @@ function activate( context )
 
     function updateCurrentChannel( message, isEdit )
     {
+        trace( "updateCurrentChannel" );
         addMessageToChannel( message, isEdit );
         streams.autoHide( message.channel.id.toString() );
     }
 
     function selectServer()
     {
+        trace( "selectServer" );
     }
 
     function revealElement( element, focus, select )
     {
+        trace( "revealElement" );
         if( element !== undefined )
         {
             if( discordChatExplorerView.visible === true )
@@ -379,8 +399,10 @@ function activate( context )
 
     function updateChannel( message, hidden, isEdit )
     {
+        trace( "updateChannel" );
         function showNotification()
         {
+            trace( "showNotification" );
             var notify = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'notify' );
             if( notify === "always" || ( notify == "whenHidden" && hidden === true ) )
             {
@@ -404,6 +426,7 @@ function activate( context )
 
     function updateViewSelection()
     {
+        trace( "updateViewSelection" );
         streams.updateVisibleEditors( vscode.window.visibleTextEditors, onOutputChannelVisible, onOutputChannelNoLongerVisible );
         clearTimeout( selectionChangedTimeout );
         selectionChangedTimeout = setTimeout( selectionChanged, 200 );
@@ -411,6 +434,7 @@ function activate( context )
 
     function openChannel( channel )
     {
+        trace( "openChannel" );
         if( typeof channel === 'string' )
         {
             channel = client.channels.get( channel );
@@ -424,6 +448,7 @@ function activate( context )
 
     function selectionChanged()
     {
+        trace( "selectionChanged" );
         handlingSelectionChanged = true;
         var sc = selectedChannel();
         var ss = selectedServer();
@@ -446,6 +471,7 @@ function activate( context )
 
     function setShowUnreadOnly( enabled )
     {
+        trace( "setShowUnreadOnly" );
         context.workspaceState.update( 'showUnreadOnly', enabled );
         vscode.commands.executeCommand( 'setContext', 'discord-show-unread-only', context.workspaceState.get( 'showUnreadOnly' ) );
         provider.refresh();
@@ -453,6 +479,7 @@ function activate( context )
 
     function onOutputChannelVisible( channel )
     {
+        trace( "onOutputChannelVisible" );
         if( channel !== selectedChannel() )
         {
             provider.setCurrentChannel( channel );
@@ -466,6 +493,7 @@ function activate( context )
 
     function onOutputChannelNoLongerVisible( channel )
     {
+        trace( "onOutputChannelNoLongerVisible" );
         var sc = selectedChannel();
         if( sc && channel.id === sc.id )
         {
@@ -475,6 +503,7 @@ function activate( context )
 
     function register()
     {
+        trace( "register" );
         updateToolbarButtons();
 
         discordChatExplorerView = vscode.window.createTreeView( 'discord-chat-view-explorer', { treeDataProvider: provider } );
@@ -503,11 +532,13 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.abort', function()
         {
+            trace( "discord-chat.abort" );
             aborted = true;
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.statusButtonPressed', function()
         {
+            trace( "discord-chat.statusButtonPressed" );
             setShowUnreadOnly( true );
             if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showInExplorer' ) )
             {
@@ -527,6 +558,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markChannelRead', function( element )
         {
+            trace( "discord-chat.markChannelRead" );
             var sc = element && element.channel ? element.channel : selectedChannel();
             if( sc )
             {
@@ -543,6 +575,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.markServerRead', function( element )
         {
+            trace( "discord-chat.markServerRead" );
             var ss = element && element.server ? element.server : selectedServer();
             if( ss )
             {
@@ -553,6 +586,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.createChannel', function()
         {
+            trace( "discord-chat.createChannel" );
             var ss = selectedServer();
             if( ss )
             {
@@ -579,6 +613,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.deleteChannel', function()
         {
+            trace( "discord-chat.deleteChannel" );
             var sc = selectedChannel();
             if( sc )
             {
@@ -607,6 +642,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.closeChannel', function()
         {
+            trace( "discord-chat.closeChannel" );
             var sc = selectedChannel();
             if( sc )
             {
@@ -622,6 +658,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.leaveServer', function()
         {
+            trace( "discord-chat.leaveServer" );
             var ss = selectedServer();
             if( ss )
             {
@@ -654,6 +691,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.post', function()
         {
+            trace( "discord-chat.post" );
             var sc = selectedChannel();
             if( sc )
             {
@@ -683,6 +721,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.editPost', function()
         {
+            trace( "discord-chat.editPost" );
             var sc = selectedChannel();
             if( sc )
             {
@@ -737,6 +776,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.postSelection', function()
         {
+            trace( "discord-chat.postSelection" );
             var editor = vscode.window.activeTextEditor;
             var sc = selectedChannel();
 
@@ -762,6 +802,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.mute', function()
         {
+            trace( "discord-chat.mute" );
             var sc = selectedChannel();
             var ss = selectedServer();
             if( sc )
@@ -785,6 +826,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.unmute', function()
         {
+            trace( "discord-chat.unmute" );
             var sc = selectedChannel();
             var ss = selectedServer();
             if( sc )
@@ -801,6 +843,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.openDebugConsole', function()
         {
+            trace( "discord-chat.openDebugConsole" );
             generalOutputChannel.show( true );
         } ) );
 
@@ -808,6 +851,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.workspace.onDidOpenTextDocument( function( e )
         {
+            trace( "vscode.workspace.onDidOpenTextDocument" );
             if( e.uri.scheme === "output" )
             {
                 streams.outputChannelCreated( e.fileName );
@@ -816,6 +860,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
         {
+            trace( "vscode.workspace.onDidChangeWindowState" );
             storage.setActive( e.focused );
             if( e.focused )
             {
@@ -825,11 +870,13 @@ function activate( context )
 
         context.subscriptions.push( vscode.window.onDidChangeVisibleTextEditors( function( editors )
         {
+            trace( "vscode.workspace.onDidChangeVisibleTextEditors" );
             streams.updateVisibleEditors( editors, onOutputChannelVisible, onOutputChannelNoLongerVisible );
         } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeTextDocument( function( e )
         {
+            trace( "vscode.workspace.onDidChangeTextDocument" );
             clearTimeout( decorateTimeout );
             decorateTimeout = setTimeout( function()
             {
@@ -840,6 +887,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.window.onDidChangeActiveTextEditor( function( e )
         {
+            trace( "vscode.workspace.onDidChangeActiveTextEditor" );
             if( e && e.document )
             {
                 var channelId = streams.getChannelId( e.document.fileName );
@@ -853,6 +901,7 @@ function activate( context )
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
         {
+            trace( "vscode.workspace.onDidChangeConfiguration" );
             if( e.affectsConfiguration( 'discord-chat.showInExplorer' ) )
             {
                 vscode.commands.executeCommand( 'setContext', 'discord-chat-in-explorer', vscode.workspace.getConfiguration( 'discord-chat' ).get( 'showInExplorer' ) );
@@ -931,6 +980,7 @@ function activate( context )
 
         client.on( 'message', message =>
         {
+            trace( "client.on.message" );
             if( utils.isReadableChannel( client.user, message.channel ) )
             {
                 if( storage.isChannelMuted( message.channel ) !== true )
@@ -967,6 +1017,7 @@ function activate( context )
 
         client.on( 'messageUpdate', ( oldMessage, newMessage ) =>
         {
+            trace( "client.on.messageUpdate" );
             if( utils.isReadableChannel( client.user, oldMessage.channel ) )
             {
                 if( storage.isChannelMuted( oldMessage.channel ) !== true )
