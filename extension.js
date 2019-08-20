@@ -215,6 +215,7 @@ function activate( context )
     function populateChannelMessages( user, channels )
     {
         trace( "populateChannelMessages" );
+        var count = channels.size;
         channels.map( function( channel )
         {
             if( utils.isReadableChannel( user, channel ) && storage.isChannelMuted( channel ) !== true )
@@ -242,8 +243,16 @@ function activate( context )
                         chats.chatRead( channelId, channelLastRead );
                     } );
 
-                    updateToolbarButtons();
+                    count--;
+                    if( count === 0 )
+                    {
+                        updateToolbarButtons();
+                    }
                 }, channel );
+            }
+            else
+            {
+                count--;
             }
         }, this );
     }
