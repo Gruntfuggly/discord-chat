@@ -708,6 +708,7 @@ function activate( context )
                                 provider.markChannelRead( message.channel );
                             } ).catch( e =>
                             {
+                                vscode.window.showInformationMessage( "discord-chat: Failed to send - missing permissions." );
                                 console.error( "Failed to send: " + e );
                             } );
                         }
