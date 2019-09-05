@@ -239,6 +239,11 @@
                 "command": "discord-chat.resetChannelUnread",
                 "title": "Reset Channel Unread",
                 "category": "discord-chat"
+            },
+            {
+                "command": "discord-chat.register",
+                "title": "Register",
+                "category": "discord-chat"
             }
         ],
         "configuration": {
@@ -281,8 +286,8 @@
                     "default": true
                 },
                 "discord-chat.syncEnabled": {
-                    "type":"boolean",
-                    "description":"Enable syncing of read state via gist",
+                    "type": "boolean",
+                    "description": "Enable syncing of read state via gist",
                     "default": true
                 },
                 "discord-chat.syncToken": {

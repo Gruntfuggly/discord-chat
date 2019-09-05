@@ -123,7 +123,7 @@ function formatMessage( message, compact, short )
 
 function addMessage( channelId, messageId, message, timeOfMessage )
 {
-    console.log( "discord-chat.trace: chats.addMessage" );
+    // console.log( "discord-chat.trace: chats.addMessage" );
 
     if( messages[ channelId ] === undefined )
     {
@@ -140,7 +140,7 @@ function addMessage( channelId, messageId, message, timeOfMessage )
     } );
     if( isNew === true )
     {
-        console.log( "discord-chat.trace: chats.addMessage (adding message)" );
+        // console.log( "discord-chat.trace: chats.addMessage (adding message)" );
         message.map( function( line )
         {
             messages[ channelId ].push( { text: line, timeOfMessage: timeOfMessage, read: false, id: messageId } );
@@ -148,7 +148,7 @@ function addMessage( channelId, messageId, message, timeOfMessage )
     }
     else
     {
-        console.log( "discord-chat.trace: chats.addMessage (updating messages)" );
+        // console.log( "discord-chat.trace: chats.addMessage (updating messages)" );
         var inserted = false;
         var updatedMessages = [];
         for( var i = 0; i < messages[ channelId ].length; ++i )

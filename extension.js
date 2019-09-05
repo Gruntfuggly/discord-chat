@@ -31,10 +31,6 @@ function activate( context )
         var provider = new treeView.DiscordChatDataProvider( context );
         var generalOutputChannel = vscode.window.createOutputChannel( 'Discord Chat' );
 
-        utils.initialize( generalOutputChannel );
-        storage.initialize( context.globalState );
-        streams.initialize( client );
-
         function trace( text )
         {
             console.log( "discord-chat.trace: " + text );
@@ -261,7 +257,7 @@ function activate( context )
 
         function populateChannel( channel )
         {
-            trace( "populateChannel" );
+            trace( "populateChannel>" );
             var channelId = channel.id.toString();
             streams.outputChannel( channelId, function( outputChannel )
             {
@@ -285,6 +281,7 @@ function activate( context )
             var channelLastRead = new Date( storedDate ? storedDate : 0 );
 
             chats.chatRead( channelId, channelLastRead );
+            trace( "<populateChannel" );
         }
 
         function refresh()
@@ -358,7 +355,7 @@ function activate( context )
 
         function addMessageToChannel( message, isEdit )
         {
-            trace( "addMessageToChannel" );
+            trace( "addMessageToChannel>" );
             var channelId = message.channel.id.toString();
 
             var compact = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'compactView' );
@@ -383,13 +380,15 @@ function activate( context )
                     } );
                 } );
             }
+            trace( "<addMessageToChannel" );
         }
 
         function updateCurrentChannel( message, isEdit )
         {
-            trace( "updateCurrentChannel" );
+            trace( "updateCurrentChannel>" );
             addMessageToChannel( message, isEdit );
             streams.autoHide( message.channel.id.toString() );
+            trace( "<updateCurrentChannel" );
         }
 
         function selectServer()
@@ -399,7 +398,7 @@ function activate( context )
 
         function revealElement( element, focus, select )
         {
-            trace( "revealElement" );
+            trace( "revealElement>" );
             if( element !== undefined )
             {
                 if( discordChatExplorerView.visible === true )
@@ -411,11 +410,12 @@ function activate( context )
                     discordChatView.reveal( element, { focus: focus, select: select } );
                 }
             }
+            trace( "<revealElement" );
         }
 
         function updateChannel( message, hidden, isEdit )
         {
-            trace( "updateChannel" );
+            trace( "updateChannel>" );
             function showNotification()
             {
                 trace( "showNotification" );
@@ -438,6 +438,7 @@ function activate( context )
                     showNotification();
                 }
             }
+            trace( "<updateChannel" );
         }
 
         function updateViewSelection()
@@ -526,6 +527,10 @@ function activate( context )
 
         function register()
         {
+            utils.initialize( generalOutputChannel );
+            storage.initialize( context.globalState );
+            streams.initialize( client );
+
             trace( "register" );
             updateToolbarButtons();
 
@@ -1065,10 +1070,12 @@ function activate( context )
                     }
                 }
             } );
+
             setTimeout( login, 1000 );
         }
 
-        register();
+        // register();
+        context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.register', register ) );
 
         return storage;
 
