@@ -829,6 +829,33 @@ function activate( context )
                 }
             } ) );
 
+            context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.postFile', function( e )
+            {
+                trace( "discord-chat.postFile" );
+                var sc = selectedChannel();
+                if( sc )
+                {
+                    streams.cancelAutoHide( sc.id.toString() );
+
+                    if( e.fsPath )
+                    {
+                        sc.send( { files: [ { attachment: e.fsPath } ] } ).then( message =>
+                        {
+                            utils.log( "Sent file to channel " + sc.name + " at " + new Date().toISOString() );
+                            provider.markChannelRead( message.channel );
+                        } ).catch( e =>
+                        {
+                            vscode.window.showInformationMessage( "discord-chat: Failed to send." );
+                            console.error( "Failed to send: " + e );
+                        } );
+                    }
+                }
+                else
+                {
+                    vscode.window.showInformationMessage( "discord-chat: Please select a channel first" );
+                }
+            } ) );
+
             context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.mute', function()
             {
                 trace( "discord-chat.mute" );

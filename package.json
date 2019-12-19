@@ -43,6 +43,12 @@
             ]
         },
         "menus": {
+            "explorer/context": [
+                {
+                    "when": "!explorerResourceIsFolder",
+                    "command": "discord-chat.postFile"
+                }
+            ],
             "view/title": [
                 {
                     "command": "discord-chat.refresh",
@@ -131,6 +137,16 @@
             {
                 "command": "discord-chat.postSelection",
                 "title": "Post Selection",
+                "category": "discord-chat",
+                "when": "discord-channel-selected",
+                "icon": {
+                    "dark": "resources/icons/dark/post.svg",
+                    "light": "resources/icons/light/post.svg"
+                }
+            },
+            {
+                "command": "discord-chat.postFile",
+                "title": "Post File To Current Discord Channel",
                 "category": "discord-chat",
                 "when": "discord-channel-selected",
                 "icon": {
