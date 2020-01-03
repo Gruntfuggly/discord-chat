@@ -29,6 +29,10 @@ function activate( context )
         const client = new discord.Client();
 
         var provider = new treeView.DiscordChatDataProvider( context );
+
+        discordChatExplorerView = vscode.window.createTreeView( 'discord-chat-view-explorer', { treeDataProvider: provider } );
+        discordChatView = vscode.window.createTreeView( 'discord-chat-view', { treeDataProvider: provider } );
+
         var generalOutputChannel = vscode.window.createOutputChannel( 'Discord Chat' );
 
         function trace( text )
@@ -170,9 +174,22 @@ function activate( context )
             vscode.commands.executeCommand( 'setContext', 'discord-can-unmute', canUnmute );
 
             var children = provider.getChildren();
-            var empty = children.length === 1 && children[ 0 ].empty === true;
+            var showTree = !client.user || children.length > 0;
             vscode.commands.executeCommand( 'setContext', 'discord-chat-tree-not-empty',
-                ( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideEmptyTree' ) === false ) || ( empty === false ) );
+                ( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'hideEmptyTree' ) === false ) || showTree );
+
+            var message = "";
+            if( !client.user )
+            {
+                message = "Click the refresh button to log in...";
+            }
+            else if( children.length === 0 )
+            {
+                message = "No new messages...";
+            }
+
+            discordChatView.message = message;
+            discordChatExplorerView.message = message;
         }
 
         function getUnreadMessages( done, channel, messages, before )
@@ -350,7 +367,14 @@ function activate( context )
                 }
             }
 
-            storage.sync( onSync );
+            if( !client.user )
+            {
+                login();
+            }
+            else
+            {
+                storage.sync( onSync );
+            }
         }
 
         function addMessageToChannel( message, isEdit )
@@ -499,6 +523,7 @@ function activate( context )
             context.workspaceState.update( 'showUnreadOnly', enabled );
             vscode.commands.executeCommand( 'setContext', 'discord-show-unread-only', context.workspaceState.get( 'showUnreadOnly' ) );
             provider.refresh();
+            updateToolbarButtons();
         }
 
         function onOutputChannelVisible( channel )
@@ -533,9 +558,6 @@ function activate( context )
 
             trace( "register" );
             updateToolbarButtons();
-
-            discordChatExplorerView = vscode.window.createTreeView( 'discord-chat-view-explorer', { treeDataProvider: provider } );
-            discordChatView = vscode.window.createTreeView( 'discord-chat-view', { treeDataProvider: provider } );
 
             context.subscriptions.push( discordChatExplorerView );
             context.subscriptions.push( discordChatView );
@@ -918,7 +940,7 @@ function activate( context )
             {
                 trace( "vscode.workspace.onDidChangeWindowState" );
                 storage.setActive( e.focused );
-                if( e.focused )
+                if( e.focused && client.user )
                 {
                     refresh();
                 }
@@ -1098,10 +1120,13 @@ function activate( context )
                 }
             } );
 
-            setTimeout( login, 1000 );
+            if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'logInOnStartup', true ) === true )
+            {
+                login();
+            }
         }
 
-        // register();
+        register();
         context.subscriptions.push( vscode.commands.registerCommand( 'discord-chat.register', register ) );
 
         return storage;

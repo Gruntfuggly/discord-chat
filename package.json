@@ -266,6 +266,11 @@
             "type": "object",
             "title": "Discord Chat",
             "properties": {
+                "discord-chat.logInOnStartup": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Log in when the window is opened"
+                },
                 "discord-chat.token": {
                     "type": "string",
                     "description": "Your discord token",
